@@ -87,11 +87,11 @@ pub fn (b Button) build() json2.Any {
 
 pub struct SelectOption {
 pub:
-	label string
-	value string
+	label       string
+	value       string
 	description ?string
-	emoji ?PartialEmoji
-	default? bool
+	emoji       ?PartialEmoji
+	default     ?bool
 }
 
 pub fn (so SelectOption) build() json2.Any {
@@ -113,20 +113,22 @@ pub fn (so SelectOption) build() json2.Any {
 
 pub struct StringSelect {
 pub:
-	custom_id string
-	options []SelectOption
+	custom_id   string
+	options     []SelectOption
 	placeholder ?string
-	min_values ?int
-	max_values ?int
-	disabled ?bool
+	min_values  ?int
+	max_values  ?int
+	disabled    bool
 }
 
 fn (_ StringSelect) is_component() {}
+
 pub fn (ss StringSelect) build() json2.Any {
 	mut r := {
-		'type': ComponentType.string_select.build()
+		'type':      ComponentType.string_select.build()
 		'custom_id': ss.custom_id
-		'options': ss.options.map(it.build())
+		'options':   ss.options.map(it.build())
+		'disabled':  ss.disabled
 	}
 	if placeholder := ss.placeholder {
 		r['placeholder'] = placeholder
@@ -137,8 +139,173 @@ pub fn (ss StringSelect) build() json2.Any {
 	if max_values := ss.max_values {
 		r['max_values'] = max_values
 	}
-	if disabled := ss.disabled {
-		r['disabled'] = disabled
+	return r
+}
+
+pub struct UserSelect {
+pub:
+	custom_id      string
+	placeholder    ?string
+	default_values ?[]Snowflake
+	min_values     ?int
+	max_values     ?int
+	disabled       bool
+}
+
+fn (_ UserSelect) is_component() {}
+
+pub fn (us UserSelect) build() json2.Any {
+	mut r := {
+		'type':      ComponentType.user_select.build()
+		'custom_id': us.custom_id
+		'disabled':  us.disabled
+	}
+	if placeholder := us.placeholder {
+		r['placeholder'] = placeholder
+	}
+	if default_values := us.default_values {
+		r['default_values'] = default_values.map(json2.Any({
+			'id':   json2.Any(it.build())
+			'type': 'user'
+		}))
+	}
+	if min_values := us.min_values {
+		r['min_values'] = min_values
+	}
+	if max_values := us.max_values {
+		r['max_values'] = max_values
+	}
+	return r
+}
+
+pub struct RoleSelect {
+pub:
+	custom_id      string
+	placeholder    ?string
+	default_values ?[]Snowflake
+	min_values     ?int
+	max_values     ?int
+	disabled       bool
+}
+
+fn (_ RoleSelect) is_component() {}
+
+pub fn (rs RoleSelect) build() json2.Any {
+	mut r := {
+		'type':      ComponentType.role_select.build()
+		'custom_id': rs.custom_id
+		'disabled':  rs.disabled
+	}
+	if placeholder := rs.placeholder {
+		r['placeholder'] = placeholder
+	}
+	if default_values := rs.default_values {
+		r['default_values'] = default_values.map(json2.Any({
+			'id':   json2.Any(it.build())
+			'type': 'role'
+		}))
+	}
+	if min_values := rs.min_values {
+		r['min_values'] = min_values
+	}
+	if max_values := rs.max_values {
+		r['max_values'] = max_values
+	}
+	return r
+}
+
+pub enum DefaultValueType {
+	user
+	role
+	channel
+}
+
+pub struct DefaultValue {
+pub:
+	id  Snowflake        @[required]
+	typ DefaultValueType @[required]
+}
+
+pub fn (dv DefaultValue) build() json2.Any {
+	return {
+		'id':   json2.Any(dv.id.build())
+		'type': match dv.typ {
+			.user { 'user' }
+			.role { 'role' }
+			.channel { 'channel' }
+		}
+	}
+}
+
+pub struct MentionableSelect {
+pub:
+	custom_id      string
+	placeholder    ?string
+	default_values ?[]DefaultValue
+	min_values     ?int
+	max_values     ?int
+	disabled       bool
+}
+
+fn (_ MentionableSelect) is_component() {}
+
+pub fn (ms MentionableSelect) build() json2.Any {
+	mut r := {
+		'type':      ComponentType.mentionable_select.build()
+		'custom_id': ms.custom_id
+		'disabled':  ms.disabled
+	}
+	if placeholder := ms.placeholder {
+		r['placeholder'] = placeholder
+	}
+	if default_values := ms.default_values {
+		r['default_values'] = default_values.map(it.build())
+	}
+	if min_values := ms.min_values {
+		r['min_values'] = min_values
+	}
+	if max_values := ms.max_values {
+		r['max_values'] = max_values
+	}
+	return r
+}
+
+pub struct ChannelSelect {
+pub:
+	custom_id      string
+	channel_types  ?[]ChannelType
+	placeholder    ?string
+	default_values ?[]Snowflake
+	min_values     ?int
+	max_values     ?int
+	disabled       bool
+}
+
+fn (_ ChannelSelect) is_component() {}
+
+pub fn (cs ChannelSelect) build() json2.Any {
+	mut r := {
+		'type':      ComponentType.channel_select.build()
+		'custom_id': cs.custom_id
+		'disabled':  cs.disabled
+	}
+	if channel_types := cs.channel_types {
+		r['channel_types'] = channel_types.map(json2.Any(int(it)))
+	}
+	if placeholder := cs.placeholder {
+		r['placeholder'] = placeholder
+	}
+	if default_values := cs.default_values {
+		r['default_values'] = default_values.map(json2.Any({
+			'id':   json2.Any(it.build())
+			'type': 'channel'
+		}))
+	}
+	if min_values := cs.min_values {
+		r['min_values'] = min_values
+	}
+	if max_values := cs.max_values {
+		r['max_values'] = max_values
 	}
 	return r
 }
