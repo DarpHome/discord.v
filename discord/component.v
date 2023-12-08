@@ -29,7 +29,7 @@ pub:
 	components []Component
 }
 
-fn (ar ActionRow) is_component() {}
+fn (_ ActionRow) is_component() {}
 
 pub fn (ar ActionRow) build() json2.Any {
 	return {
@@ -60,11 +60,12 @@ pub:
 	disabled  ?bool
 }
 
-fn (b Button) is_component() {}
+fn (_ Button) is_component() {}
 
 pub fn (b Button) build() json2.Any {
 	mut r := {
-		'style': b.style.build()
+		'type':  ComponentType.button.build()
+		'style': json2.Any(int(b.style.build()))
 	}
 	if label := b.label {
 		r['label'] = label
@@ -80,6 +81,52 @@ pub fn (b Button) build() json2.Any {
 	}
 	if disabled := b.disabled {
 		r['disabled'] = disabled
+	}
+	return r
+}
+
+pub enum TextInputStyle {
+	short     = 1
+	paragraph = 2
+}
+
+pub fn (tis TextInputStyle) build() json2.Any {
+	return json2.Any(int(tis))
+}
+
+pub struct TextInput {
+pub:
+	custom_id   string         @[required]
+	style       TextInputStyle = .short
+	label       string         @[required]
+	min_length  ?int
+	max_length  ?int
+	required    bool = false
+	value       ?string
+	placeholder ?string
+}
+
+fn (_ TextInput) is_component() {}
+
+pub fn (ti TextInput) build() json2.Any {
+	mut r := {
+		'type':      ComponentType.text_input.build()
+		'custom_id': ti.custom_id
+		'style':     json2.Any(int(ti.style.build()))
+		'label':     ti.label
+		'required':  ti.required
+	}
+	if min_length := ti.min_length {
+		r['min_length'] = min_length
+	}
+	if max_length := ti.max_length {
+		r['max_length'] = max_length
+	}
+	if value := ti.value {
+		r['value'] = value
+	}
+	if placeholder := ti.placeholder {
+		r['placeholder'] = placeholder
 	}
 	return r
 }
