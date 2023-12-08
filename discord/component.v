@@ -65,7 +65,7 @@ fn (_ Button) is_component() {}
 pub fn (b Button) build() json2.Any {
 	mut r := {
 		'type':  ComponentType.button.build()
-		'style': json2.Any(int(b.style.build()))
+		'style': b.style.build()
 	}
 	if label := b.label {
 		r['label'] = label
@@ -80,6 +80,64 @@ pub fn (b Button) build() json2.Any {
 		r['url'] = url
 	}
 	if disabled := b.disabled {
+		r['disabled'] = disabled
+	}
+	return r
+}
+
+pub struct SelectOption {
+pub:
+	label string
+	value string
+	description ?string
+	emoji ?PartialEmoji
+	default? bool
+}
+
+pub fn (so SelectOption) build() json2.Any {
+	mut r := {
+		'label': json2.Any(so.label)
+		'value': so.value
+	}
+	if description := so.description {
+		r['description'] = description
+	}
+	if emoji := so.emoji {
+		r['emoji'] = emoji.build()
+	}
+	if default := so.default {
+		r['default'] = default
+	}
+	return r
+}
+
+pub struct StringSelect {
+pub:
+	custom_id string
+	options []SelectOption
+	placeholder ?string
+	min_values ?int
+	max_values ?int
+	disabled ?bool
+}
+
+fn (_ StringSelect) is_component() {}
+pub fn (ss StringSelect) build() json2.Any {
+	mut r := {
+		'type': ComponentType.string_select.build()
+		'custom_id': ss.custom_id
+		'options': ss.options.map(it.build())
+	}
+	if placeholder := ss.placeholder {
+		r['placeholder'] = placeholder
+	}
+	if min_values := ss.min_values {
+		r['min_values'] = min_values
+	}
+	if max_values := ss.max_values {
+		r['max_values'] = max_values
+	}
+	if disabled := ss.disabled {
 		r['disabled'] = disabled
 	}
 	return r
@@ -101,7 +159,7 @@ pub:
 	label       string         @[required]
 	min_length  ?int
 	max_length  ?int
-	required    bool = false
+	required    bool
 	value       ?string
 	placeholder ?string
 }
@@ -112,7 +170,7 @@ pub fn (ti TextInput) build() json2.Any {
 	mut r := {
 		'type':      ComponentType.text_input.build()
 		'custom_id': ti.custom_id
-		'style':     json2.Any(int(ti.style.build()))
+		'style':     ti.style.build()
 		'label':     ti.label
 		'required':  ti.required
 	}
