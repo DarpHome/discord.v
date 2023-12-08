@@ -2,15 +2,15 @@ module discord
 
 import x.json2
 
-pub enum ComponentType as int {
-	action_row = 1
-	button = 2
-	string_select = 3
-	text_input = 4
-	user_select = 5
-	role_select = 6
+pub enum ComponentType {
+	action_row         = 1
+	button             = 2
+	string_select      = 3
+	text_input         = 4
+	user_select        = 5
+	role_select        = 6
 	mentionable_select = 7
-	channel_select = 8
+	channel_select     = 8
 }
 
 pub fn (ct ComponentType) build() json2.Any {
@@ -24,44 +24,44 @@ pub interface Component {
 
 // ignore is_component(), it is used to differ interfaces
 
-
 pub struct ActionRow {
 pub:
 	components []Component
 }
 
 fn (ar ActionRow) is_component() {}
+
 pub fn (ar ActionRow) build() json2.Any {
 	return {
-		'type': ComponentType.action_row.build()
+		'type':       ComponentType.action_row.build()
 		'components': ar.components.map(it.build())
 	}
 }
 
-pub enum ButtonStyle as int {
-	primary = 1
+pub enum ButtonStyle {
+	primary   = 1
 	secondary = 2
-	success = 3
-	danger = 4
-	link = 5
+	success   = 3
+	danger    = 4
+	link      = 5
 }
 
 pub fn (bs ButtonStyle) build() json2.Any {
 	return json2.Any(int(bs))
 }
 
-
 pub struct Button {
 pub:
-	style ButtonStyle = .secondary
-	label ?string
-	emoji ?PartialEmoji
+	style     ButtonStyle = .secondary
+	label     ?string
+	emoji     ?PartialEmoji
 	custom_id ?string
-	url ?string
-	disabled ?bool
+	url       ?string
+	disabled  ?bool
 }
 
 fn (b Button) is_component() {}
+
 pub fn (b Button) build() json2.Any {
 	mut r := {
 		'style': b.style.build()
