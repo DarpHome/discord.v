@@ -13,17 +13,15 @@ fn main() {
 		json: {
 			'content':    json2.Any('Test')
 			'components': [
-				json2.Any({
-					'type':       json2.Any(1)
-					'components': [
-						json2.Any({
-							'type':      json2.Any(2)
-							'style':     2
-							'label':     'hey'
-							'custom_id': 'idk'
-						}),
+				discord.ActionRow{
+					components: [
+						discord.Button{
+							style: .secondary
+							label: 'hey'
+							custom_id: 'idk'
+						},
 					]
-				}),
+				}.build(),
 			]
 		}
 	)!
