@@ -74,22 +74,39 @@ pub fn AvatarDecorationData.parse(j json2.Any) !AvatarDecorationData {
 
 pub struct User {
 pub:
-	id                Snowflake
-	username          string
-	discriminator     string
-	global_name       ?string
-	avatar            ?string
-	bot               ?bool
-	system            ?bool
-	mfa_enabled       ?bool
-	banner            ?string
-	accent_color      ?int
-	locale            ?string
-	verified          ?bool
-	email             ?string
-	flags             ?UserFlags
-	premium_type      ?PremiumType
-	public_flags      ?UserFlags
+	// the user's id
+	id Snowflake
+	// the user's username, not unique across the platform
+	username string
+	// the user's Discord-tag
+	discriminator string
+	// the user's display name, if it is set. For bots, this is the application name
+	global_name ?string
+	// the user's avatar hash
+	avatar ?string
+	// whether the user belongs to an OAuth2 application
+	bot ?bool
+	// whether the user is an Official Discord System user (part of the urgent message system)
+	system ?bool
+	// whether the user has two factor enabled on their account
+	mfa_enabled ?bool
+	// the user's banner hash
+	banner ?string
+	// the user's banner color encoded as an integer representation of hexadecimal color code
+	accent_color ?int
+	// the user's chosen language option
+	locale ?string
+	// whether the email on this account has been verified
+	verified ?bool
+	// the user's email
+	email ?string
+	// the flags on a user's account
+	flags ?UserFlags
+	// the type of Nitro subscription on a user's account
+	premium_type ?PremiumType
+	// the public flags on a user's account
+	public_flags ?UserFlags
+	// data for the user's avatar decoration
 	avatar_decoration ?AvatarDecorationData
 }
 
@@ -194,10 +211,12 @@ pub fn User.parse(j json2.Any) !User {
 	}
 }
 
+// Returns the user object of the requester's account. For OAuth2, this requires the `identify` scope, which will return the object without an email, and optionally the `email` scope, which returns the object _with_ an email.
 pub fn (c Client) fetch_my_user() !User {
 	return User.parse(json2.raw_decode(c.request(.get, '/users/@me')!.body)!)!
 }
 
+// Returns a user object for a given user ID.
 pub fn (c Client) fetch_user(user_id Snowflake) !User {
 	return User.parse(json2.raw_decode(c.request(.get, '/users/${urllib.path_escape(user_id.build())}')!.body)!)!
 }
@@ -220,10 +239,12 @@ pub fn (mue MyUserEdit) build() json2.Any {
 	return r
 }
 
+// Modify the requester's user account settings. Returns a user object on success. Fires a User Update Gateway event.
 pub fn (c Client) edit_my_user(params MyUserEdit) !User {
 	return User.parse(json2.raw_decode(c.request(.patch, '/users/@me', json: params.build())!.body)!)!
 }
 
+// Leave a guild. Fires a Guild Delete Gateway event and a Guild Member Remove Gateway event.
 pub fn (c Client) leave_guild(guild_id Snowflake) ! {
 	c.request(.delete, '/users/@me/guilds/${urllib.path_escape(guild_id.build())}')!
 }

@@ -18,26 +18,38 @@ pub:
 }
 
 pub enum VerificationLevel {
+	// unrestricted
 	none_
+	// must have verified email on account
 	low
+	// must be registered on Discord for longer than 5 minutes
 	medium
+	// must be a member of the server for longer than 10 minutes
 	high
+	// must have a verified phone number
 	very_high
 }
 
 pub enum MessageNotificationsLevel {
+	// members will receive notifications for all messages by default
 	all_messages
+	// members will receive notifications only for messages that @mention them by default
 	only_mentions
 }
 
 pub enum ExplicitContentFilterLevel {
+	// media content will not be scanned
 	disabled
+	// media content sent by members without roles will be scanned
 	members_without_roles
+	// media content sent by all members will be scanned
 	all_members
 }
 
 pub enum MFALevel {
+	// guild has no MFA/2FA requirement for moderation actions
 	none_
+	// guild has a 2FA requirement for moderation actions
 	elevated
 }
 
@@ -148,7 +160,7 @@ pub fn Role.parse(j json2.Any) !Role {
 					none
 				}
 				position: int(j['position']! as i64)
-				permissions: unsafe { Permissions(j['permissions']! as string) }
+				permissions: Permissions.parse(j['permissions']!)!
 				managed: j['managed']! as bool
 				mentionable: j['mentionable']! as bool
 				tags: if o := j['tags'] {
@@ -167,18 +179,28 @@ pub fn Role.parse(j json2.Any) !Role {
 
 @[flag]
 pub enum SystemChannelFlags {
+	// Suppress member join notifications
 	suppress_join_notifications
+	// Suppress server boost notifications
 	suppress_premium_subscriptions
+	// Suppress server setup tips
 	suppress_guild_reminder_notifications
+	// Hide member join sticker reply buttons
 	suppress_join_notification_replies
+	// Suppress role subscription purchase and renewal notifications
 	suppress_role_subscription_purchase_notifications
+	// Hide role subscription sticker reply buttons
 	suppress_role_subscription_purchase_notifications_replies
 }
 
 pub enum PremiumTier {
+	// guild has not unlocked any Server Boost perks
 	none_
+	// guild has unlocked Server Boost level 1 perks
 	tier_1
+	// guild has unlocked Server Boost level 2 perks
 	tier_2
+	// guild has unlocked Server Boost level 3 perks
 	tier_3
 }
 
