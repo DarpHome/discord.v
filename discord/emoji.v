@@ -23,3 +23,63 @@ pub fn (pe PartialEmoji) build() json2.Any {
 	}
 	return r
 }
+
+pub struct Emoji {
+pub:
+	id             ?Snowflake
+	name           ?string
+	roles          ?[]Snowflake
+	user           ?User
+	require_colons ?bool
+	managed        ?bool
+	animated       ?bool
+	available      ?bool
+}
+
+pub fn Emoji.parse(j json2.Any) !Emoji {
+	match j {
+		map[string]json2.Any {
+			id := j['id']!
+			name := j['name']!
+			roles := if a := j['roles'] {
+				(a as []json2.Any).map(Snowflake.parse(it)!)
+			} else {
+				?[]Snowflake(none)
+			}
+			user := if o := j['user'] {
+				User.parse(o)!
+			} else {
+				?User(none)
+			}
+			return Emoji{
+				id: if id is json2.Null { none } else { Snowflake.parse(id)! }
+				name: if name is json2.Null { none } else { name as string }
+				roles: roles
+				user: user
+				require_colons: if b := j['require_colons'] {
+					b as bool
+				} else {
+					?bool(none)
+				}
+				managed: if b := j['managed'] {
+					b as bool
+				} else {
+					?bool(none)
+				}
+				animated: if b := j['animated'] {
+					b as bool
+				} else {
+					?bool(none)
+				}
+				available: if b := j['available'] {
+					b as bool
+				} else {
+					?bool(none)
+				}
+			}
+		}
+		else {
+			return error('expected emoji to be object, got ${j.type_name()}')
+		}
+	}
+}

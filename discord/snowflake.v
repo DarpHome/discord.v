@@ -1,6 +1,7 @@
 module discord
 
 import time
+import x.json2
 
 pub const snowflake_epoch = u64(1420070400000)
 
@@ -25,4 +26,11 @@ pub fn Snowflake.now() Snowflake {
 
 pub fn (s Snowflake) build() string {
 	return s.str()
+}
+
+pub fn Snowflake.parse(j json2.Any) !Snowflake {
+	match j {
+		string { return j.u64() }
+		else { return error('expected snowflake to be string, got ${j.type_name()}') }
+	}
 }
