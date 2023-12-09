@@ -34,9 +34,9 @@ pub fn Sticker.parse(j json2.Any) !Sticker {
 		map[string]json2.Any {
 			id := Snowflake.parse(j['id']!)!
 			pack_id := if s := j['pack_id'] {
-				Snowflake.parse(s)!
+				?Snowflake(Snowflake.parse(s)!)
 			} else {
-				?Snowflake(none)
+				none
 			}
 			name := j['name']! as string
 			description := j['description']!
@@ -44,30 +44,30 @@ pub fn Sticker.parse(j json2.Any) !Sticker {
 			typ := unsafe { StickerType(j['type']! as i64) }
 			format_type := unsafe { StickerFormatType(j['format_type']! as i64) }
 			available := if b := j['available'] {
-				b as bool
+				?bool(b as bool)
 			} else {
-				?bool(none)
+				none
 			}
 			guild_id := if s := j['guild_id'] {
-				Snowflake.parse(s)!
+				?Snowflake(Snowflake.parse(s)!)
 			} else {
-				?Snowflake(none)
+				none
 			}
 			user := if o := j['user'] {
-				User.parse(o)!
+				?User(User.parse(o)!)
 			} else {
-				?User(none)
+				none
 			}
 			sort_value := if i := j['sort_value'] {
-				int(i as i64)
+				?int(i as i64)
 			} else {
-				?int(none)
+				none
 			}
 			return Sticker{
 				id: id
 				pack_id: pack_id
 				name: name
-				description: if description is string { description } else { ?string(none) }
+				description: if description is string { ?string(description) } else { none }
 				tags: tags
 				typ: typ
 				format_type: format_type

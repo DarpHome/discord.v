@@ -13,6 +13,8 @@ pub:
 	device  string = 'discord.v'
 }
 
+const default_user_agent = 'DiscordBot (https://github.com/DarpHome/discord.v, 10.0.0) V ${@VHASH}'
+
 pub struct Client {
 pub:
 	token      string
@@ -21,6 +23,7 @@ pub:
 
 	base_url    string = 'https://discord.com/api/v10'
 	gateway_url string = 'wss://gateway.discord.gg'
+	user_agent string = default_user_agent
 mut:
 	logger   log.Logger
 	ws       &websocket.Client = unsafe { nil }
@@ -63,16 +66,6 @@ fn (mut c Client) raw_dispatch(event string, data json2.Any) ! {
 			req.add_header(http.CommonHeader.content_type, 'application/json')
 			req.do()!*/
 		}
-		if content == '!gateway' {
-			print('what')
-			s := c.fetch_gateway_url()!
-			print('why')
-			c.request(.post, '/channels/${channel_id}/messages',
-				json: {
-					'content': json2.Any(s)
-				}
-			)!
-		}
 		c.heartbeat()!
 	}
 }
@@ -101,9 +94,7 @@ pub fn (mut c Client) init() ! {
 	}, &mut c)
 	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, r voidptr) ! {
 		mut client := unsafe { &Client(r) }
-		println('recv')
 		message := decode_websocket_message(m)!
-		println('decode')
 		if !client.ready {
 			if message.opcode != 10 {
 				return error('First message wasnt HELLO')
@@ -151,6 +142,7 @@ pub fn (mut c Client) launch() ! {
 @[params]
 pub struct ClientConfig {
 pub:
+	user_agent string = default_user_agent
 	debug bool
 }
 
@@ -177,6 +169,7 @@ pub fn bot(token string, config BotConfig) Client {
 			level: config.get_level()
 			output_label: 'discord.v'
 		}
+		user_agent: config.user_agent
 	}
 }
 
@@ -187,5 +180,6 @@ pub fn bearer(token string, config ClientConfig) Client {
 			level: config.get_level()
 			output_label: 'discord.v'
 		}
+		user_agent: config.user_agent
 	}
 }

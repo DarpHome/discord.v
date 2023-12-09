@@ -143,7 +143,7 @@ pub fn Role.parse(j json2.Any) !Role {
 				hoist: j['hoist']! as bool
 				icon: if s := j['icon'] {
 					if s is string {
-						s
+						?string(s)
 					} else {
 						none
 					}
@@ -152,7 +152,7 @@ pub fn Role.parse(j json2.Any) !Role {
 				}
 				unicode_emoji: if s := j['unicode_emoji'] {
 					if s is string {
-						s
+						?string(s)
 					} else {
 						none
 					}
@@ -164,7 +164,7 @@ pub fn Role.parse(j json2.Any) !Role {
 				managed: j['managed']! as bool
 				mentionable: j['mentionable']! as bool
 				tags: if o := j['tags'] {
-					RoleTags.parse(o)!
+					?RoleTags(RoleTags.parse(o)!)
 				} else {
 					none
 				}

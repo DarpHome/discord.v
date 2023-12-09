@@ -42,18 +42,18 @@ pub fn Emoji.parse(j json2.Any) !Emoji {
 			id := j['id']!
 			name := j['name']!
 			roles := if a := j['roles'] {
-				(a as []json2.Any).map(Snowflake.parse(it)!)
+				?[]Snowflake((a as []json2.Any).map(Snowflake.parse(it)!))
 			} else {
 				?[]Snowflake(none)
 			}
 			user := if o := j['user'] {
-				User.parse(o)!
+				?User(User.parse(o)!)
 			} else {
 				?User(none)
 			}
 			return Emoji{
 				id: if id is json2.Null { none } else { Snowflake.parse(id)! }
-				name: if name is json2.Null { none } else { name as string }
+				name: if name is json2.Null { none } else { ?string(name as string) }
 				roles: roles
 				user: user
 				require_colons: if b := j['require_colons'] {

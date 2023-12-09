@@ -27,6 +27,7 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 	} else {
 		''
 	})
+	req.user_agent = c.user_agent
 	req.header = http.Header{}
 	if options.authenticate {
 		req.header.add(.authorization, c.token)
