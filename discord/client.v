@@ -15,6 +15,14 @@ pub:
 
 const default_user_agent = 'DiscordBot (https://github.com/DarpHome/discord.v, 10.0.0) V ${@VHASH}'
 
+pub struct DispatchEvent {
+pub:
+	creator &Client
+	name string
+	data json2.Any
+}
+
+@[heap]
 pub struct Client {
 pub:
 	token      string
@@ -24,6 +32,7 @@ pub:
 	base_url    string = 'https://discord.com/api/v10'
 	gateway_url string = 'wss://gateway.discord.gg'
 	user_agent string = default_user_agent
+
 mut:
 	logger   log.Logger
 	ws       &websocket.Client = unsafe { nil }
@@ -31,6 +40,10 @@ mut:
 	sequence ?int
 pub mut:
 	user_data voidptr
+
+	// === events ====
+
+	on_raw_event EventController[DispatchEvent]
 }
 
 fn (mut c Client) recv() !WSMessage {
@@ -49,25 +62,19 @@ fn (mut c Client) heartbeat() ! {
 	})!
 }
 
-fn (mut c Client) raw_dispatch(event string, data json2.Any) ! {
-	if event == 'MESSAGE_CREATE' {
-		dm := data.as_map()
-		channel_id := dm['channel_id']! as string
-		content := dm['content']! as string
-		dump(content)
-		if content.starts_with('!ping') {
-			println('bro ${channel_id}')
-
-			/*mut req := http.new_request(http.Method.post, 'https://discord.com/api/v10/channels/${channel_id}/messages',
-				json2.Any({
-				'content': json2.Any('pong')
-			}).json_str())
-			req.add_header(http.CommonHeader.authorization, c.token)
-			req.add_header(http.CommonHeader.content_type, 'application/json')
-			req.do()!*/
-		}
-		c.heartbeat()!
+fn (mut c Client) error_logger() fn (int, IError) {
+	mut cr := &mut c
+	return fn [mut cr] (i int, e IError) {
+		cr.logger.error('Error on listener ${i}: ${e}')
 	}
+}
+
+fn (mut c Client) raw_dispatch(name string, data json2.Any) ! {
+	c.on_raw_event.emit(DispatchEvent{
+		creator: &c
+		name: name
+		data: data
+	}, error_handler: c.error_logger())
 }
 
 fn (mut c Client) spawn_heart(interval i64) {

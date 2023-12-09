@@ -2,8 +2,6 @@ module main
 
 import discord
 import os
-import x.json2
-import net.http
 
 fn main() {
 	token := os.read_file('token.txt')!
@@ -34,7 +32,27 @@ fn main() {
 			}
 		)!
 	} */
-	// c.launch()!
+	c.on_raw_event.listen(fn (event discord.DispatchEvent) ! {
+		if event.name == 'MESSAGE_CREATE' {
+			dm := event.data.as_map()
+			channel_id := dm['channel_id']! as string
+			content := dm['content']! as string
+			dump(content)
+			if content.starts_with('!ping') {
+				println('bro ${channel_id}')
+
+				/*mut req := http.new_request(http.Method.post, 'https://discord.com/api/v10/channels/${channel_id}/messages',
+					json2.Any({
+					'content': json2.Any('pong')
+				}).json_str())
+				req.add_header(http.CommonHeader.authorization, c.token)
+				req.add_header(http.CommonHeader.content_type, 'application/json')
+				req.do()!*/
+			}
+		}
+	})
+	c.launch()!
+	/*
 	json := {
 		'content':     json2.Any('Test')
 		'attachments': [
@@ -78,6 +96,6 @@ fn main() {
 				},
 			]
 		}
-	})!)
+	})!) */
 	// c.request(.post, '/channels/${channel_id}/messages')!
 }
