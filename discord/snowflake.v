@@ -13,7 +13,7 @@ pub fn (s Snowflake) raw_timestamp() u64 {
 
 pub fn (s Snowflake) timestamp() time.Time {
 	ts := s.raw_timestamp()
-	return time.unix_microsecond(ts / 1000, int(ts % 1000))
+	return time.unix_microsecond(ts / 1000, int(ts % 1000) * 1000).as_utc()
 }
 
 pub fn Snowflake.from(t time.Time) Snowflake {

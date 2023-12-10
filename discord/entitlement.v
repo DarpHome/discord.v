@@ -95,7 +95,7 @@ pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitle
 		query_params.add('user_id', user_id.build())
 	}
 	if sku_ids := params.sku_ids {
-		query_params.add('sku_ids', 'raw:' + sku_ids.map(it.build()).join(','))
+		query_params.add('sku_ids', sku_ids.map(it.build()).join(','))
 	}
 	if before := params.before {
 		query_params.add('before', before.build())
@@ -112,7 +112,7 @@ pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitle
 	if exclude_ended := params.exclude_ended {
 		query_params.add('exclude_ended', exclude_ended.str())
 	}
-	tmp1 := encode_values(query_params)
+	tmp1 := query_params.encode()
 	tmp2 := if tmp1 == '' { '' } else { '?${tmp1}' }
 	r := json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${tmp2}')!.body)!
 	return (r as []json2.Any).map(Entitlement.parse(it)!)
