@@ -172,6 +172,7 @@ fn (config ClientConfig) get_level() log.Level {
 pub struct BotConfig {
 	ClientConfig
 pub:
+	properties Properties
 	intents Intents
 }
 
@@ -179,6 +180,7 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 	return GatewayClient{
 		token: 'Bot ${token}'
 		intents: int(config.intents)
+		properties: config.properties
 		logger: log.Log{
 			level: config.get_level()
 			output_label: 'discord.v'
