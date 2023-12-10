@@ -11,9 +11,9 @@ fn main() {
 	)
 	c.on_raw_event.listen(fn (event discord.DispatchEvent[discord.GatewayClient]) ! {
 		if event.name == 'MESSAGE_CREATE' {
-			dm := event.data.as_map()
-			channel_id := dm['channel_id']! as string
-			content := dm['content']! as string
+			d := event.data.as_map()
+			channel_id := d['channel_id']! as string
+			content := d['content']! as string
 			if content.starts_with('!ping') {
 				event.creator.request(.post, '/channels/${channel_id}/messages',
 					json: {
