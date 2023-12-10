@@ -4,6 +4,7 @@ import time
 
 pub type EventListener[T] = fn (T) !
 
+@[heap]
 struct Chan[T] {
 	c chan T
 }
@@ -36,8 +37,7 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 	for i, w in ec.wait_fors {
 		mut b := false
 		if w.check != none {
-			b = (w.check or { panic(err) })
-			e
+			b = (w.check or { panic(err) })(e)
 		} else {
 			b = true
 		}
@@ -67,19 +67,27 @@ pub:
 	timeout ?time.Duration
 }
 
-pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) ?T {
-	mut c := Chan[T]{}
-	id := ec.generate_id()
-	ec.wait_fors[id] = EventWaiter[T]{
-		check: params.check
-		c: &mut c
-	}
+pub struct Awaitable[T] {
+	id int
+	timeout ?time.Duration
+	c Chan[T]
+mut:
+	controller &EventController[T]
+}
+
+struct Zero[T] {
+	e T
+}
+
+pub fn (mut a Awaitable[T]) do() ?T {
+
 	defer {
-		ec.wait_fors.delete(id)
+		a.controller.wait_fors.delete(a.id)
 	}
-	if timeout := params.timeout {
+	if timeout := a.timeout {
+		mut e := Zero[T]{}.e
 		select {
-			e := <-c.c {
+			e = <-a.c.c {
 				r := e
 				return r
 			}
@@ -88,7 +96,24 @@ pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) ?T {
 			}
 		}
 	}
-	return <-c.c
+	return <-a.c.c
+
+}
+
+
+pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] {
+	mut c := Chan[T]{}
+	id := ec.generate_id()
+	ec.wait_fors[id] = EventWaiter[T]{
+		check: params.check
+		c: &mut c
+	}
+	return Awaitable[T]{
+		id: id
+		timeout: params.timeout
+		controller: unsafe { &mut ec }
+		c: c
+	}
 }
 
 pub fn (mut ec EventController[T]) override(listener EventListener[T]) EventController[T] {
