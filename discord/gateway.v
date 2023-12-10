@@ -71,8 +71,7 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 }
 
 pub fn (mut c GatewayClient) init() ! {
-	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') +
-		'?v=10&encoding=json')!
+	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') + '?v=10&encoding=json')!
 	c.ws = ws
 	c.ready = false
 	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, r voidptr) ! {

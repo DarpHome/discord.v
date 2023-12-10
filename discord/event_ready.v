@@ -4,7 +4,7 @@ import x.json2
 
 pub struct UnavailableGuild {
 pub:
-	id Snowflake
+	id          Snowflake
 	unavailable bool
 }
 
@@ -25,11 +25,11 @@ pub fn UnavailableGuild.parse(j json2.Any) !UnavailableGuild {
 pub struct ReadyEvent {
 	BaseEvent
 pub:
-	user User
-	guilds []UnavailableGuild
-	session_id string
+	user               User
+	guilds             []UnavailableGuild
+	session_id         string
 	resume_gateway_url string
-	application PartialApplication
+	application        PartialApplication
 }
 
 pub fn ReadyEvent.parse(j json2.Any, base BaseEvent) !ReadyEvent {

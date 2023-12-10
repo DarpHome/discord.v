@@ -80,7 +80,8 @@ pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) ?T {
 	if timeout := params.timeout {
 		select {
 			e := <-c.c {
-				return e
+				r := e
+				return r
 			}
 			timeout.nanoseconds() {
 				return none
@@ -90,14 +91,14 @@ pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) ?T {
 	return <-c.c
 }
 
-pub fn (mut ec EventController[T]) override[T](listener EventListener[T]) EventController[T] {
+pub fn (mut ec EventController[T]) override(listener EventListener[T]) EventController[T] {
 	ec.listeners = {
 		ec.generate_id(): listener
 	}
 	return ec
 }
 
-pub fn (mut ec EventController[T]) listen[T](listener EventListener[T]) EventController[T] {
+pub fn (mut ec EventController[T]) listen(listener EventListener[T]) EventController[T] {
 	ec.listeners[ec.generate_id()] = listener
 	return ec
 }

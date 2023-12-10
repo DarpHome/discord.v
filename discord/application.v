@@ -3,7 +3,7 @@ module discord
 import x.json2
 
 @[flag]
-pub enum ApplicationFlags as int {
+pub enum ApplicationFlags {
 	reserved_0
 	reserved_1
 	reserved_2
@@ -42,7 +42,7 @@ pub enum ApplicationFlags as int {
 
 pub struct PartialApplication {
 pub:
-	id Snowflake
+	id    Snowflake
 	flags ApplicationFlags
 }
 
