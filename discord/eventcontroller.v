@@ -67,7 +67,7 @@ pub:
 	timeout ?time.Duration
 }
 
-pub fn (mut ec EventController[T]) wait[T](params EventWaitParams[T]) ?T {
+pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) ?T {
 	mut c := Chan[T]{}
 	id := ec.generate_id()
 	ec.wait_fors[id] = EventWaiter[T]{

@@ -17,7 +17,8 @@ mut:
 	sequence ?int
 pub mut:
 	// === events ====
-	on_raw_event EventController[DispatchEvent[GatewayClient]]
+	events Events
+	// on_raw_event EventController[DispatchEvent[GatewayClient]]
 }
 
 fn (mut c GatewayClient) recv() !WSMessage {
@@ -44,7 +45,7 @@ fn (mut c GatewayClient) error_logger() fn (int, IError) {
 }
 
 fn (mut c GatewayClient) raw_dispatch(name string, data json2.Any) ! {
-	c.on_raw_event.emit(DispatchEvent[GatewayClient]{
+	c.events.on_raw_event.emit(DispatchEvent{
 		creator: &c
 		name: name
 		data: data
@@ -54,21 +55,24 @@ fn (mut c GatewayClient) raw_dispatch(name string, data json2.Any) ! {
 }
 
 fn (mut c GatewayClient) spawn_heart(interval i64) {
-	spawn fn (mut client GatewayClient, heartbeat_interval time.Duration) !int {
-		client.logger.debug('Heart spawned with interval: ${heartbeat_interval}')
+	spawn fn (mut client GatewayClient, heartbeat_interval time.Duration) {
+		client.logger.info('Heart spawned with interval: ${heartbeat_interval}')
 		for client.ready {
 			client.logger.debug('Sleeping')
 			time.sleep(heartbeat_interval)
 			client.logger.debug('Sending HEARTBEAT')
-			client.heartbeat()!
+			client.heartbeat() or {
+				client.logger.error('Got error when sending heartbeat: ${err}')
+				break
+			}
 			client.logger.debug('Sent HEARTBEAT')
 		}
-		return 0
 	}(mut c, interval * time.millisecond)
 }
 
 pub fn (mut c GatewayClient) init() ! {
-	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') + '?v=10&encoding=json')!
+	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') +
+		'?v=10&encoding=json')!
 	c.ws = ws
 	c.ready = false
 	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, r voidptr) ! {
@@ -78,7 +82,6 @@ pub fn (mut c GatewayClient) init() ! {
 	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, r voidptr) ! {
 		mut client := unsafe { &GatewayClient(r) }
 		message := decode_websocket_message(m)!
-		client.logger.debug('M ${message}')
 		if !client.ready {
 			if message.opcode != 10 {
 				return error('First message wasnt HELLO')
@@ -89,7 +92,7 @@ pub fn (mut c GatewayClient) init() ! {
 			} else {
 				Properties{}
 			}
-			client.logger.debug('Sending IDENTIFY')
+			client.logger.info('Sending IDENTIFY')
 			client.send(WSMessage{
 				opcode: 2
 				data: json2.Any({
@@ -114,11 +117,8 @@ pub fn (mut c GatewayClient) init() ! {
 }
 
 pub fn (mut c GatewayClient) run() ! {
-	c.logger.info('a')
 	c.ws.connect()!
-	c.logger.info('b')
 	c.ws.listen()!
-	c.logger.info('c')
 }
 
 pub fn (mut c GatewayClient) launch() ! {

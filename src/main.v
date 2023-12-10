@@ -12,8 +12,12 @@ fn main() {
 		properties: discord.Properties{
 			browser: 'Discord Android'
 		}
+		debug: true
 	)
-	c.on_raw_event.listen(fn (event discord.DispatchEvent[discord.GatewayClient]) ! {
+	c.events.on_ready_event.listen(fn (event discord.ReadyEvent) ! {
+		println('Logged as ${event.user.username}!')
+	})
+	c.events.on_raw_event.listen(fn (event discord.DispatchEvent) ! {
 		if event.name == 'MESSAGE_CREATE' {
 			d := event.data.as_map()
 			channel_id := d['channel_id']! as string

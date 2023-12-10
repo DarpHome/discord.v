@@ -1,7 +1,6 @@
 module discord
 
 import log
-import x.json2
 import os as v_os
 
 pub struct Properties {
@@ -12,13 +11,6 @@ pub:
 }
 
 pub const default_user_agent = 'DiscordBot (https://github.com/DarpHome/discord.v, 10.0.0) V ${@VHASH}'
-
-pub struct DispatchEvent[T] {
-pub:
-	creator &T
-	name    string
-	data    json2.Any
-}
 
 @[heap]
 pub struct Client {

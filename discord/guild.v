@@ -54,9 +54,9 @@ pub fn PartialGuild.parse(j json2.Any) !PartialGuild {
 @[params]
 pub struct FetchMyGuildsParams {
 pub:
-	before ?Snowflake
-	after ?Snowflake
-	limit ?int
+	before      ?Snowflake
+	after       ?Snowflake
+	limit       ?int
 	with_counts ?bool
 }
 
@@ -595,7 +595,7 @@ pub fn (c Client) fetch_guild(guild_id Snowflake) !Guild {
 }
 
 @[flag]
-pub enum GuildMemberFlags as int {
+pub enum GuildMemberFlags {
 	// Member has left and rejoined the guild
 	did_rejoin
 	// Member has completed onboarding
