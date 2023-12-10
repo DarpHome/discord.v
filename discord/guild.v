@@ -223,6 +223,17 @@ pub:
 	emoji_name ?string
 }
 
+pub fn WelcomeChannel.parse(j json2.Any) !WelcomeChannel {
+	match j {
+		map[string]json2.Any {
+			return error('TODO')
+		}
+		else {
+			return error('expected welcome channel to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct WelcomeScreen {
 pub:
 	// the server description shown in the welcome screen

@@ -53,14 +53,14 @@ fn main() {
 				'ping' {
 					event.creator.request(.post, '/channels/${channel_id}/messages',
 						json: {
-							'content': json2.Any('Pong!')
+							'content':           json2.Any('Pong!')
 							'message_reference': {
 								'message_id': json2.Any(message_id)
 							}
 						}
 					)!
 				}
-				else { }
+				else {}
 			}
 		}
 	})

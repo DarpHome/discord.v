@@ -122,7 +122,6 @@ pub fn (mut c GatewayClient) launch() ! {
 	c.run()!
 }
 
-
 fn (c Client) fetch_gateway_url() !string {
 	r1 := json2.raw_decode(c.request(.get, '/gateway', authenticate: false)!.body)!
 	return match r1 {

@@ -53,7 +53,7 @@ pub struct BotConfig {
 	ClientConfig
 pub:
 	properties Properties
-	intents Intents
+	intents    Intents
 }
 
 pub fn bot(token string, config BotConfig) GatewayClient {
