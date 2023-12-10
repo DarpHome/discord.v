@@ -29,14 +29,12 @@ pub:
 	// entitlements []Entitlement
 }
 
-pub fn message() {}
+pub fn Interaction.parse(j json2.Any) !Interaction {
+	// TODO: implement this
+	panic('TODO')
+}
 
 pub struct InteractionCreateEvent {
 pub:
 	interaction Interaction
-}
-
-pub fn Interaction.parse() Interaction {
-	// TODO: implement this
-	panic('TODO')
 }

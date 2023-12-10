@@ -270,12 +270,11 @@ pub fn WelcomeScreen.parse(j json2.Any) !WelcomeScreen {
 				welcome_channels: (j['welcome_channels']! as []json2.Any).map(WelcomeChannel.parse(it)!)
 			}
 		}
-		else { 
+		else {
 			return error('expected welcome screen to be object, got ${j.type_name()}')
 		}
 	}
 }
-
 
 pub struct Guild {
 pub:
