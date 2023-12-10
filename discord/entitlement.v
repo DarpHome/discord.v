@@ -90,7 +90,31 @@ pub:
 // Returns all entitlements for a given app, active and expired.
 pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement {
 	// TODO: Implement query params
-	r := json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements')!.body)!
+	mut query_params := urllib.new_values()
+	if user_id := params.user_id {
+		query_params.add('user_id', user_id.build())
+	}
+	if sku_ids := params.sku_ids {
+		query_params.add('sku_ids', 'raw:' + sku_ids.map(it.build()).join(','))
+	}
+	if before := params.before {
+		query_params.add('before', before.build())
+	}
+	if after := params.after {
+		query_params.add('after', after.build())
+	}
+	if limit := params.limit {
+		query_params.add('limit', limit.str())
+	}
+	if guild_id := params.guild_id {
+		query_params.add('guild_id', guild_id.build())
+	}
+	if exclude_ended := params.exclude_ended {
+		query_params.add('exclude_ended', exclude_ended.str())
+	}
+	tmp1 := encode_values(query_params)
+	tmp2 := if tmp1 == '' { '' } else { '?${tmp1}' }
+	r := json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${tmp2}')!.body)!
 	return (r as []json2.Any).map(Entitlement.parse(it)!)
 }
 

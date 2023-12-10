@@ -257,6 +257,26 @@ pub:
 	welcome_channels []WelcomeChannel
 }
 
+pub fn WelcomeScreen.parse(j json2.Any) !WelcomeScreen {
+	match j {
+		map[string]json2.Any {
+			description := j['description']!
+			return WelcomeScreen{
+				description: if description is string {
+					?string(description)
+				} else {
+					none
+				}
+				welcome_channels: (j['welcome_channels']! as []json2.Any).map(WelcomeChannel.parse(it)!)
+			}
+		}
+		else { 
+			return error('expected welcome screen to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+
 pub struct Guild {
 pub:
 	// guild id
