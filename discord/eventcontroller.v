@@ -8,15 +8,16 @@ struct Chan[T] {
 	c chan T
 }
 
+pub type Check[T] = fn (T) bool
 
 struct EventWaiter[T] {
-	check ?fn (T) bool
-	c &Chan[T]
+	check ?Check[T]
+	c     &Chan[T]
 }
 
 pub struct EventController[T] {
 mut:
-	id int
+	id        int
 	wait_fors map[int]EventWaiter[T]
 	listeners map[int]EventListener[T]
 }
@@ -33,11 +34,13 @@ pub:
 
 pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 	for i, w in ec.wait_fors {
-		if if check := w.check {
-			check(e)
+		mut b := false 
+		if w.check != none {
+			b = (w.check or { panic(err) })(e)
 		} else {
-			true
-		} {
+			b = true
+		}
+		if b {
 			w.c.c <- e
 			ec.wait_fors.delete(i)
 			return
@@ -45,7 +48,7 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 	}
 	mut ts := []thread{}
 	for i, l in ec.listeners {
-		ts << spawn fn [options] [T] (f EventListener[T], j int, e T) {
+		ts << spawn fn [options] [T](f EventListener[T], j int, e T) {
 			f(e) or {
 				if g := options.error_handler {
 					g(j, err)
@@ -59,7 +62,7 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 @[params]
 pub struct EventWaitParams[T] {
 pub:
-	check ?fn (T) bool
+	check   ?Check[T]
 	timeout ?time.Duration
 }
 

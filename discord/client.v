@@ -13,72 +13,79 @@ pub:
 	device  string = 'discord.v'
 }
 
-const default_user_agent = 'DiscordBot (https://github.com/DarpHome/discord.v, 10.0.0) V ${@VHASH}'
+pub const default_user_agent = 'DiscordBot (https://github.com/DarpHome/discord.v, 10.0.0) V ${@VHASH}'
 
-pub struct DispatchEvent {
+pub struct DispatchEvent[T] {
 pub:
-	creator &Client
-	name string
-	data json2.Any
+	creator &T
+	name    string
+	data    json2.Any
 }
 
 @[heap]
 pub struct Client {
 pub:
-	token      string
-	intents    int
-	properties ?Properties
+	token string
 
-	base_url    string = 'https://discord.com/api/v10'
-	gateway_url string = 'wss://gateway.discord.gg'
-	user_agent string = default_user_agent
-
+	base_url   string = 'https://discord.com/api/v10'
+	user_agent string = discord.default_user_agent
 mut:
-	logger   log.Logger
+	logger log.Logger
+pub mut:
+	user_data voidptr
+}
+
+@[heap]
+pub struct GatewayClient {
+	Client
+pub:
+	intents     int
+	properties  ?Properties
+	gateway_url string = 'wss://gateway.discord.gg'
+mut:
 	ws       &websocket.Client = unsafe { nil }
 	ready    bool
 	sequence ?int
 pub mut:
-	user_data voidptr
-
 	// === events ====
-
-	on_raw_event EventController[DispatchEvent]
+	on_raw_event EventController[DispatchEvent[GatewayClient]]
 }
 
-fn (mut c Client) recv() !WSMessage {
+fn (mut c GatewayClient) recv() !WSMessage {
 	return ws_recv_message(mut c.ws)!
 }
 
-fn (mut c Client) send(message WSMessage) ! {
+fn (mut c GatewayClient) send(message WSMessage) ! {
 	println('send ${message}')
 	ws_send_message(mut c.ws, message)!
 }
 
-fn (mut c Client) heartbeat() ! {
+fn (mut c GatewayClient) heartbeat() ! {
 	c.send(WSMessage{
 		opcode: 1
 		data: if c.sequence == none { json2.Null{} } else { json2.Any(c.sequence) }
 	})!
 }
 
-fn (mut c Client) error_logger() fn (int, IError) {
+fn (mut c GatewayClient) error_logger() fn (int, IError) {
 	mut cr := &mut c
 	return fn [mut cr] (i int, e IError) {
 		cr.logger.error('Error on listener ${i}: ${e}')
 	}
 }
 
-fn (mut c Client) raw_dispatch(name string, data json2.Any) ! {
-	c.on_raw_event.emit(DispatchEvent{
+fn (mut c GatewayClient) raw_dispatch(name string, data json2.Any) ! {
+	c.on_raw_event.emit(DispatchEvent[GatewayClient]{
 		creator: &c
 		name: name
 		data: data
-	}, error_handler: c.error_logger())
+	},
+		error_handler: c.error_logger()
+	)
 }
 
-fn (mut c Client) spawn_heart(interval i64) {
-	spawn fn (mut client Client, heartbeat_interval time.Duration) !int {
+fn (mut c GatewayClient) spawn_heart(interval i64) {
+	spawn fn (mut client GatewayClient, heartbeat_interval time.Duration) !int {
 		client.logger.debug('Heart spawned with interval: ${heartbeat_interval}')
 		for client.ready {
 			client.logger.debug('Sleeping')
@@ -91,7 +98,7 @@ fn (mut c Client) spawn_heart(interval i64) {
 	}(mut c, interval * time.millisecond)
 }
 
-pub fn (mut c Client) init() ! {
+pub fn (mut c GatewayClient) init() ! {
 	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') + '?v=10&encoding=json')!
 	c.ws = ws
 	c.ready = false
@@ -100,7 +107,7 @@ pub fn (mut c Client) init() ! {
 		client.logger.error('Websocket closed with ${code} ${reason}')
 	}, &mut c)
 	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, r voidptr) ! {
-		mut client := unsafe { &Client(r) }
+		mut client := unsafe { &GatewayClient(r) }
 		message := decode_websocket_message(m)!
 		if !client.ready {
 			if message.opcode != 10 {
@@ -136,12 +143,12 @@ pub fn (mut c Client) init() ! {
 	}, &c)
 }
 
-pub fn (mut c Client) run() ! {
+pub fn (mut c GatewayClient) run() ! {
 	c.ws.connect()!
 	c.ws.listen()!
 }
 
-pub fn (mut c Client) launch() ! {
+pub fn (mut c GatewayClient) launch() ! {
 	c.init()!
 	c.run()!
 }
@@ -149,8 +156,8 @@ pub fn (mut c Client) launch() ! {
 @[params]
 pub struct ClientConfig {
 pub:
-	user_agent string = default_user_agent
-	debug bool
+	user_agent string = discord.default_user_agent
+	debug      bool
 }
 
 fn (config ClientConfig) get_level() log.Level {
@@ -168,8 +175,8 @@ pub:
 	intents Intents
 }
 
-pub fn bot(token string, config BotConfig) Client {
-	return Client{
+pub fn bot(token string, config BotConfig) GatewayClient {
+	return GatewayClient{
 		token: 'Bot ${token}'
 		intents: int(config.intents)
 		logger: log.Log{

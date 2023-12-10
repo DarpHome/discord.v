@@ -32,7 +32,7 @@ fn main() {
 			}
 		)!
 	} */
-	c.on_raw_event.listen(fn (event discord.DispatchEvent) ! {
+	c.on_raw_event.listen(fn (event discord.DispatchEvent[discord.GatewayClient]) ! {
 		if event.name == 'MESSAGE_CREATE' {
 			dm := event.data.as_map()
 			channel_id := dm['channel_id']! as string
