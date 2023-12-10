@@ -60,6 +60,18 @@ fn main() {
 						}
 					)!
 				}
+				'guild' {
+					guild_id := discord.Snowflake.parse(d['guild_id']!)!
+					dump(event.creator.fetch_guild(guild_id)!)
+					event.creator.request(.post, '/channels/${channel_id}/messages',
+						json: {
+							'content':           json2.Any('Dumped!')
+							'message_reference': {
+								'message_id': json2.Any(message_id)
+							}
+						}
+					)!
+				}
 				else {}
 			}
 		}

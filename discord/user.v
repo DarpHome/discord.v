@@ -244,6 +244,11 @@ pub fn (c Client) edit_my_user(params MyUserEdit) !User {
 	return User.parse(json2.raw_decode(c.request(.patch, '/users/@me', json: params.build())!.body)!)!
 }
 
+// Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
+pub fn (c Client) fetch_my_guild_member(guild_id Snowflake) !GuildMember {
+	return GuildMember.parse(c.request(.get, '/users/@me/guilds/${urllib.path_escape(guild_id.build())}/member')!.body)!
+}
+
 // Leave a guild. Fires a Guild Delete Gateway event and a Guild Member Remove Gateway event.
 pub fn (c Client) leave_guild(guild_id Snowflake) ! {
 	c.request(.delete, '/users/@me/guilds/${urllib.path_escape(guild_id.build())}')!

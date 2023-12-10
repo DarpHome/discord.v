@@ -2,6 +2,7 @@ module discord
 
 import time
 import x.json2
+import net.urllib
 
 pub type GuildFeature = string
 
@@ -15,6 +16,67 @@ pub:
 	features                   []GuildFeature
 	approximate_member_count   ?int
 	approximate_presence_count ?int
+}
+
+pub fn PartialGuild.parse(j json2.Any) !PartialGuild {
+	match j {
+		map[string]json2.Any {
+			icon := j['icon']!
+			return PartialGuild{
+				id: Snowflake.parse(j['id']!)!
+				name: j['name']! as string
+				icon: if icon is string {
+					?string(icon)
+				} else {
+					none
+				}
+				owner: j['owner']! as bool
+				permissions: Permissions.parse(j['permissions']!)!
+				features: (j['features']! as []json2.Any).map(GuildFeature(it as string))
+				approximate_member_count: if i := j['approximate_member_count'] {
+					?int(i as int)
+				} else {
+					none
+				}
+				approximate_presence_count: if i := j['approximate_presence_count'] {
+					?int(i as int)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected partial guild to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+@[params]
+pub struct FetchMyGuildsParams {
+pub:
+	before ?Snowflake
+	after ?Snowflake
+	limit ?int
+	with_counts ?bool
+}
+
+pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
+	mut vs := urllib.new_values()
+	if before := params.before {
+		vs.add('before', before.build())
+	}
+	if after := params.after {
+		vs.add('after', after.build())
+	}
+	if limit := params.limit {
+		vs.add('limit', limit.str())
+	}
+	if with_counts := params.with_counts {
+		vs.add('with_counts', with_counts.str())
+	}
+	tmp1 := vs.encode()
+	tmp2 := if tmp1 == '' { '' } else { '?${tmp1}' }
+	return (json2.raw_decode(c.request(.get, '/users/@me/guilds${tmp2}')!.body)! as []json2.Any).map(PartialGuild.parse(it)!)
 }
 
 pub enum VerificationLevel {
@@ -358,4 +420,284 @@ pub:
 	premium_progress_bar_enabled bool
 	// the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
 	safety_alerts_channel_id ?Snowflake
+}
+
+pub fn Guild.parse(j json2.Any) !Guild {
+	match j {
+		map[string]json2.Any {
+			icon := j['icon']!
+			icon_hash := j['icon_hash']!
+			splash := j['splash']!
+			discovery_splash := j['discovery_splash']!
+			afk_channel_id := j['afk_channel_id']!
+			application_id := j['application_id']!
+			system_channel_id := j['system_channel_id']!
+			rules_channel_id := j['rules_channel_id']!
+			vanity_url_code := j['vanity_url_code']!
+			description := j['description']!
+			banner := j['banner']!
+			public_updates_channel_id := j['public_updates_channel_id']!
+			safety_alerts_channel_id := j['safety_alerts_channel_id']!
+			return Guild{
+				id: Snowflake.parse(j['id']!)!
+				name: j['name']! as string
+				icon: if icon is string {
+					?string(icon)
+				} else {
+					none
+				}
+				icon_hash: if icon_hash is string {
+					?string(icon_hash)
+				} else {
+					none
+				}
+				splash: if splash is string {
+					?string(splash)
+				} else {
+					none
+				}
+				discovery_splash: if discovery_splash is string {
+					?string(discovery_splash)
+				} else {
+					none
+				}
+				owner_id: Snowflake.parse(j['owner_id']!)!
+				afk_channel_id: if afk_channel_id !is json2.Null {
+					?Snowflake(Snowflake.parse(afk_channel_id)!)
+				} else {
+					none
+				}
+				afk_timeout: j['afk_timeout']! as i64 * time.second
+				widget_enabled: if b := j['widget_enabled'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				widget_channel_id: if s := j['widget_channel_id'] {
+					if s !is json2.Null {
+						Snowflake.parse(s)!
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				verification_level: unsafe { VerificationLevel(j['verification_level']! as i64) }
+				explicit_content_filter: unsafe { ExplicitContentFilterLevel(j['explicit_content_filter']! as i64) }
+				roles: (j['roles']! as []json2.Any).map(Role.parse(it)!)
+				emojis: (j['emojis']! as []json2.Any).map(Emoji.parse(it)!)
+				features: (j['features']! as []json2.Any).map(GuildFeature(it as string))
+				mfa_level: unsafe { MFALevel(j['mfa_level']! as i64) }
+				application_id: if application_id !is json2.Null {
+					?Snowflake(Snowflake.parse(application_id)!)
+				} else {
+					none
+				}
+				system_channel_id: if system_channel_id !is json2.Null {
+					?Snowflake(Snowflake.parse(system_channel_id)!)
+				} else {
+					none
+				}
+				system_channel_flags: unsafe { SystemChannelFlags(j['system_channel_flags']! as i64) }
+				rules_channel_id: if rules_channel_id !is json2.Null {
+					?Snowflake(Snowflake.parse(rules_channel_id)!)
+				} else {
+					none
+				}
+				max_presences: if i := j['max_presences'] {
+					if i is int {
+						?int(i)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				max_members: if i := j['max_members'] {
+					if i is int {
+						?int(i)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				vanity_url_code: if vanity_url_code !is json2.Null {
+					?string(vanity_url_code as string)
+				} else {
+					none
+				}
+				description: if description !is json2.Null {
+					?string(description as string)
+				} else {
+					none
+				}
+				banner: if banner !is json2.Null {
+					?string(banner as string)
+				} else {
+					none
+				}
+				premium_tier: unsafe { PremiumTier(j['premium_tier']! as i64) }
+				premium_subscription_count: if i := j['premium_subscription_count'] {
+					?int(i as i64)
+				} else {
+					none
+				}
+				preferred_locale: j['preferred_locale']! as string
+				public_updates_channel_id: if public_updates_channel_id !is json2.Null {
+					?Snowflake(Snowflake.parse(public_updates_channel_id)!)
+				} else {
+					none
+				}
+				max_video_channel_users: if i := j['max_video_channel_users'] {
+					?int(i as i64)
+				} else {
+					none
+				}
+				max_stage_video_channel_users: if i := j['max_stage_video_channel_users'] {
+					?int(i as i64)
+				} else {
+					none
+				}
+				approximate_member_count: if i := j['approximate_member_count'] {
+					?int(i as i64)
+				} else {
+					none
+				}
+				approximate_presence_count: if i := j['approximate_presence_count'] {
+					?int(i as i64)
+				} else {
+					none
+				}
+				welcome_screen: if o := j['welcome_screen'] {
+					?WelcomeScreen(WelcomeScreen.parse(o)!)
+				} else {
+					none
+				}
+				nsfw_level: unsafe { NSFWLevel(j['nsfw_level']! as i64) }
+				stickers: ((j['stickers'] or { []json2.Any{} }) as []json2.Any).map(Sticker.parse(it)!)
+				premium_progress_bar_enabled: j['premium_progress_bar_enabled']! as bool
+				safety_alerts_channel_id: if safety_alerts_channel_id !is json2.Null {
+					?Snowflake(Snowflake.parse(safety_alerts_channel_id)!)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected guild to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (c Client) fetch_guild(guild_id Snowflake) !Guild {
+	return Guild.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}')!.body)!)!
+}
+
+@[flag]
+pub enum GuildMemberFlags as int {
+	// Member has left and rejoined the guild
+	did_rejoin
+	// Member has completed onboarding
+	completed_onboarding
+	// Member is exempt from guild verification requirements
+	bypasses_verification
+	// Member has started onboarding
+	started_onboarding
+}
+
+pub struct GuildMember {
+pub:
+	// the user this guild member represents
+	user ?User
+	// this user's guild nickname
+	nick ?string
+	// the member's guild avatar hash
+	avatar ?string
+	// array of role object ids
+	roles []Snowflake
+	// when the user joined the guild
+	joined_at time.Time
+	// when the user started boosting the guild
+	premium_since ?time.Time
+	// whether the user is deafened in voice channels
+	deaf bool
+	// whether the user is muted in voice channels
+	mute bool
+	// guild member flags represented as a bit set, defaults to 0
+	flags GuildMemberFlags
+	// whether the user has not yet passed the guild's Membership Screening requirements
+	pending ?bool
+	// total permissions of the member in the channel, including overwrites, returned when in the interaction object
+	permissions ?Permissions
+	// when the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
+	communication_disabled_until ?time.Time
+}
+
+pub fn GuildMember.parse(j json2.Any) !GuildMember {
+	match j {
+		map[string]json2.Any {
+			return GuildMember{
+				user: if o := j['user'] {
+					?User(User.parse(o)!)
+				} else {
+					none
+				}
+				nick: if s := j['nick'] {
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				avatar: if s := j['avatar'] {
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				roles: (j['roles']! as []json2.Any).map(Snowflake.parse(it)!)
+				joined_at: time.parse_iso8601(j['joined_at']! as string)!
+				premium_since: if s := j['premium_since'] {
+					if s !is json2.Null {
+						?time.Time(time.parse_iso8601(s as string)!)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				deaf: j['deaf']! as bool
+				mute: j['mute']! as bool
+				flags: unsafe { GuildMemberFlags(j['flags']! as i64) }
+				pending: if b := j['pending'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				permissions: if s := j['permissions'] {
+					?Permissions(Permissions.parse(s)!)
+				} else {
+					none
+				}
+				communication_disabled_until: if s := j['communication_disabled_until'] {
+					if s !is json2.Null {
+						?time.Time(time.parse_iso8601(s as string)!)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected guild member to be object, got ${j.type_name()}')
+		}
+	}
 }

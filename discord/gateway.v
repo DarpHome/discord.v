@@ -72,12 +72,13 @@ pub fn (mut c GatewayClient) init() ! {
 	c.ws = ws
 	c.ready = false
 	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, r voidptr) ! {
-		mut client := unsafe { &Client(r) }
+		mut client := unsafe { &GatewayClient(r) }
 		client.logger.error('Websocket closed with ${code} ${reason}')
 	}, &mut c)
 	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, r voidptr) ! {
 		mut client := unsafe { &GatewayClient(r) }
 		message := decode_websocket_message(m)!
+		client.logger.debug('M ${message}')
 		if !client.ready {
 			if message.opcode != 10 {
 				return error('First message wasnt HELLO')
