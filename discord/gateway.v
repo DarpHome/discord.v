@@ -114,8 +114,11 @@ pub fn (mut c GatewayClient) init() ! {
 }
 
 pub fn (mut c GatewayClient) run() ! {
+	c.logger.info('a')
 	c.ws.connect()!
+	c.logger.info('b')
 	c.ws.listen()!
+	c.logger.info('c')
 }
 
 pub fn (mut c GatewayClient) launch() ! {
