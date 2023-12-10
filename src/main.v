@@ -15,7 +15,11 @@ fn main() {
 			channel_id := dm['channel_id']! as string
 			content := dm['content']! as string
 			if content.starts_with('!ping') {
-        event.creator.request(.post, '/channels/${channel_id}/messages', json: {'content': json2.Any('pong!')})!
+				event.creator.request(.post, '/channels/${channel_id}/messages',
+					json: {
+						'content': json2.Any('pong!')
+					}
+				)!
 			}
 		}
 	})
