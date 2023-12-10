@@ -22,20 +22,24 @@ fn main() {
 			args := content[1..].split(' ')
 			if args[0] == 'square' {
 				if args.len != 2 {
-					event.creator.request(.post, '/channels/${channel_id}/messages', json: {
-						'content': json2.Any('Specify argument, e.g. !square 7'),
-					})!
+					event.creator.request(.post, '/channels/${channel_id}/messages',
+						json: {
+							'content': json2.Any('Specify argument, e.g. !square 7')
+						}
+					)!
 					return
 				}
 				i := strconv.atoi(args[1]) or {
-					event.creator.request(.post, '/channels/${channel_id}/messages', json: {
-						'content': json2.Any('Invalid integer'),
-					})!
-					return 
+					event.creator.request(.post, '/channels/${channel_id}/messages',
+						json: {
+							'content': json2.Any('Invalid integer')
+						}
+					)!
+					return
 				}
 				event.creator.request(.post, '/channels/${channel_id}/messages',
 					json: {
-						'content': json2.Any((i * i).str())
+						'content':           json2.Any((i * i).str())
 						'message_reference': {
 							'message_id': json2.Any(message_id)
 						}
