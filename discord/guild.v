@@ -226,7 +226,22 @@ pub:
 pub fn WelcomeChannel.parse(j json2.Any) !WelcomeChannel {
 	match j {
 		map[string]json2.Any {
-			return error('TODO')
+			emoji_id := j['emoji_id']!
+			emoji_name := j['emoji_name']!
+			return WelcomeChannel{
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				description: j['description']! as string
+				emoji_id: if emoji_id !is json2.Null {
+					?Snowflake(Snowflake.parse(emoji_id)!)
+				} else {
+					none
+				}
+				emoji_name: if emoji_name !is json2.Null {
+					?string(emoji_name as string)
+				} else {
+					none
+				}
+			}
 		}
 		else {
 			return error('expected welcome channel to be object, got ${j.type_name()}')
