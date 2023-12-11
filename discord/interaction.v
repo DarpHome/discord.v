@@ -79,6 +79,11 @@ pub fn (mrd ModalResponseData) build() json2.Any {
 	}
 }
 
+pub interface IInteractionResponse {
+	is_interaction_response()
+	build() json2.Any
+}
+
 pub struct InteractionResponse {
 pub:
 	// the type of response
@@ -87,6 +92,7 @@ pub:
 	data ?InteractionResponseData
 }
 
+fn (_ InteractionResponse) is_interaction_response() {}
 pub fn (ir InteractionResponse) build() json2.Any {
 	mut r := {
 		'type': json2.Any(int(ir.typ))
@@ -97,7 +103,29 @@ pub fn (ir InteractionResponse) build() json2.Any {
 	return r
 }
 
-pub fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response InteractionResponse) ! {
+pub struct ModalInteractionResponse {
+pub:
+	// a developer-defined identifier for the modal, max 100 characters
+	custom_id string
+	// the title of the popup modal, max 45 characters
+	title string
+	// between 1 and 5 (inclusive) components that make up the modal
+	components []Component
+}
+
+fn (_ ModalInteractionResponse) is_interaction_response() {}
+pub fn (mir ModalInteractionResponse) build() json2.Any {
+	return InteractionResponse{
+		typ: .modal
+		data: ModalResponseData{
+			custom_id: mir.custom_id
+			title: mir.title
+			components: mir.components
+		}
+	}.build()
+}
+
+pub fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response IInteractionResponse) ! {
 	c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
 		json: response.build()
 	)!

@@ -17,19 +17,26 @@ pub const sentinel_number = math.nan()
 
 pub const sentinel_snowflake = Snowflake(0)
 pub const sentinel_permissions = unsafe { Permissions(math.max_u64) }
+pub const sentinel_image = Image(NoneImage{})
 
 // is_sentinel reports whether `target` is sentinel
 pub fn is_sentinel[T](target T) bool {
 	$if T is Snowflake {
-		return target == discord.sentinel_snowflake
+		return target == sentinel_snowflake
 	} $else $if T is Permissions {
-		return target == discord.sentinel_permissions
+		return target == sentinel_permissions
+	} $else $if T is Image {
+		return target == sentinel_image
+	} $else $if T is JpegImage || T is PngImage || T is GifImage {
+		return false
+	} $else $if T is NoneImage {
+		return true
 	} $else $if T is int {
-		return target == discord.sentinel_int
+		return target == sentinel_int
 	} $else $if T is time.Time {
-		return target == discord.sentinel_time
+		return target == sentinel_time
 	} $else $if T is string {
-		return target.str == discord.sentinel_string.str
+		return target.str == sentinel_string.str
 	} $else $if T is f32 || T is f64 {
 		return math.is_nan(f64(target))
 	} $else {

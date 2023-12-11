@@ -40,3 +40,13 @@ fn (_ GifImage) is_image() {}
 pub fn (gi GifImage) build() string {
 	return 'data:image/gif;base64,${base64.encode(gi.data)}'
 }
+
+pub struct NoneImage {
+	data []u8 = []
+}
+
+fn (_ NoneImage) is_image() {}
+
+pub fn (_ NoneImage) build() string {
+	return ''
+}

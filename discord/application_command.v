@@ -149,6 +149,8 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 						fn (k string, v json2.Any) (Locale, string) {
 						return k, v as string
 					})
+					// as map[Locale]string
+					// i was trying to fix
 				} else {
 					none
 				}

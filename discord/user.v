@@ -281,3 +281,36 @@ pub fn (c Client) create_group_dm(params CreateGroupDMParams) ! {
 		}
 	)!
 }
+
+pub struct PartialUser {
+pub:
+	// the user's id
+	id Snowflake
+	// the user's username, not unique across the platform
+	username string
+	// the user's Discord-tag
+	discriminator string
+	// the user's avatar hash
+	avatar ?string
+}
+
+pub fn PartialUser.parse(j json2.Any) !PartialUser {
+	match j {
+		map[string]json2.Any {
+			avatar := j['avatar']!
+			return PartialUser{
+				id: Snowflake.parse(j['id']!)!
+				username: j['username']! as string
+				discriminator: j['discriminator']! as string
+				avatar: if avatar !is json2.Null {
+					?string(avatar as string)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected partial user to be object, got ${j.type_name()}')
+		}
+	}
+}
