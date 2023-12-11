@@ -1,6 +1,7 @@
 module discord
 
 import net.http
+import net.urllib
 import x.json2
 
 pub type Prepare = fn (mut http.Request) !
@@ -109,4 +110,12 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 		}
 	}
 	return res
+}
+
+fn encode_query(vs urllib.Values) string {
+	r := vs.encode()
+	if r == '' {
+		return ''
+	}
+	return '?${r}'
 }

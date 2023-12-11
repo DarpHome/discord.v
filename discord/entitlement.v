@@ -89,7 +89,6 @@ pub:
 
 // Returns all entitlements for a given app, active and expired.
 pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement {
-	// TODO: Implement query params
 	mut query_params := urllib.new_values()
 	if user_id := params.user_id {
 		query_params.add('user_id', user_id.build())
@@ -112,9 +111,7 @@ pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitle
 	if exclude_ended := params.exclude_ended {
 		query_params.add('exclude_ended', exclude_ended.str())
 	}
-	tmp1 := query_params.encode()
-	tmp2 := if tmp1 == '' { '' } else { '?${tmp1}' }
-	r := json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${tmp2}')!.body)!
+	r := json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${encode_query(query_params)}')!.body)!
 	return (r as []json2.Any).map(Entitlement.parse(it)!)
 }
 
