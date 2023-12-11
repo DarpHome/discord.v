@@ -69,9 +69,9 @@ pub:
 }
 
 pub struct Awaitable[T] {
-	id int
+	id      int
 	timeout ?time.Duration
-	c Chan[T]
+	c       Chan[T]
 mut:
 	controller &EventController[T]
 }
@@ -81,7 +81,6 @@ struct Zero[T] {
 }
 
 pub fn (mut a Awaitable[T]) do() ?T {
-
 	defer {
 		a.controller.wait_fors.delete(a.id)
 	}
@@ -98,9 +97,7 @@ pub fn (mut a Awaitable[T]) do() ?T {
 		}
 	}
 	return <-a.c.c
-
 }
-
 
 pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] {
 	mut c := Chan[T]{}

@@ -81,5 +81,5 @@ pub fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig
 			output_label: 'discord.v'
 		}
 		user_agent: config.user_agent
-	}	
+	}
 }

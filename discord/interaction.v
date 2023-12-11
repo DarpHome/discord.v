@@ -20,14 +20,14 @@ pub:
 	guild_id       ?Snowflake
 	// channel ?Channel
 	channel_id ?Snowflake
-	member ?GuildMember
-	user  ?User
-	token string
+	member     ?GuildMember
+	user       ?User
+	token      string
 	// message ?Message
 	app_permissions ?Permissions
 	locale          ?string
 	guild_locale    ?string
-	entitlements []Entitlement
+	entitlements    []Entitlement
 }
 
 pub fn Interaction.parse(j json2.Any) !Interaction {
@@ -37,9 +37,9 @@ pub fn Interaction.parse(j json2.Any) !Interaction {
 
 pub enum InteractionResponseType {
 	// ACK a `Ping`
-	pong = 1
+	pong                                    = 1
 	// respond to an interaction with a message
-	channel_message_with_source = 4
+	channel_message_with_source             = 4
 	// ACK an interaction and edit a response later, the user sees a loading state
 	deferred_channel_message_with_source
 	// for components, ACK an interaction and edit the original message later; the user does not see a loading state
@@ -70,10 +70,11 @@ pub:
 }
 
 pub fn (_ ModalResponseData) is_interaction_response_data() {}
+
 pub fn (mrd ModalResponseData) build() json2.Any {
 	return {
-		'custom_id': json2.Any(mrd.custom_id)
-		'title': mrd.title
+		'custom_id':  json2.Any(mrd.custom_id)
+		'title':      mrd.title
 		'components': mrd.components.map(it.build())
 	}
 }
@@ -97,9 +98,7 @@ pub fn (ir InteractionResponse) build() json2.Any {
 }
 
 pub fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response InteractionResponse) ! {
-	c.request(
-		.post,
-		'/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
+	c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
 		json: response.build()
 	)!
 }
