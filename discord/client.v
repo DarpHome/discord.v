@@ -1,5 +1,6 @@
 module discord
 
+import encoding.base64
 import log
 import os as v_os
 
@@ -70,4 +71,15 @@ pub fn bearer(token string, config ClientConfig) Client {
 		}
 		user_agent: config.user_agent
 	}
+}
+
+pub fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig) Client {
+	return Client{
+		token: 'Basic ' + base64.encode_str('${client_id.build()}:${client_secret}')
+		logger: log.Log{
+			level: config.get_level()
+			output_label: 'discord.v'
+		}
+		user_agent: config.user_agent
+	}	
 }
