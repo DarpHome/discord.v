@@ -4,7 +4,6 @@ import maps
 import net.urllib
 import x.json2
 
-
 pub enum ApplicationCommandType {
 	// Slash commands; a text-based command that shows up when a user types `/`
 	chat_input = 1
@@ -18,64 +17,94 @@ pub type Locale = string
 
 // Indonesian (Bahasa Indonesia)
 pub const locale_id = Locale('id')
+
 // Danish (Dansk)
 pub const locale_da = Locale('da')
+
 // German (Deutsch)
 pub const locale_de = Locale('de')
+
 // English, UK (English, UK)
 pub const locale_en_gb = Locale('en-GB')
+
 // English, US (English, US)
 pub const locale_en_us = Locale('en-US')
+
 // Spanish (Español)
 pub const locale_es_es = Locale('es-ES')
+
 // French (Français)
 pub const locale_fr = Locale('fr')
+
 // Croatian (Hrvatski)
 pub const locale_hr = Locale('hr')
+
 // Italian (Italiano)
 pub const locale_it = Locale('it')
+
 // Lithuanian (Lietuviškai)
 pub const locale_lt = Locale('lt')
+
 // Hungarian (Magyar)
 pub const locale_hu = Locale('hu')
+
 // Dutch (Nederlands)
 pub const locale_nl = Locale('nl')
+
 // Norweigan (Norsk)
 pub const locale_no = Locale('no')
+
 // Polish (Polski)
 pub const locale_pl = Locale('pl')
+
 // Portuguese, Brazilian (Português do Brasil)
 pub const locale_pt_br = Locale('pt-BR')
+
 // Romanian, Romania (Română)
 pub const locale_ro = Locale('ro')
+
 // Finnish (Suomi)
 pub const locale_fi = Locale('fi')
+
 // Swedish (Svenska)
 pub const locale_sv_se = Locale('sv-SE')
+
 // Vietnamese (Tiếng Việt)
 pub const locale_vi = Locale('vi')
+
 // Turkish (Türkçe)
 pub const locale_tr = Locale('tr')
+
 // Czech (Čeština)
 pub const locale_cs = Locale('cs')
+
 // Greek (Ελληνικά)
 pub const locale_el = Locale('el')
+
 // Bulgarian (български)
 pub const locale_bg = Locale('bg')
+
 // Russian (Pусский)
 pub const locale_ru = Locale('ru')
+
 // Ukrainian (Українська)
 pub const locale_uk = Locale('uk')
+
 // Hindi (हिन्दी)
 pub const locale_hi = Locale('hi')
+
 // Thai (ไทย)
 pub const locale_th = Locale('th')
+
 // Chinese, China (中文)
 pub const locale_zh_cn = Locale('zh-CN')
+
 // Japanese (日本語)
 pub const locale_ja = Locale('ja')
+
 // Chinese, Taiwan (繁體中文)
 pub const locale_zh_tw = Locale('zh-TW')
+
 // Korean (한국어)
 pub const locale_ko = Locale('ko')
 
@@ -97,7 +126,8 @@ pub enum ApplicationCommandOptionType {
 	attachment
 }
 
-pub type ApplicationCommandOptionChoiceValue = string | int | f64
+pub type ApplicationCommandOptionChoiceValue = f64 | int | string
+
 pub struct ApplicationCommandOptionChoice {
 pub:
 	// 1-100 character choice name
@@ -115,16 +145,23 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 			return ApplicationCommandOptionChoice{
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
-					maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any, fn (k string, v json2.Any) (Locale, string) {
+					maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+						fn (k string, v json2.Any) (Locale, string) {
 						return k, v as string
 					})
 				} else {
 					none
 				}
 				value: match value {
-					string { ApplicationCommandOptionChoiceValue(value) }
-					i64 { ApplicationCommandOptionChoiceValue(int(value)) }
-					f64 { ApplicationCommandOptionChoiceValue(value) }
+					string {
+						ApplicationCommandOptionChoiceValue(value)
+					}
+					i64 {
+						ApplicationCommandOptionChoiceValue(int(value))
+					}
+					f64 {
+						ApplicationCommandOptionChoiceValue(value)
+					}
 					else {
 						return error('expected application command option choice value to be string/i64/f64, got ${value.type_name()}')
 					}
@@ -139,7 +176,7 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 
 pub fn (acoc ApplicationCommandOptionChoice) build() json2.Any {
 	mut r := {
-		'name': json2.Any(acoc.name)
+		'name':  json2.Any(acoc.name)
 		'value': match acoc.value {
 			string { json2.Any(acoc.value) }
 			int { json2.Any(acoc.value) }
@@ -147,7 +184,8 @@ pub fn (acoc ApplicationCommandOptionChoice) build() json2.Any {
 		}
 	}
 	if name_localizations := acoc.name_localizations {
-		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations, fn (k Locale, v string) (string, json2.Any) {
+		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations,
+			fn (k Locale, v string) (string, json2.Any) {
 			return k, v
 		})
 	}
@@ -156,7 +194,7 @@ pub fn (acoc ApplicationCommandOptionChoice) build() json2.Any {
 
 pub struct ApplicationCommandOption {
 pub:
-  // Type of option
+	// Type of option
 	typ ApplicationCommandOptionType
 	// 1-32 character name
 	name string
@@ -194,7 +232,8 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
 					if m !is json2.Null {
-						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any, fn (k string, v json2.Any) (Locale, string) {
+						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
 						})
 					} else {
@@ -206,7 +245,8 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 				description: j['description']! as string
 				description_localizations: if m := j['description_localizations'] {
 					if m !is json2.Null {
-						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any, fn (k string, v json2.Any) (Locale, string) {
+						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
 						})
 					} else {
@@ -270,17 +310,19 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 
 pub fn (aco ApplicationCommandOption) build() json2.Any {
 	mut r := {
-		'type': json2.Any(int(aco.typ))
-		'name': aco.name
+		'type':        json2.Any(int(aco.typ))
+		'name':        aco.name
 		'description': aco.description
 	}
 	if name_localizations := aco.name_localizations {
-		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations, fn (k Locale, v string) (string, json2.Any) {
+		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations,
+			fn (k Locale, v string) (string, json2.Any) {
 			return k, v
 		})
 	}
 	if description_localizations := aco.description_localizations {
-		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations, fn (k Locale, v string) (string, json2.Any) {
+		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations,
+			fn (k Locale, v string) (string, json2.Any) {
 			return k, v
 		})
 	}
@@ -357,7 +399,8 @@ pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
 					if m !is json2.Null {
-						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any, fn (k string, v json2.Any) (Locale, string) {
+						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
 						})
 					} else {
@@ -369,7 +412,8 @@ pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 				description: j['description']! as string
 				description_localizations: if m := j['description_localizations'] {
 					if m !is json2.Null {
-						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any, fn (k string, v json2.Any) (Locale, string) {
+						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
 						})
 					} else {
@@ -449,7 +493,8 @@ pub fn (params CreateApplicationCommandParams) build() json2.Any {
 		'name': json2.Any(params.name)
 	}
 	if name_localizations := params.name_localizations {
-		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations, fn (k Locale, v string) (string, json2.Any) {
+		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations,
+			fn (k Locale, v string) (string, json2.Any) {
 			return k, v
 		})
 	}
@@ -457,7 +502,8 @@ pub fn (params CreateApplicationCommandParams) build() json2.Any {
 		r['description'] = description
 	}
 	if description_localizations := params.description_localizations {
-		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations, fn (k Locale, v string) (string, json2.Any) {
+		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations,
+			fn (k Locale, v string) (string, json2.Any) {
 			return k, v
 		})
 	}
@@ -481,7 +527,9 @@ pub fn (params CreateApplicationCommandParams) build() json2.Any {
 
 // Create a new global command. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
 pub fn (c Client) create_global_application_command(application_id Snowflake, params CreateApplicationCommandParams) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.post, '/application/${urllib.path_escape(application_id.build())}/commands', json: params.build())!.body)!)!
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.post, '/application/${urllib.path_escape(application_id.build())}/commands',
+		json: params.build()
+	)!.body)!)!
 }
 
 // Fetch a global command for your application. Returns an application command object.
@@ -516,7 +564,8 @@ pub fn (params EditApplicationCommandParams) build() json2.Any {
 		r['name'] = name
 	}
 	if name_localizations := params.name_localizations {
-		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations, fn (k Locale, v string) (string, json2.Any) {
+		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations,
+			fn (k Locale, v string) (string, json2.Any) {
 			return k, v
 		})
 	}
@@ -524,7 +573,8 @@ pub fn (params EditApplicationCommandParams) build() json2.Any {
 		r['description'] = description
 	}
 	if description_localizations := params.description_localizations {
-		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations, fn (k Locale, v string) (string, json2.Any) {
+		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations,
+			fn (k Locale, v string) (string, json2.Any) {
 			return k, v
 		})
 	}
@@ -549,7 +599,9 @@ pub fn (params EditApplicationCommandParams) build() json2.Any {
 
 // Edit a global command. Returns application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
 pub fn (c Client) edit_global_application_command(application_id Snowflake, command_id Snowflake, params EditApplicationCommandParams) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.patch, '/application/${urllib.path_escape(application_id.build())}/commands/${urllib.path_escape(command_id.build())}', json: params.build())!.body)!)!
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.patch, '/application/${urllib.path_escape(application_id.build())}/commands/${urllib.path_escape(command_id.build())}',
+		json: params.build()
+	)!.body)!)!
 }
 
 // Deletes a global command. Returns 204 No Content on success.
@@ -559,12 +611,16 @@ pub fn (c Client) delete_global_application_command(application_id Snowflake, co
 
 // Takes a list of application commands, overwriting the existing global command list for this application. Returns 200 and a list of application command objects. Commands that do not already exist will count toward daily application command create limits.
 pub fn (c Client) bulk_overwrite_global_application_commands(application_id Snowflake, commands []CreateApplicationCommandParams) ![]ApplicationCommand {
-	return (json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/commands', json: commands.map(it.build()))!.body)! as []json2.Any).map(ApplicationCommand.parse(it)!)
+	return (json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/commands',
+		json: commands.map(it.build())
+	)!.body)! as []json2.Any).map(ApplicationCommand.parse(it)!)
 }
 
 // Create a new guild command. New guild commands will be available in the guild immediately. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
 pub fn (c Client) create_guild_application_command(application_id Snowflake, guild_id Snowflake, params CreateApplicationCommandParams) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.post, '/application/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands', json: params.build())!.body)!)!
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.post, '/application/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands',
+		json: params.build()
+	)!.body)!)!
 }
 
 // Fetch a guild command for your application. Returns an application command object.
@@ -574,7 +630,9 @@ pub fn (c Client) fetch_guild_application_command(application_id Snowflake, guil
 
 // Edit a guild command. Updates for guild commands will be available immediately. Returns application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
 pub fn (c Client) edit_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake, params EditApplicationCommandParams) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.patch, '/application/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands/${urllib.path_escape(command_id.build())}', json: params.build())!.body)!)!
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.patch, '/application/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands/${urllib.path_escape(command_id.build())}',
+		json: params.build()
+	)!.body)!)!
 }
 
 // Delete a guild command. Returns 204 No Content on success.
@@ -584,13 +642,14 @@ pub fn (c Client) delete_guild_application_command(application_id Snowflake, gui
 
 // Takes a list of application commands, overwriting the existing command list for this application for the targeted guild. Returns 200 and a list of application command objects.
 pub fn (c Client) bulk_overwrite_guild_application_commands(application_id Snowflake, guild_id Snowflake, commands []CreateApplicationCommandParams) ![]ApplicationCommand {
-	return (json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands', json: commands.map(it.build()))!.body)! as []json2.Any).map(ApplicationCommand.parse(it)!)
+	return (json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands',
+		json: commands.map(it.build())
+	)!.body)! as []json2.Any).map(ApplicationCommand.parse(it)!)
 }
 
-//Guild Application Command Permissions Structure
-
+// Guild Application Command Permissions Structure
 pub enum ApplicationCommandPermissionType {
-	role = 1
+	role    = 1
 	user
 	channel
 }
@@ -607,8 +666,8 @@ pub:
 
 pub fn (acp ApplicationCommandPermission) build() json2.Any {
 	return {
-		'id': json2.Any(acp.id.build())
-		'type': int(acp.typ)
+		'id':         json2.Any(acp.id.build())
+		'type':       int(acp.typ)
 		'permission': acp.permission
 	}
 }
@@ -680,8 +739,10 @@ pub fn (params EditApplicationCommandPermissionsParams) build() json2.Any {
 }
 
 // Edits command permissions for a specific command for your application in a guild and returns a guild application command permissions object. Fires an Application Command Permissions Update Gateway event.
-// 
+//
 // You can add up to 100 permission overwrites for a command.
 pub fn (c Client) edit_application_command_permissions(application_id Snowflake, guild_id Snowflake, command_id Snowflake, params EditApplicationCommandPermissionsParams) !GuildApplicationCommandPermissions {
-	return GuildApplicationCommandPermissions.parse(json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands/${urllib.path_escape(command_id.build())}/permissions', json: params.build())!.body)!)!
+	return GuildApplicationCommandPermissions.parse(json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands/${urllib.path_escape(command_id.build())}/permissions',
+		json: params.build()
+	)!.body)!)!
 }
