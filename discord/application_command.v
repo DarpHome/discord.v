@@ -111,7 +111,7 @@ pub const locale_ko = Locale('ko')
 pub enum ApplicationCommandOptionType {
 	sub_command
 	sub_command_group
-	string_
+	string
 	// Any integer between -2^53 and 2^53
 	integer
 	boolean
