@@ -1,5 +1,6 @@
 module discord
 
+import encoding.hex
 import x.json2
 
 @[flag]
@@ -42,8 +43,28 @@ pub enum ApplicationFlags {
 
 pub struct PartialApplication {
 pub:
-	id    Snowflake
+	// ID of the app
+	id Snowflake
+	// Name of the app
+	name ?string
+	// Icon hash of the app
+	icon ?string
+	// Description of the app
+	description ?string
+	// When `false`, only the app owner can add the app to guilds
+	bot_public ?bool
+	// When `true`, the app's bot will only join upon completion of the full OAuth2 code grant flow
+	bot_require_code_grant ?bool
+	// URL of the app's Terms of Service
+	terms_of_service_url ?string
+	// URL of the app's Privacy Policy
+	privacy_policy_url ?string
+	// Key for verification in interactions and the GameSDK's GetTicket
+	verify_key ?[]u8
+	// App's public flags
 	flags ApplicationFlags
+	// List of tags describing the content and functionality of the app. Max of 5 tags.
+	tags ?[]string
 }
 
 pub fn PartialApplication.parse(j json2.Any) !PartialApplication {
@@ -51,7 +72,56 @@ pub fn PartialApplication.parse(j json2.Any) !PartialApplication {
 		map[string]json2.Any {
 			return PartialApplication{
 				id: Snowflake.parse(j['id']!)!
+				name: if s := j['name'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				icon: if s := j['icon'] {
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				description: if s := j['description'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				bot_public: if b := j['bot_public'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				bot_require_code_grant: if b := j['bot_require_code_grant'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				terms_of_service_url: if s := j['terms_of_service_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				privacy_policy_url: if s := j['privacy_policy_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				verify_key: if s := j['verify_key'] {
+					?[]u8(hex.decode(s as string)!)
+				} else {
+					none
+				}
 				flags: unsafe { ApplicationFlags(j['flags']! as i64) }
+				tags: if a := j['tags'] {
+					?[]string((a as []json2.Any).map(it as string))
+				} else {
+					none
+				}
 			}
 		}
 		else {
@@ -188,8 +258,8 @@ pub:
 	privacy_policy_url ?string
 	// Partial user object for the owner of the app
 	owner ?User
-	// Hex encoded key for verification in interactions and the GameSDK's GetTicket
-	verify_key string
+	// Key for verification in interactions and the GameSDK's GetTicket
+	verify_key []u8
 	// If the app belongs to a team, this will be a list of the members of that team
 	team ?Team
 	// Guild associated with the app. For example, a developer support server.
@@ -261,7 +331,7 @@ pub fn Application.parse(j json2.Any) !Application {
 				} else {
 					none
 				}
-				verify_key: j['verify_key']! as string
+				verify_key: hex.decode(j['verify_key']! as string)!
 				team: if team !is json2.Null {
 					?Team(Team.parse(team)!)
 				} else {

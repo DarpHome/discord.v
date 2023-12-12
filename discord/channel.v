@@ -1,6 +1,7 @@
 module discord
 
 import net.urllib
+import x.json2
 
 @[params]
 pub struct ReasonParam {
@@ -43,4 +44,33 @@ pub enum ChannelType {
 // event (or Thread Delete if the channel was a thread).
 pub fn (c Client) delete_channel(id Snowflake, config ReasonParam) ! {
 	c.request(.delete, '/channels/${urllib.path_escape(id.build())}', reason: config.reason)!
+}
+
+pub interface Channel {
+	id Snowflake
+	is_channel()
+}
+
+pub struct PartialChannel {
+pub:
+	id   Snowflake
+	typ  ChannelType
+	name string
+}
+
+fn (_ PartialChannel) is_channel() {}
+
+pub fn PartialChannel.parse(j json2.Any) !PartialChannel {
+	match j {
+		map[string]json2.Any {
+			return PartialChannel{
+				id: Snowflake.parse(j['id']!)!
+				typ: unsafe { ChannelType(j['type']! as i64) }
+				name: j['name']! as string
+			}
+		}
+		else {
+			return error('expected partial channel to be object, got ${j.type_name()}')
+		}
+	}
 }

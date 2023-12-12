@@ -11,8 +11,8 @@ pub:
 	id                         Snowflake
 	name                       string
 	icon                       ?string
-	owner                      bool
-	permissions                Permissions
+	owner                      ?bool
+	permissions                ?Permissions
 	features                   []GuildFeature
 	approximate_member_count   ?int
 	approximate_presence_count ?int
@@ -30,8 +30,16 @@ pub fn PartialGuild.parse(j json2.Any) !PartialGuild {
 				} else {
 					none
 				}
-				owner: j['owner']! as bool
-				permissions: Permissions.parse(j['permissions']!)!
+				owner: if b := j['owner'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				permissions: if s := j['permissions'] {
+					?Permissions(Permissions.parse(s)!)
+				} else {
+					none
+				}
 				features: (j['features']! as []json2.Any).map(GuildFeature(it as string))
 				approximate_member_count: if i := j['approximate_member_count'] {
 					?int(i as int)

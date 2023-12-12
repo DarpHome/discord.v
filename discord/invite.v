@@ -17,7 +17,7 @@ pub:
 	// the guild this invite is for
 	guild ?PartialGuild
 	// the channel this invite is for
-	// channel ?PartialChannel
+	channel ?PartialChannel
 	// the user who created the invite
 	inviter ?User
 	// the type of target for this voice channel invite
@@ -97,7 +97,6 @@ pub fn (c Client) fetch_invite(code string, params FetchInviteParams) !Invite {
 	}
 	return Invite.parse(c.request(.get, '/invites/${urllib.path_escape(code)}${encode_query(query_params)}')!.body)!
 }
-
 
 // Delete an invite. Requires the `.manage_channels` permission on the channel this invite belongs to, or `.manage_guild` to remove any invite across the guild. Returns an [Invite] object on success. Fires an Invite Delete Gateway event.
 

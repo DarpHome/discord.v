@@ -117,14 +117,14 @@ pub:
 fn (_ ModalInteractionResponse) is_interaction_response() {}
 
 pub fn (mir ModalInteractionResponse) build() json2.Any {
-	return InteractionResponse{
-		typ: .modal
-		data: ModalResponseData{
-			custom_id: mir.custom_id
-			title: mir.title
-			components: mir.components
+	return {
+		'type': json2.Any(int(InteractionResponseType.modal))
+		'data': {
+			'custom_id':  json2.Any(mir.custom_id)
+			'title':      mir.title
+			'components': mir.components.map(it.build())
 		}
-	}.build()
+	}
 }
 
 pub fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response IInteractionResponse) ! {
