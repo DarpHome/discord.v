@@ -5,7 +5,7 @@ import time
 import x.json2
 
 pub enum InviteTargetType {
-	stream = 1
+	stream               = 1
 	embedded_application
 }
 
@@ -16,10 +16,8 @@ pub:
 	code string
 	// the guild this invite is for
 	guild ?PartialGuild
-
 	// the channel this invite is for
 	// channel ?PartialChannel
-
 	// the user who created the invite
 	inviter ?User
 	// the type of target for this voice channel invite
@@ -34,7 +32,6 @@ pub:
 	approximate_member_count ?int
 	// the expiration date of this invite, returned from the `GET /invites/<code>` endpoint when `with_expiration` is `true`
 	expires_at ?time.Time
-
 	// guild scheduled event data, only included if `guild_scheduled_event_id` contains a valid guild scheduled event id
 	// guild_scheduled_event? GuildScheduledEvent
 }
@@ -109,7 +106,8 @@ pub:
 
 // Delete an invite. Requires the `.manage_channels` permission on the channel this invite belongs to, or `.manage_guild` to remove any invite across the guild. Returns an [Invite] object on success. Fires an Invite Delete Gateway event.
 
-
 pub fn (c Client) delete_invite(code string, params DeleteInviteParams) !Invite {
-	return Invite.parse(c.request(.delete, '/invites/${urllib.path_escape(code)}', reason: params.reason)!.body)!
+	return Invite.parse(c.request(.delete, '/invites/${urllib.path_escape(code)}',
+		reason: params.reason
+	)!.body)!
 }

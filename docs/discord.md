@@ -2,104 +2,146 @@
 
 ## Contents
 - [Constants](#Constants)
+- [is_sentinel](#is_sentinel)
+- [oauth2_app](#oauth2_app)
 - [bot](#bot)
 - [bearer](#bearer)
-- [is_sentinel](#is_sentinel)
 - [combine_intents](#combine_intents)
-- [oauth2_app](#oauth2_app)
 - [ApplicationCommandOption.parse](#ApplicationCommandOption.parse)
-- [User.parse](#User.parse)
-- [ApplicationCommandOptionChoice.parse](#ApplicationCommandOptionChoice.parse)
-- [Interaction.parse](#Interaction.parse)
-- [InstallParams.parse](#InstallParams.parse)
-- [UnavailableGuild.parse](#UnavailableGuild.parse)
-- [ApplicationCommandPermission.parse](#ApplicationCommandPermission.parse)
-- [GuildMember.parse](#GuildMember.parse)
-- [PartialApplication.parse](#PartialApplication.parse)
-- [GuildApplicationCommandPermissions.parse](#GuildApplicationCommandPermissions.parse)
-- [ApplicationCommand.parse](#ApplicationCommand.parse)
-- [AvatarDecorationData.parse](#AvatarDecorationData.parse)
-- [Guild.parse](#Guild.parse)
-- [PartialUser.parse](#PartialUser.parse)
-- [TeamMember.parse](#TeamMember.parse)
-- [Application.parse](#Application.parse)
-- [WelcomeChannel.parse](#WelcomeChannel.parse)
 - [Team.parse](#Team.parse)
-- [Permissions.all](#Permissions.all)
-- [Permissions.all_except](#Permissions.all_except)
-- [Permissions.parse](#Permissions.parse)
-- [Permissions.zero](#Permissions.zero)
-- [Entitlement.parse](#Entitlement.parse)
-- [ReadyEvent.parse](#ReadyEvent.parse)
+- [ApplicationCommandOptionChoice.parse](#ApplicationCommandOptionChoice.parse)
 - [Sticker.parse](#Sticker.parse)
-- [PartialGuild.parse](#PartialGuild.parse)
-- [Emoji.parse](#Emoji.parse)
-- [Role.parse](#Role.parse)
-- [WelcomeScreen.parse](#WelcomeScreen.parse)
 - [Snowflake.parse](#Snowflake.parse)
 - [Snowflake.now](#Snowflake.now)
+- [ApplicationCommandPermission.parse](#ApplicationCommandPermission.parse)
 - [Snowflake.from](#Snowflake.from)
-- [RoleTags.parse](#RoleTags.parse)
 - [Sku.parse](#Sku.parse)
-- [InteractionResponseData](#InteractionResponseData)
-- [IInteractionResponse](#IInteractionResponse)
-- [Image](#Image)
+- [RoleTags.parse](#RoleTags.parse)
+- [TeamMember.parse](#TeamMember.parse)
+- [AvatarDecorationData.parse](#AvatarDecorationData.parse)
+- [ReadyEvent.parse](#ReadyEvent.parse)
+- [Permissions.zero](#Permissions.zero)
+- [Permissions.parse](#Permissions.parse)
+- [ApplicationCommand.parse](#ApplicationCommand.parse)
+- [UnavailableGuild.parse](#UnavailableGuild.parse)
+- [Permissions.all_except](#Permissions.all_except)
+- [Permissions.all](#Permissions.all)
+- [PartialUser.parse](#PartialUser.parse)
+- [PartialGuild.parse](#PartialGuild.parse)
+- [PartialApplication.parse](#PartialApplication.parse)
+- [Application.parse](#Application.parse)
+- [User.parse](#User.parse)
+- [InviteMetadata.parse](#InviteMetadata.parse)
+- [Role.parse](#Role.parse)
+- [Invite.parse](#Invite.parse)
+- [WelcomeChannel.parse](#WelcomeChannel.parse)
+- [WelcomeScreen.parse](#WelcomeScreen.parse)
+- [Interaction.parse](#Interaction.parse)
+- [InstallParams.parse](#InstallParams.parse)
+- [GuildMember.parse](#GuildMember.parse)
+- [GuildApplicationCommandPermissions.parse](#GuildApplicationCommandPermissions.parse)
+- [Guild.parse](#Guild.parse)
+- [Entitlement.parse](#Entitlement.parse)
+- [Emoji.parse](#Emoji.parse)
 - [Component](#Component)
-- [Snowflake](#Snowflake)
-  - [raw_timestamp](#raw_timestamp)
-  - [timestamp](#timestamp)
-  - [build](#build)
-- [ApplicationCommandOptionChoiceValue](#ApplicationCommandOptionChoiceValue)
+- [InteractionResponseData](#InteractionResponseData)
+- [Image](#Image)
+- [IInteractionResponse](#IInteractionResponse)
 - [TeamMemberRole](#TeamMemberRole)
-- [GuildFeature](#GuildFeature)
 - [Check](#Check)
+- [Awaitable[T]](#Awaitable[T])
+  - [do](#do)
+- [GuildFeature](#GuildFeature)
 - [Locale](#Locale)
-- [Prepare](#Prepare)
+- [ApplicationCommandOptionChoiceValue](#ApplicationCommandOptionChoiceValue)
 - [EventController[T]](#EventController[T])
   - [emit](#emit)
   - [wait](#wait)
   - [override](#override)
   - [listen](#listen)
 - [EventListener](#EventListener)
-- [Awaitable[T]](#Awaitable[T])
-  - [do](#do)
-- [PremiumTier](#PremiumTier)
-- [ExplicitContentFilterLevel](#ExplicitContentFilterLevel)
-- [ChannelType](#ChannelType)
-- [StickerType](#StickerType)
-- [ButtonStyle](#ButtonStyle)
+- [Prepare](#Prepare)
+- [Snowflake](#Snowflake)
+  - [raw_timestamp](#raw_timestamp)
+  - [timestamp](#timestamp)
   - [build](#build)
-- [SystemChannelFlags](#SystemChannelFlags)
-- [Permissions](#Permissions)
-- [PremiumType](#PremiumType)
+- [ExplicitContentFilterLevel](#ExplicitContentFilterLevel)
+- [ApplicationCommandPermissionType](#ApplicationCommandPermissionType)
+- [SkuType](#SkuType)
+- [SkuFlags](#SkuFlags)
+- [ApplicationCommandType](#ApplicationCommandType)
+- [ApplicationFlags](#ApplicationFlags)
+- [RoleFlags](#RoleFlags)
+- [ApplicationCommandOptionType](#ApplicationCommandOptionType)
 - [EntitlementType](#EntitlementType)
+- [PremiumType](#PremiumType)
+- [PremiumTier](#PremiumTier)
+- [StickerFormatType](#StickerFormatType)
+- [StickerType](#StickerType)
+- [Permissions](#Permissions)
+- [GuildMemberFlags](#GuildMemberFlags)
+- [SystemChannelFlags](#SystemChannelFlags)
 - [TextInputStyle](#TextInputStyle)
   - [build](#build)
-- [ApplicationFlags](#ApplicationFlags)
-- [StickerFormatType](#StickerFormatType)
-- [ApplicationCommandType](#ApplicationCommandType)
-- [ApplicationCommandPermissionType](#ApplicationCommandPermissionType)
-- [GuildMemberFlags](#GuildMemberFlags)
-- [ComponentType](#ComponentType)
+- [ButtonStyle](#ButtonStyle)
   - [build](#build)
-- [RoleFlags](#RoleFlags)
-- [OwnerType](#OwnerType)
-- [ApplicationCommandOptionType](#ApplicationCommandOptionType)
+- [ChannelType](#ChannelType)
 - [Intents](#Intents)
-- [DefaultValueType](#DefaultValueType)
-- [UserFlags](#UserFlags)
+- [OwnerType](#OwnerType)
+- [InteractionType](#InteractionType)
 - [NSFWLevel](#NSFWLevel)
 - [MFALevel](#MFALevel)
-- [SkuFlags](#SkuFlags)
+- [UserFlags](#UserFlags)
 - [InteractionResponseType](#InteractionResponseType)
-- [InteractionType](#InteractionType)
+- [ComponentType](#ComponentType)
+  - [build](#build)
 - [MessageNotificationsLevel](#MessageNotificationsLevel)
-- [VerificationLevel](#VerificationLevel)
 - [MembershipState](#MembershipState)
-- [SkuType](#SkuType)
-- [ListEntitlementParams](#ListEntitlementParams)
+- [VerificationLevel](#VerificationLevel)
+- [DefaultValueType](#DefaultValueType)
+- [InviteTargetType](#InviteTargetType)
+- [ClientConfig](#ClientConfig)
+- [Client](#Client)
+  - [bulk_overwrite_global_application_commands](#bulk_overwrite_global_application_commands)
+  - [bulk_overwrite_guild_application_commands](#bulk_overwrite_guild_application_commands)
+  - [create_dm](#create_dm)
+  - [create_global_application_command](#create_global_application_command)
+  - [create_group_dm](#create_group_dm)
+  - [create_guild_application_command](#create_guild_application_command)
+  - [create_interaction_response](#create_interaction_response)
+  - [create_test_entitlement](#create_test_entitlement)
+  - [delete_channel](#delete_channel)
+  - [delete_global_application_command](#delete_global_application_command)
+  - [delete_guild_application_command](#delete_guild_application_command)
+  - [delete_invite](#delete_invite)
+  - [delete_message](#delete_message)
+  - [delete_test_entitlement](#delete_test_entitlement)
+  - [edit_application_command_permissions](#edit_application_command_permissions)
+  - [edit_global_application_command](#edit_global_application_command)
+  - [edit_guild_application_command](#edit_guild_application_command)
+  - [edit_my_application](#edit_my_application)
+  - [edit_my_user](#edit_my_user)
+  - [fetch_application_command_permissions](#fetch_application_command_permissions)
+  - [fetch_global_application_command](#fetch_global_application_command)
+  - [fetch_global_application_commands](#fetch_global_application_commands)
+  - [fetch_guild](#fetch_guild)
+  - [fetch_guild_application_command](#fetch_guild_application_command)
+  - [fetch_guild_application_command_permissions](#fetch_guild_application_command_permissions)
+  - [fetch_invite](#fetch_invite)
+  - [fetch_my_application](#fetch_my_application)
+  - [fetch_my_guild_member](#fetch_my_guild_member)
+  - [fetch_my_guilds](#fetch_my_guilds)
+  - [fetch_my_user](#fetch_my_user)
+  - [fetch_user](#fetch_user)
+  - [leave_guild](#leave_guild)
+  - [list_entitlements](#list_entitlements)
+  - [list_skus](#list_skus)
+  - [request](#request)
 - [JpegImage](#JpegImage)
   - [build](#build)
+- [ListEntitlementParams](#ListEntitlementParams)
+- [InviteMetadata](#InviteMetadata)
+- [Invite](#Invite)
 - [MentionableSelect](#MentionableSelect)
   - [build](#build)
 - [InternalServerError](#InternalServerError)
@@ -116,126 +158,93 @@
   - [build](#build)
 - [NotFound](#NotFound)
 - [InteractionCreateEvent](#InteractionCreateEvent)
-- [Interaction](#Interaction)
-- [InstallParams](#InstallParams)
+- [CreateApplicationCommandParams](#CreateApplicationCommandParams)
   - [build](#build)
+- [Interaction](#Interaction)
 - [PartialApplication](#PartialApplication)
-- [GuildMember](#GuildMember)
+- [CreateGroupDMParams](#CreateGroupDMParams)
 - [PartialEmoji](#PartialEmoji)
   - [build](#build)
 - [PartialGuild](#PartialGuild)
-- [GuildApplicationCommandPermissions](#GuildApplicationCommandPermissions)
-- [PartialUser](#PartialUser)
-- [Guild](#Guild)
-- [GifImage](#GifImage)
+- [ChannelSelect](#ChannelSelect)
   - [build](#build)
-- [GatewayClient](#GatewayClient)
-  - [launch](#launch)
-  - [process_dispatch](#process_dispatch)
-  - [run](#run)
-  - [init](#init)
-- [Forbidden](#Forbidden)
-- [FetchMyGuildsParams](#FetchMyGuildsParams)
-- [FetchGlobalApplicationCommandsParams](#FetchGlobalApplicationCommandsParams)
+- [PartialUser](#PartialUser)
+- [InstallParams](#InstallParams)
+  - [build](#build)
+- [CreateTestEntitlementParams](#CreateTestEntitlementParams)
+- [Button](#Button)
+  - [build](#build)
+- [BotConfig](#BotConfig)
+- [BaseEvent](#BaseEvent)
+- [GuildMember](#GuildMember)
 - [PngImage](#PngImage)
   - [build](#build)
-- [EventWaitParams](#EventWaitParams)
-- [Events](#Events)
-- [EventController](#EventController)
+- [DefaultValue](#DefaultValue)
+  - [build](#build)
+- [GuildApplicationCommandPermissions](#GuildApplicationCommandPermissions)
+- [Guild](#Guild)
 - [Properties](#Properties)
 - [Ratelimit](#Ratelimit)
 - [ReadyEvent](#ReadyEvent)
-- [Entitlement](#Entitlement)
+- [Awaitable](#Awaitable)
 - [RequestOptions](#RequestOptions)
 - [RestError](#RestError)
   - [code](#code)
   - [msg](#msg)
 - [Role](#Role)
-- [Emoji](#Emoji)
-- [EmitOptions](#EmitOptions)
+- [AvatarDecorationData](#AvatarDecorationData)
+- [GifImage](#GifImage)
+  - [build](#build)
 - [RoleSelect](#RoleSelect)
   - [build](#build)
 - [RoleTags](#RoleTags)
-- [EditApplicationParams](#EditApplicationParams)
-  - [build](#build)
+- [GatewayClient](#GatewayClient)
+  - [launch](#launch)
+  - [process_dispatch](#process_dispatch)
+  - [run](#run)
+  - [init](#init)
 - [SelectOption](#SelectOption)
   - [build](#build)
 - [Sku](#Sku)
-- [EditApplicationCommandPermissionsParams](#EditApplicationCommandPermissionsParams)
-  - [build](#build)
-- [EditApplicationCommandParams](#EditApplicationCommandParams)
-  - [build](#build)
-- [DispatchEvent](#DispatchEvent)
-- [DefaultValue](#DefaultValue)
-  - [build](#build)
-- [CreateTestEntitlementParams](#CreateTestEntitlementParams)
-- [CreateGroupDMParams](#CreateGroupDMParams)
-- [CreateApplicationCommandParams](#CreateApplicationCommandParams)
-  - [build](#build)
-- [Sticker](#Sticker)
-- [ClientConfig](#ClientConfig)
-- [Client](#Client)
-  - [bulk_overwrite_global_application_commands](#bulk_overwrite_global_application_commands)
-  - [bulk_overwrite_guild_application_commands](#bulk_overwrite_guild_application_commands)
-  - [create_dm](#create_dm)
-  - [create_global_application_command](#create_global_application_command)
-  - [create_group_dm](#create_group_dm)
-  - [create_guild_application_command](#create_guild_application_command)
-  - [create_interaction_response](#create_interaction_response)
-  - [create_test_entitlement](#create_test_entitlement)
-  - [delete_channel](#delete_channel)
-  - [delete_global_application_command](#delete_global_application_command)
-  - [delete_guild_application_command](#delete_guild_application_command)
-  - [delete_message](#delete_message)
-  - [delete_test_entitlement](#delete_test_entitlement)
-  - [edit_application_command_permissions](#edit_application_command_permissions)
-  - [edit_global_application_command](#edit_global_application_command)
-  - [edit_guild_application_command](#edit_guild_application_command)
-  - [edit_my_application](#edit_my_application)
-  - [edit_my_user](#edit_my_user)
-  - [fetch_application_command_permissions](#fetch_application_command_permissions)
-  - [fetch_global_application_command](#fetch_global_application_command)
-  - [fetch_global_application_commands](#fetch_global_application_commands)
-  - [fetch_guild](#fetch_guild)
-  - [fetch_guild_application_command](#fetch_guild_application_command)
-  - [fetch_guild_application_command_permissions](#fetch_guild_application_command_permissions)
-  - [fetch_my_application](#fetch_my_application)
-  - [fetch_my_guild_member](#fetch_my_guild_member)
-  - [fetch_my_guilds](#fetch_my_guilds)
-  - [fetch_my_user](#fetch_my_user)
-  - [fetch_user](#fetch_user)
-  - [leave_guild](#leave_guild)
-  - [list_entitlements](#list_entitlements)
-  - [list_skus](#list_skus)
-  - [request](#request)
-- [ChannelSelect](#ChannelSelect)
-  - [build](#build)
-- [StringSelect](#StringSelect)
-  - [build](#build)
-- [Button](#Button)
-  - [build](#build)
-- [Team](#Team)
-- [BotConfig](#BotConfig)
-- [TeamMember](#TeamMember)
-- [BaseEvent](#BaseEvent)
-- [Awaitable](#Awaitable)
-- [TextInput](#TextInput)
-  - [build](#build)
-- [AvatarDecorationData](#AvatarDecorationData)
-- [Unauthorized](#Unauthorized)
-- [UnavailableGuild](#UnavailableGuild)
+- [Forbidden](#Forbidden)
+- [FetchMyGuildsParams](#FetchMyGuildsParams)
+- [FetchInviteParams](#FetchInviteParams)
+- [FetchGlobalApplicationCommandsParams](#FetchGlobalApplicationCommandsParams)
+- [EventWaitParams](#EventWaitParams)
 - [ApplicationCommandPermission](#ApplicationCommandPermission)
   - [build](#build)
-- [User](#User)
+- [Events](#Events)
+- [Sticker](#Sticker)
+- [EventController](#EventController)
+- [DeleteInviteParams](#DeleteInviteParams)
+- [Entitlement](#Entitlement)
+- [StringSelect](#StringSelect)
+  - [build](#build)
+- [DispatchEvent](#DispatchEvent)
+- [Team](#Team)
 - [ApplicationCommandOptionChoice](#ApplicationCommandOptionChoice)
   - [build](#build)
+- [TeamMember](#TeamMember)
 - [ApplicationCommandOption](#ApplicationCommandOption)
+  - [build](#build)
+- [Emoji](#Emoji)
+- [TextInput](#TextInput)
+  - [build](#build)
+- [EmitOptions](#EmitOptions)
+- [Unauthorized](#Unauthorized)
+- [UnavailableGuild](#UnavailableGuild)
+- [ApplicationCommand](#ApplicationCommand)
+- [User](#User)
+- [Application](#Application)
+- [EditApplicationParams](#EditApplicationParams)
   - [build](#build)
 - [UserSelect](#UserSelect)
   - [build](#build)
-- [ApplicationCommand](#ApplicationCommand)
+- [EditApplicationCommandPermissionsParams](#EditApplicationCommandPermissionsParams)
+  - [build](#build)
 - [WelcomeChannel](#WelcomeChannel)
-- [Application](#Application)
+- [EditApplicationCommandParams](#EditApplicationCommandParams)
+  - [build](#build)
 - [WelcomeScreen](#WelcomeScreen)
 - [ActionRow](#ActionRow)
   - [build](#build)
@@ -557,6 +566,22 @@ const snowflake_epoch = u64(1420070400000)
 
 [[Return to contents]](#Contents)
 
+## is_sentinel
+```v
+fn is_sentinel[T](target T) bool
+```
+is_sentinel reports whether `target` is sentinel
+
+[[Return to contents]](#Contents)
+
+## oauth2_app
+```v
+fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig) Client
+```
+`oauth2_app` accepts client ID and secret and returns Client with Basic token
+
+[[Return to contents]](#Contents)
+
 ## bot
 ```v
 fn bot(token string, config BotConfig) GatewayClient
@@ -577,14 +602,6 @@ Note: token should not contain `Bearer` prefix
 
 [[Return to contents]](#Contents)
 
-## is_sentinel
-```v
-fn is_sentinel[T](target T) bool
-```
-is_sentinel reports whether `target` is sentinel
-
-[[Return to contents]](#Contents)
-
 ## combine_intents
 ```v
 fn combine_intents(list ...Intents) int
@@ -593,145 +610,9 @@ fn combine_intents(list ...Intents) int
 
 [[Return to contents]](#Contents)
 
-## oauth2_app
-```v
-fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig) Client
-```
-`oauth2_app` accepts client ID and secret and returns Client with Basic token
-
-[[Return to contents]](#Contents)
-
 ## ApplicationCommandOption.parse
 ```v
 fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption
-```
-
-
-[[Return to contents]](#Contents)
-
-## User.parse
-```v
-fn User.parse(j json2.Any) !User
-```
-
-
-[[Return to contents]](#Contents)
-
-## ApplicationCommandOptionChoice.parse
-```v
-fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOptionChoice
-```
-
-
-[[Return to contents]](#Contents)
-
-## Interaction.parse
-```v
-fn Interaction.parse(j json2.Any) !Interaction
-```
-
-
-[[Return to contents]](#Contents)
-
-## InstallParams.parse
-```v
-fn InstallParams.parse(j json2.Any) !InstallParams
-```
-
-
-[[Return to contents]](#Contents)
-
-## UnavailableGuild.parse
-```v
-fn UnavailableGuild.parse(j json2.Any) !UnavailableGuild
-```
-
-
-[[Return to contents]](#Contents)
-
-## ApplicationCommandPermission.parse
-```v
-fn ApplicationCommandPermission.parse(j json2.Any) !ApplicationCommandPermission
-```
-
-
-[[Return to contents]](#Contents)
-
-## GuildMember.parse
-```v
-fn GuildMember.parse(j json2.Any) !GuildMember
-```
-
-
-[[Return to contents]](#Contents)
-
-## PartialApplication.parse
-```v
-fn PartialApplication.parse(j json2.Any) !PartialApplication
-```
-
-
-[[Return to contents]](#Contents)
-
-## GuildApplicationCommandPermissions.parse
-```v
-fn GuildApplicationCommandPermissions.parse(j json2.Any) !GuildApplicationCommandPermissions
-```
-
-
-[[Return to contents]](#Contents)
-
-## ApplicationCommand.parse
-```v
-fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand
-```
-
-
-[[Return to contents]](#Contents)
-
-## AvatarDecorationData.parse
-```v
-fn AvatarDecorationData.parse(j json2.Any) !AvatarDecorationData
-```
-
-
-[[Return to contents]](#Contents)
-
-## Guild.parse
-```v
-fn Guild.parse(j json2.Any) !Guild
-```
-
-
-[[Return to contents]](#Contents)
-
-## PartialUser.parse
-```v
-fn PartialUser.parse(j json2.Any) !PartialUser
-```
-
-
-[[Return to contents]](#Contents)
-
-## TeamMember.parse
-```v
-fn TeamMember.parse(j json2.Any) !TeamMember
-```
-
-
-[[Return to contents]](#Contents)
-
-## Application.parse
-```v
-fn Application.parse(j json2.Any) !Application
-```
-
-
-[[Return to contents]](#Contents)
-
-## WelcomeChannel.parse
-```v
-fn WelcomeChannel.parse(j json2.Any) !WelcomeChannel
 ```
 
 
@@ -745,49 +626,9 @@ fn Team.parse(j json2.Any) !Team
 
 [[Return to contents]](#Contents)
 
-## Permissions.all
+## ApplicationCommandOptionChoice.parse
 ```v
-fn Permissions.all() Permissions
-```
-
-
-[[Return to contents]](#Contents)
-
-## Permissions.all_except
-```v
-fn Permissions.all_except(permissions Permissions) Permissions
-```
-
-
-[[Return to contents]](#Contents)
-
-## Permissions.parse
-```v
-fn Permissions.parse(j json2.Any) !Permissions
-```
-
-
-[[Return to contents]](#Contents)
-
-## Permissions.zero
-```v
-fn Permissions.zero() Permissions
-```
-
-
-[[Return to contents]](#Contents)
-
-## Entitlement.parse
-```v
-fn Entitlement.parse(j json2.Any) !Entitlement
-```
-
-
-[[Return to contents]](#Contents)
-
-## ReadyEvent.parse
-```v
-fn ReadyEvent.parse(j json2.Any, base BaseEvent) !ReadyEvent
+fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOptionChoice
 ```
 
 
@@ -796,38 +637,6 @@ fn ReadyEvent.parse(j json2.Any, base BaseEvent) !ReadyEvent
 ## Sticker.parse
 ```v
 fn Sticker.parse(j json2.Any) !Sticker
-```
-
-
-[[Return to contents]](#Contents)
-
-## PartialGuild.parse
-```v
-fn PartialGuild.parse(j json2.Any) !PartialGuild
-```
-
-
-[[Return to contents]](#Contents)
-
-## Emoji.parse
-```v
-fn Emoji.parse(j json2.Any) !Emoji
-```
-
-
-[[Return to contents]](#Contents)
-
-## Role.parse
-```v
-fn Role.parse(j json2.Any) !Role
-```
-
-
-[[Return to contents]](#Contents)
-
-## WelcomeScreen.parse
-```v
-fn WelcomeScreen.parse(j json2.Any) !WelcomeScreen
 ```
 
 
@@ -849,17 +658,17 @@ fn Snowflake.now() Snowflake
 
 [[Return to contents]](#Contents)
 
-## Snowflake.from
+## ApplicationCommandPermission.parse
 ```v
-fn Snowflake.from(t time.Time) Snowflake
+fn ApplicationCommandPermission.parse(j json2.Any) !ApplicationCommandPermission
 ```
 
 
 [[Return to contents]](#Contents)
 
-## RoleTags.parse
+## Snowflake.from
 ```v
-fn RoleTags.parse(j json2.Any) !RoleTags
+fn Snowflake.from(t time.Time) Snowflake
 ```
 
 
@@ -873,21 +682,237 @@ fn Sku.parse(j json2.Any) !Sku
 
 [[Return to contents]](#Contents)
 
-## InteractionResponseData
+## RoleTags.parse
 ```v
-interface InteractionResponseData {
-	is_interaction_response_data()
-	build() json2.Any
-}
+fn RoleTags.parse(j json2.Any) !RoleTags
 ```
 
 
 [[Return to contents]](#Contents)
 
-## IInteractionResponse
+## TeamMember.parse
 ```v
-interface IInteractionResponse {
-	is_interaction_response()
+fn TeamMember.parse(j json2.Any) !TeamMember
+```
+
+
+[[Return to contents]](#Contents)
+
+## AvatarDecorationData.parse
+```v
+fn AvatarDecorationData.parse(j json2.Any) !AvatarDecorationData
+```
+
+
+[[Return to contents]](#Contents)
+
+## ReadyEvent.parse
+```v
+fn ReadyEvent.parse(j json2.Any, base BaseEvent) !ReadyEvent
+```
+
+
+[[Return to contents]](#Contents)
+
+## Permissions.zero
+```v
+fn Permissions.zero() Permissions
+```
+
+
+[[Return to contents]](#Contents)
+
+## Permissions.parse
+```v
+fn Permissions.parse(j json2.Any) !Permissions
+```
+
+
+[[Return to contents]](#Contents)
+
+## ApplicationCommand.parse
+```v
+fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand
+```
+
+
+[[Return to contents]](#Contents)
+
+## UnavailableGuild.parse
+```v
+fn UnavailableGuild.parse(j json2.Any) !UnavailableGuild
+```
+
+
+[[Return to contents]](#Contents)
+
+## Permissions.all_except
+```v
+fn Permissions.all_except(permissions Permissions) Permissions
+```
+
+
+[[Return to contents]](#Contents)
+
+## Permissions.all
+```v
+fn Permissions.all() Permissions
+```
+
+
+[[Return to contents]](#Contents)
+
+## PartialUser.parse
+```v
+fn PartialUser.parse(j json2.Any) !PartialUser
+```
+
+
+[[Return to contents]](#Contents)
+
+## PartialGuild.parse
+```v
+fn PartialGuild.parse(j json2.Any) !PartialGuild
+```
+
+
+[[Return to contents]](#Contents)
+
+## PartialApplication.parse
+```v
+fn PartialApplication.parse(j json2.Any) !PartialApplication
+```
+
+
+[[Return to contents]](#Contents)
+
+## Application.parse
+```v
+fn Application.parse(j json2.Any) !Application
+```
+
+
+[[Return to contents]](#Contents)
+
+## User.parse
+```v
+fn User.parse(j json2.Any) !User
+```
+
+
+[[Return to contents]](#Contents)
+
+## InviteMetadata.parse
+```v
+fn InviteMetadata.parse(j json2.Any) !InviteMetadata
+```
+
+
+[[Return to contents]](#Contents)
+
+## Role.parse
+```v
+fn Role.parse(j json2.Any) !Role
+```
+
+
+[[Return to contents]](#Contents)
+
+## Invite.parse
+```v
+fn Invite.parse(j json2.Any) !Invite
+```
+
+
+[[Return to contents]](#Contents)
+
+## WelcomeChannel.parse
+```v
+fn WelcomeChannel.parse(j json2.Any) !WelcomeChannel
+```
+
+
+[[Return to contents]](#Contents)
+
+## WelcomeScreen.parse
+```v
+fn WelcomeScreen.parse(j json2.Any) !WelcomeScreen
+```
+
+
+[[Return to contents]](#Contents)
+
+## Interaction.parse
+```v
+fn Interaction.parse(j json2.Any) !Interaction
+```
+
+
+[[Return to contents]](#Contents)
+
+## InstallParams.parse
+```v
+fn InstallParams.parse(j json2.Any) !InstallParams
+```
+
+
+[[Return to contents]](#Contents)
+
+## GuildMember.parse
+```v
+fn GuildMember.parse(j json2.Any) !GuildMember
+```
+
+
+[[Return to contents]](#Contents)
+
+## GuildApplicationCommandPermissions.parse
+```v
+fn GuildApplicationCommandPermissions.parse(j json2.Any) !GuildApplicationCommandPermissions
+```
+
+
+[[Return to contents]](#Contents)
+
+## Guild.parse
+```v
+fn Guild.parse(j json2.Any) !Guild
+```
+
+
+[[Return to contents]](#Contents)
+
+## Entitlement.parse
+```v
+fn Entitlement.parse(j json2.Any) !Entitlement
+```
+
+
+[[Return to contents]](#Contents)
+
+## Emoji.parse
+```v
+fn Emoji.parse(j json2.Any) !Emoji
+```
+
+
+[[Return to contents]](#Contents)
+
+## Component
+```v
+interface Component {
+	is_component()
+	build() json2.Any
+}
+```
+ignore is_component(), it is used to differ interfaces
+
+[[Return to contents]](#Contents)
+
+## InteractionResponseData
+```v
+interface InteractionResponseData {
+	is_interaction_response_data()
 	build() json2.Any
 }
 ```
@@ -907,52 +932,12 @@ interface Image {
 
 [[Return to contents]](#Contents)
 
-## Component
+## IInteractionResponse
 ```v
-interface Component {
-	is_component()
+interface IInteractionResponse {
+	is_interaction_response()
 	build() json2.Any
 }
-```
-ignore is_component(), it is used to differ interfaces
-
-[[Return to contents]](#Contents)
-
-## Snowflake
-```v
-type Snowflake = u64
-```
-
-
-[[Return to contents]](#Contents)
-
-## raw_timestamp
-```v
-fn (s Snowflake) raw_timestamp() u64
-```
-
-
-[[Return to contents]](#Contents)
-
-## timestamp
-```v
-fn (s Snowflake) timestamp() time.Time
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (s Snowflake) build() string
-```
-
-
-[[Return to contents]](#Contents)
-
-## ApplicationCommandOptionChoiceValue
-```v
-type ApplicationCommandOptionChoiceValue = f64 | int | string
 ```
 
 
@@ -966,17 +951,26 @@ type TeamMemberRole = string
 
 [[Return to contents]](#Contents)
 
-## GuildFeature
+## Check
 ```v
-type GuildFeature = string
+type Check[T] = fn (T) bool
 ```
 
 
 [[Return to contents]](#Contents)
 
-## Check
+## Awaitable[T]
+## do
 ```v
-type Check[T] = fn (T) bool
+fn (mut a Awaitable[T]) do() ?T
+```
+`do` waits for event and returns it. After it returned event, it will return none If timeout is exceeded, it returns none
+
+[[Return to contents]](#Contents)
+
+## GuildFeature
+```v
+type GuildFeature = string
 ```
 
 
@@ -990,9 +984,9 @@ type Locale = string
 
 [[Return to contents]](#Contents)
 
-## Prepare
+## ApplicationCommandOptionChoiceValue
 ```v
-type Prepare = fn (mut http.Request) !
+type ApplicationCommandOptionChoiceValue = f64 | int | string
 ```
 
 
@@ -1039,27 +1033,41 @@ type EventListener[T] = fn (T) !
 
 [[Return to contents]](#Contents)
 
-## Awaitable[T]
-## do
+## Prepare
 ```v
-fn (mut a Awaitable[T]) do() ?T
+type Prepare = fn (mut http.Request) !
 ```
-`do` waits for event and returns it. After it returned event, it will return none If timeout is exceeded, it returns none
+
 
 [[Return to contents]](#Contents)
 
-## PremiumTier
+## Snowflake
 ```v
-enum PremiumTier {
-	// guild has not unlocked any Server Boost perks
-	none_
-	// guild has unlocked Server Boost level 1 perks
-	tier_1
-	// guild has unlocked Server Boost level 2 perks
-	tier_2
-	// guild has unlocked Server Boost level 3 perks
-	tier_3
-}
+type Snowflake = u64
+```
+
+
+[[Return to contents]](#Contents)
+
+## raw_timestamp
+```v
+fn (s Snowflake) raw_timestamp() u64
+```
+
+
+[[Return to contents]](#Contents)
+
+## timestamp
+```v
+fn (s Snowflake) timestamp() time.Time
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (s Snowflake) build() string
 ```
 
 
@@ -1080,35 +1088,193 @@ enum ExplicitContentFilterLevel {
 
 [[Return to contents]](#Contents)
 
-## ChannelType
+## ApplicationCommandPermissionType
 ```v
-enum ChannelType {
-	// a text channel within a server
-	guild_text          = 0
-	// a direct message between users
-	dm                  = 1
-	// a voice channel within a server
-	guild_voice         = 2
-	// a direct message between multiple users
-	group_dm            = 3
-	// an organizational category that contains up to 50 channels
-	guild_category      = 4
-	// a channel that users can follow and crosspost into their own server (formerly news channels)
-	guild_announcement  = 5
-	// a temporary sub-channel within a GUILD_ANNOUNCEMENT channel
-	announcement_thread = 10
-	// a temporary sub-channel within a GUILD_TEXT or GUILD_FORUM channel
-	public_thread       = 11
-	// a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
-	private_thread      = 12
-	// a voice channel for hosting events with an audience
-	guild_stage_voice   = 13
-	// the channel in a hub containing the listed servers
-	guild_directory     = 14
-	// Channel that can only contain threads
-	guild_forum         = 15
-	// Channel that can only contain threads, similar to GUILD_FORUM channels
-	guild_media         = 16
+enum ApplicationCommandPermissionType {
+	role    = 1
+	user
+	channel
+}
+```
+Guild Application Command Permissions Structure
+
+[[Return to contents]](#Contents)
+
+## SkuType
+```v
+enum SkuType {
+	// Represents a recurring subscription
+	subscription       = 5
+	// System-generated group for each SUBSCRIPTION SKU created
+	subscription_group
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## SkuFlags
+```v
+enum SkuFlags {
+	reserved_0
+	reserved_1
+	// SKU is available for purchase
+	available
+	reserved_3
+	reserved_4
+	reserved_5
+	reserved_6
+	// Recurring SKU that can be purchased by a user and applied to a single server. Grants access to every user in that server.
+	guild_subscription
+	// Recurring SKU purchased by a user for themselves. Grants access to the purchasing user in every server.
+	user_subscription
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## ApplicationCommandType
+```v
+enum ApplicationCommandType {
+	// Slash commands; a text-based command that shows up when a user types `/`
+	chat_input = 1
+	// A UI-based command that shows up when you right click or tap on a user
+	user
+	// A UI-based command that shows up when you right click or tap on a message
+	message
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## ApplicationFlags
+```v
+enum ApplicationFlags {
+	reserved_0
+	reserved_1
+	reserved_2
+	reserved_3
+	reserved_4
+	reserved_5
+	// Indicates if an app uses the Auto Moderation API
+	application_auto_moderation_rule_create_badge
+	reserved_7
+	reserved_8
+	reserved_9
+	reserved_10
+	reserved_11
+	// Intent required for bots in **100 or more servers** to receive `presence_update` events
+	gateway_presence
+	// Intent required for bots in under 100 to receive `presence_update` events, found on the **Bot** page in your app's settings
+	gateway_presence_limited
+	// Intent required for bots in **100 or more servers** to receive member-related events like `guild_member_add`. See the list of member-related events under `GUILD_MEMBERS`
+	gateway_guild_members
+	// Intent required for bots in under 100 servers to receive member-related events like `guild_member_add`, found on the **Bot** page in your app's settings. See the list of member-related events under GUILD_MEMBERS
+	gateway_guild_members_limited
+	// Indicates unusual growth of an app that prevents verification
+	verification_pending_guild_limit
+	// Indicates if an app is embedded within the Discord client (currently unavailable publicly)
+	embedded
+	// Intent required for bots in **100 or more servers** to receive message content
+	gateway_message_content
+	// Intent required for bots in under 100 servers to receive message content, found on the **Bot** page in your app's settings
+	gateway_message_content_limited
+	reserved_20
+	reserved_21
+	reserved_22
+	// Indicates if an app has registered global application commands
+	application_command_badge
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## RoleFlags
+```v
+enum RoleFlags {
+	// role can be selected by members in an onboarding prompt
+	in_prompt
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## ApplicationCommandOptionType
+```v
+enum ApplicationCommandOptionType {
+	sub_command
+	sub_command_group
+	string
+	// Any integer between -2^53 and 2^53
+	integer
+	boolean
+	user
+	// Includes all channel types + categories
+	channel
+	role
+	// Includes users and roles
+	mentionable
+	// Any double between -2^53 and 2^53
+	number
+	attachment
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## EntitlementType
+```v
+enum EntitlementType {
+	// Entitlement was purchased as an app subscription
+	application_subscription = 8
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## PremiumType
+```v
+enum PremiumType {
+	none_
+	nitro_classic
+	nitro
+	nitro_basic
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## PremiumTier
+```v
+enum PremiumTier {
+	// guild has not unlocked any Server Boost perks
+	none_
+	// guild has unlocked Server Boost level 1 perks
+	tier_1
+	// guild has unlocked Server Boost level 2 perks
+	tier_2
+	// guild has unlocked Server Boost level 3 perks
+	tier_3
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## StickerFormatType
+```v
+enum StickerFormatType {
+	png
+	apng
+	lottie
+	gif
 }
 ```
 
@@ -1120,54 +1286,6 @@ enum ChannelType {
 enum StickerType {
 	standard
 	guild
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## ButtonStyle
-```v
-enum ButtonStyle {
-	// blurple
-	primary   = 1
-	// grey
-	secondary = 2
-	// green
-	success   = 3
-	// red
-	danger    = 4
-	// grey, navigates to a URL
-	link      = 5
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (bs ButtonStyle) build() json2.Any
-```
-
-
-[[Return to contents]](#Contents)
-
-## SystemChannelFlags
-```v
-enum SystemChannelFlags {
-	// Suppress member join notifications
-	suppress_join_notifications
-	// Suppress server boost notifications
-	suppress_premium_subscriptions
-	// Suppress server setup tips
-	suppress_guild_reminder_notifications
-	// Hide member join sticker reply buttons
-	suppress_join_notification_replies
-	// Suppress role subscription purchase and renewal notifications
-	suppress_role_subscription_purchase_notifications
-	// Hide role subscription sticker reply buttons
-	suppress_role_subscription_purchase_notifications_replies
 }
 ```
 
@@ -1277,24 +1395,38 @@ enum Permissions as u64 {
 
 [[Return to contents]](#Contents)
 
-## PremiumType
+## GuildMemberFlags
 ```v
-enum PremiumType {
-	none_
-	nitro_classic
-	nitro
-	nitro_basic
+enum GuildMemberFlags {
+	// Member has left and rejoined the guild
+	did_rejoin
+	// Member has completed onboarding
+	completed_onboarding
+	// Member is exempt from guild verification requirements
+	bypasses_verification
+	// Member has started onboarding
+	started_onboarding
 }
 ```
 
 
 [[Return to contents]](#Contents)
 
-## EntitlementType
+## SystemChannelFlags
 ```v
-enum EntitlementType {
-	// Entitlement was purchased as an app subscription
-	application_subscription = 8
+enum SystemChannelFlags {
+	// Suppress member join notifications
+	suppress_join_notifications
+	// Suppress server boost notifications
+	suppress_premium_subscriptions
+	// Suppress server setup tips
+	suppress_guild_reminder_notifications
+	// Hide member join sticker reply buttons
+	suppress_join_notification_replies
+	// Suppress role subscription purchase and renewal notifications
+	suppress_role_subscription_purchase_notifications
+	// Hide role subscription sticker reply buttons
+	suppress_role_subscription_purchase_notifications_replies
 }
 ```
 
@@ -1322,125 +1454,19 @@ fn (tis TextInputStyle) build() json2.Any
 
 [[Return to contents]](#Contents)
 
-## ApplicationFlags
+## ButtonStyle
 ```v
-enum ApplicationFlags {
-	reserved_0
-	reserved_1
-	reserved_2
-	reserved_3
-	reserved_4
-	reserved_5
-	// Indicates if an app uses the Auto Moderation API
-	application_auto_moderation_rule_create_badge
-	reserved_7
-	reserved_8
-	reserved_9
-	reserved_10
-	reserved_11
-	// Intent required for bots in **100 or more servers** to receive `presence_update` events
-	gateway_presence
-	// Intent required for bots in under 100 to receive `presence_update` events, found on the **Bot** page in your app's settings
-	gateway_presence_limited
-	// Intent required for bots in **100 or more servers** to receive member-related events like `guild_member_add`. See the list of member-related events under `GUILD_MEMBERS`
-	gateway_guild_members
-	// Intent required for bots in under 100 servers to receive member-related events like `guild_member_add`, found on the **Bot** page in your app's settings. See the list of member-related events under GUILD_MEMBERS
-	gateway_guild_members_limited
-	// Indicates unusual growth of an app that prevents verification
-	verification_pending_guild_limit
-	// Indicates if an app is embedded within the Discord client (currently unavailable publicly)
-	embedded
-	// Intent required for bots in **100 or more servers** to receive message content
-	gateway_message_content
-	// Intent required for bots in under 100 servers to receive message content, found on the **Bot** page in your app's settings
-	gateway_message_content_limited
-	reserved_20
-	reserved_21
-	reserved_22
-	// Indicates if an app has registered global application commands
-	application_command_badge
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## StickerFormatType
-```v
-enum StickerFormatType {
-	png
-	apng
-	lottie
-	gif
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## ApplicationCommandType
-```v
-enum ApplicationCommandType {
-	// Slash commands; a text-based command that shows up when a user types `/`
-	chat_input = 1
-	// A UI-based command that shows up when you right click or tap on a user
-	user
-	// A UI-based command that shows up when you right click or tap on a message
-	message
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## ApplicationCommandPermissionType
-```v
-enum ApplicationCommandPermissionType {
-	role    = 1
-	user
-	channel
-}
-```
-Guild Application Command Permissions Structure
-
-[[Return to contents]](#Contents)
-
-## GuildMemberFlags
-```v
-enum GuildMemberFlags {
-	// Member has left and rejoined the guild
-	did_rejoin
-	// Member has completed onboarding
-	completed_onboarding
-	// Member is exempt from guild verification requirements
-	bypasses_verification
-	// Member has started onboarding
-	started_onboarding
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## ComponentType
-```v
-enum ComponentType {
-	// Container for other components
-	action_row         = 1
-	// Button object
-	button             = 2
-	// Select menu for picking from defined text options
-	string_select      = 3
-	// Text input object
-	text_input         = 4
-	// Select menu for users
-	user_select        = 5
-	// Select menu for roles
-	role_select        = 6
-	// Select menu for mentionables (users *and roles*)
-	mentionable_select = 7
-	// Select menu for channels
-	channel_select     = 8
+enum ButtonStyle {
+	// blurple
+	primary   = 1
+	// grey
+	secondary = 2
+	// green
+	success   = 3
+	// red
+	danger    = 4
+	// grey, navigates to a URL
+	link      = 5
 }
 ```
 
@@ -1449,54 +1475,41 @@ enum ComponentType {
 
 ## build
 ```v
-fn (ct ComponentType) build() json2.Any
+fn (bs ButtonStyle) build() json2.Any
 ```
 
 
 [[Return to contents]](#Contents)
 
-## RoleFlags
+## ChannelType
 ```v
-enum RoleFlags {
-	// role can be selected by members in an onboarding prompt
-	in_prompt
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## OwnerType
-```v
-enum OwnerType {
-	// for a guild subscription
-	guild = 1
-	// for a user subscription
-	user
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## ApplicationCommandOptionType
-```v
-enum ApplicationCommandOptionType {
-	sub_command
-	sub_command_group
-	string
-	// Any integer between -2^53 and 2^53
-	integer
-	boolean
-	user
-	// Includes all channel types + categories
-	channel
-	role
-	// Includes users and roles
-	mentionable
-	// Any double between -2^53 and 2^53
-	number
-	attachment
+enum ChannelType {
+	// a text channel within a server
+	guild_text          = 0
+	// a direct message between users
+	dm                  = 1
+	// a voice channel within a server
+	guild_voice         = 2
+	// a direct message between multiple users
+	group_dm            = 3
+	// an organizational category that contains up to 50 channels
+	guild_category      = 4
+	// a channel that users can follow and crosspost into their own server (formerly news channels)
+	guild_announcement  = 5
+	// a temporary sub-channel within a GUILD_ANNOUNCEMENT channel
+	announcement_thread = 10
+	// a temporary sub-channel within a GUILD_TEXT or GUILD_FORUM channel
+	public_thread       = 11
+	// a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
+	private_thread      = 12
+	// a voice channel for hosting events with an audience
+	guild_stage_voice   = 13
+	// the channel in a hub containing the listed servers
+	guild_directory     = 14
+	// Channel that can only contain threads
+	guild_forum         = 15
+	// Channel that can only contain threads, similar to GUILD_FORUM channels
+	guild_media         = 16
 }
 ```
 
@@ -1534,12 +1547,53 @@ enum Intents {
 
 [[Return to contents]](#Contents)
 
-## DefaultValueType
+## OwnerType
 ```v
-enum DefaultValueType {
+enum OwnerType {
+	// for a guild subscription
+	guild = 1
+	// for a user subscription
 	user
-	role
-	channel
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## InteractionType
+```v
+enum InteractionType {
+	ping                             = 1
+	application_command              = 2
+	message_component                = 3
+	application_command_autocomplete = 4
+	modal_submit                     = 5
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## NSFWLevel
+```v
+enum NSFWLevel {
+	default
+	explicit
+	safe
+	age_restricted
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## MFALevel
+```v
+enum MFALevel {
+	// guild has no MFA/2FA requirement for moderation actions
+	none_
+	// guild has a 2FA requirement for moderation actions
+	elevated
 }
 ```
 
@@ -1593,53 +1647,6 @@ enum UserFlags {
 
 [[Return to contents]](#Contents)
 
-## NSFWLevel
-```v
-enum NSFWLevel {
-	default
-	explicit
-	safe
-	age_restricted
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## MFALevel
-```v
-enum MFALevel {
-	// guild has no MFA/2FA requirement for moderation actions
-	none_
-	// guild has a 2FA requirement for moderation actions
-	elevated
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## SkuFlags
-```v
-enum SkuFlags {
-	reserved_0
-	reserved_1
-	// SKU is available for purchase
-	available
-	reserved_3
-	reserved_4
-	reserved_5
-	reserved_6
-	// Recurring SKU that can be purchased by a user and applied to a single server. Grants access to every user in that server.
-	guild_subscription
-	// Recurring SKU purchased by a user for themselves. Grants access to the purchasing user in every server.
-	user_subscription
-}
-```
-
-
-[[Return to contents]](#Contents)
-
 ## InteractionResponseType
 ```v
 enum InteractionResponseType {
@@ -1665,15 +1672,34 @@ enum InteractionResponseType {
 
 [[Return to contents]](#Contents)
 
-## InteractionType
+## ComponentType
 ```v
-enum InteractionType {
-	ping                             = 1
-	application_command              = 2
-	message_component                = 3
-	application_command_autocomplete = 4
-	modal_submit                     = 5
+enum ComponentType {
+	// Container for other components
+	action_row         = 1
+	// Button object
+	button             = 2
+	// Select menu for picking from defined text options
+	string_select      = 3
+	// Text input object
+	text_input         = 4
+	// Select menu for users
+	user_select        = 5
+	// Select menu for roles
+	role_select        = 6
+	// Select menu for mentionables (users *and roles*)
+	mentionable_select = 7
+	// Select menu for channels
+	channel_select     = 8
 }
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (ct ComponentType) build() json2.Any
 ```
 
 
@@ -1686,6 +1712,17 @@ enum MessageNotificationsLevel {
 	all_messages
 	// members will receive notifications only for messages that @mention them by default
 	only_mentions
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## MembershipState
+```v
+enum MembershipState {
+	invited  = 1
+	accepted
 }
 ```
 
@@ -1711,25 +1748,355 @@ enum VerificationLevel {
 
 [[Return to contents]](#Contents)
 
-## MembershipState
+## DefaultValueType
 ```v
-enum MembershipState {
-	invited  = 1
-	accepted
+enum DefaultValueType {
+	user
+	role
+	channel
 }
 ```
 
 
 [[Return to contents]](#Contents)
 
-## SkuType
+## InviteTargetType
 ```v
-enum SkuType {
-	// Represents a recurring subscription
-	subscription       = 5
-	// System-generated group for each SUBSCRIPTION SKU created
-	subscription_group
+enum InviteTargetType {
+	stream               = 1
+	embedded_application
 }
+```
+
+
+[[Return to contents]](#Contents)
+
+## ClientConfig
+```v
+struct ClientConfig {
+pub:
+	user_agent string = discord.default_user_agent
+	debug      bool
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## Client
+```v
+struct Client {
+pub:
+	token string
+
+	base_url   string = 'https://discord.com/api/v10'
+	user_agent string = discord.default_user_agent
+mut:
+	logger log.Logger
+pub mut:
+	user_data voidptr
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## bulk_overwrite_global_application_commands
+```v
+fn (c Client) bulk_overwrite_global_application_commands(application_id Snowflake, commands []CreateApplicationCommandParams) ![]ApplicationCommand
+```
+Takes a list of application commands, overwriting the existing global command list for this application. Returns 200 and a list of application command objects. Commands that do not already exist will count toward daily application command create limits.
+
+[[Return to contents]](#Contents)
+
+## bulk_overwrite_guild_application_commands
+```v
+fn (c Client) bulk_overwrite_guild_application_commands(application_id Snowflake, guild_id Snowflake, commands []CreateApplicationCommandParams) ![]ApplicationCommand
+```
+Takes a list of application commands, overwriting the existing command list for this application for the targeted guild. Returns 200 and a list of application command objects.
+
+[[Return to contents]](#Contents)
+
+## create_dm
+```v
+fn (c Client) create_dm(recipient_id Snowflake) !
+```
+
+
+[[Return to contents]](#Contents)
+
+## create_global_application_command
+```v
+fn (c Client) create_global_application_command(application_id Snowflake, params CreateApplicationCommandParams) !ApplicationCommand
+```
+Create a new global command. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
+
+[[Return to contents]](#Contents)
+
+## create_group_dm
+```v
+fn (c Client) create_group_dm(params CreateGroupDMParams) !
+```
+
+
+[[Return to contents]](#Contents)
+
+## create_guild_application_command
+```v
+fn (c Client) create_guild_application_command(application_id Snowflake, guild_id Snowflake, params CreateApplicationCommandParams) !ApplicationCommand
+```
+Create a new guild command. New guild commands will be available in the guild immediately. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
+
+[[Return to contents]](#Contents)
+
+## create_interaction_response
+```v
+fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response IInteractionResponse) !
+```
+
+
+[[Return to contents]](#Contents)
+
+## create_test_entitlement
+```v
+fn (c Client) create_test_entitlement(application_id Snowflake, params CreateTestEntitlementParams) !Entitlement
+```
+Creates a test entitlement to a given SKU for a given guild or user. Discord will act as though that user or guild has entitlement to your premium offering. After creating a test entitlement, you'll need to reload your Discord client. After doing so, you'll see that your server or user now has premium access.
+
+[[Return to contents]](#Contents)
+
+## delete_channel
+```v
+fn (c Client) delete_channel(id Snowflake, config WithReason) !
+```
+Delete a channel, or close a private message. Requires the `MANAGE_CHANNELS` permission for the guild, or `MANAGE_THREADS` if the channel is a thread. Deleting a category does not delete its child channels; they will have their parent_id removed and a Channel Update Gateway event will fire for each of them. Returns a channel object on success. Fires a Channel Delete Gateway event (or Thread Delete if the channel was a thread).
+
+[[Return to contents]](#Contents)
+
+## delete_global_application_command
+```v
+fn (c Client) delete_global_application_command(application_id Snowflake, command_id Snowflake) !
+```
+Deletes a global command. Returns 204 No Content on success.
+
+[[Return to contents]](#Contents)
+
+## delete_guild_application_command
+```v
+fn (c Client) delete_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake) !
+```
+Delete a guild command. Returns 204 No Content on success.
+
+[[Return to contents]](#Contents)
+
+## delete_invite
+```v
+fn (c Client) delete_invite(code string, params DeleteInviteParams) !Invite
+```
+Delete an invite. Requires the `.manage_channels` permission on the channel this invite belongs to, or `.manage_guild` to remove any invite across the guild. Returns an [Invite] object on success. Fires an Invite Delete Gateway event.
+
+[[Return to contents]](#Contents)
+
+## delete_message
+```v
+fn (c Client) delete_message(channel_id Snowflake, id Snowflake, config WithReason) !
+```
+
+
+[[Return to contents]](#Contents)
+
+## delete_test_entitlement
+```v
+fn (c Client) delete_test_entitlement(application_id Snowflake, entitlement_id Snowflake) !
+```
+Deletes a currently-active test entitlement. Discord will act as though that user or guild no longer has entitlement to your premium offering.
+
+[[Return to contents]](#Contents)
+
+## edit_application_command_permissions
+```v
+fn (c Client) edit_application_command_permissions(application_id Snowflake, guild_id Snowflake, command_id Snowflake, params EditApplicationCommandPermissionsParams) !GuildApplicationCommandPermissions
+```
+Edits command permissions for a specific command for your application in a guild and returns a guild application command permissions object. Fires an Application Command Permissions Update Gateway event.
+
+You can add up to 100 permission overwrites for a command.
+
+[[Return to contents]](#Contents)
+
+## edit_global_application_command
+```v
+fn (c Client) edit_global_application_command(application_id Snowflake, command_id Snowflake, params EditApplicationCommandParams) !ApplicationCommand
+```
+Edit a global command. Returns application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
+
+[[Return to contents]](#Contents)
+
+## edit_guild_application_command
+```v
+fn (c Client) edit_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake, params EditApplicationCommandParams) !ApplicationCommand
+```
+Edit a guild command. Updates for guild commands will be available immediately. Returns application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
+
+[[Return to contents]](#Contents)
+
+## edit_my_application
+```v
+fn (c Client) edit_my_application(params EditApplicationParams) !Application
+```
+Edit properties of the app associated with the requesting bot user. Only properties that are passed will be updated. Returns the updated application object on success.
+
+[[Return to contents]](#Contents)
+
+## edit_my_user
+```v
+fn (c Client) edit_my_user(params MyUserEdit) !User
+```
+Modify the requester's user account settings. Returns a user object on success. Fires a User Update Gateway event.
+
+[[Return to contents]](#Contents)
+
+## fetch_application_command_permissions
+```v
+fn (c Client) fetch_application_command_permissions(application_id Snowflake, guild_id Snowflake, command_id Snowflake) !GuildApplicationCommandPermissions
+```
+Fetches permissions for a specific command for your application in a guild. Returns a guild application command permissions object.
+
+[[Return to contents]](#Contents)
+
+## fetch_global_application_command
+```v
+fn (c Client) fetch_global_application_command(application_id Snowflake, command_id Snowflake) !ApplicationCommand
+```
+Fetch a global command for your application. Returns an application command object.
+
+[[Return to contents]](#Contents)
+
+## fetch_global_application_commands
+```v
+fn (c Client) fetch_global_application_commands(application_id Snowflake, params FetchGlobalApplicationCommandsParams) ![]ApplicationCommand
+```
+Fetch all of the global commands for your application. Returns an array of application command objects.
+
+[[Return to contents]](#Contents)
+
+## fetch_guild
+```v
+fn (c Client) fetch_guild(guild_id Snowflake) !Guild
+```
+
+
+[[Return to contents]](#Contents)
+
+## fetch_guild_application_command
+```v
+fn (c Client) fetch_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake) !ApplicationCommand
+```
+Fetch a guild command for your application. Returns an application command object.
+
+[[Return to contents]](#Contents)
+
+## fetch_guild_application_command_permissions
+```v
+fn (c Client) fetch_guild_application_command_permissions(application_id Snowflake, guild_id Snowflake) ![]GuildApplicationCommandPermissions
+```
+Fetches permissions for all commands for your application in a guild. Returns an array of guild application command permissions objects.
+
+[[Return to contents]](#Contents)
+
+## fetch_invite
+```v
+fn (c Client) fetch_invite(code string, params FetchInviteParams) !Invite
+```
+Returns an invite object for the given code.
+
+[[Return to contents]](#Contents)
+
+## fetch_my_application
+```v
+fn (c Client) fetch_my_application() !Application
+```
+Returns the application object associated with the requesting bot user.
+
+[[Return to contents]](#Contents)
+
+## fetch_my_guild_member
+```v
+fn (c Client) fetch_my_guild_member(guild_id Snowflake) !GuildMember
+```
+Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
+
+[[Return to contents]](#Contents)
+
+## fetch_my_guilds
+```v
+fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild
+```
+
+
+[[Return to contents]](#Contents)
+
+## fetch_my_user
+```v
+fn (c Client) fetch_my_user() !User
+```
+Returns the user object of the requester's account. For OAuth2, this requires the `identify` scope, which will return the object without an email, and optionally the `email` scope, which returns the object _with_ an email.
+
+[[Return to contents]](#Contents)
+
+## fetch_user
+```v
+fn (c Client) fetch_user(user_id Snowflake) !User
+```
+Returns a user object for a given user ID.
+
+[[Return to contents]](#Contents)
+
+## leave_guild
+```v
+fn (c Client) leave_guild(guild_id Snowflake) !
+```
+Leave a guild. Fires a Guild Delete Gateway event and a Guild Member Remove Gateway event.
+
+[[Return to contents]](#Contents)
+
+## list_entitlements
+```v
+fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement
+```
+Returns all entitlements for a given app, active and expired.
+
+[[Return to contents]](#Contents)
+
+## list_skus
+```v
+fn (c Client) list_skus(application_id Snowflake) ![]Sku
+```
+
+
+[[Return to contents]](#Contents)
+
+## request
+```v
+fn (c Client) request(method http.Method, route string, options RequestOptions) !http.Response
+```
+
+
+[[Return to contents]](#Contents)
+
+## JpegImage
+```v
+struct JpegImage {
+pub:
+	data []u8 @[required]
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (ji JpegImage) build() string
 ```
 
 
@@ -1759,22 +2126,55 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## JpegImage
+## InviteMetadata
 ```v
-struct JpegImage {
+struct InviteMetadata {
 pub:
-	data []u8 @[required]
+	// number of times this invite has been used
+	uses int
+	// max number of times this invite can be used
+	max_uses int
+	// duration after which the invite expires
+	max_age time.Duration
+	// whether this invite only grants temporary membership
+	temporary bool
+	// when this invite was created
+	created_at time.Time
 }
 ```
-
+Extra information about an invite, will extend the invite object.
 
 [[Return to contents]](#Contents)
 
-## build
+## Invite
 ```v
-fn (ji JpegImage) build() string
+struct Invite {
+pub:
+	// the invite code (unique ID)
+	code string
+	// the guild this invite is for
+	guild ?PartialGuild
+	// the channel this invite is for
+	// channel ?PartialChannel
+	// the user who created the invite
+	inviter ?User
+	// the type of target for this voice channel invite
+	target_type ?InviteTargetType
+	// the user whose stream to display for this voice channel stream invite
+	target_user ?User
+	// the embedded application to open for this voice channel embedded application invite
+	target_application ?PartialApplication
+	// approximate count of online members, returned from the `GET /invites/<code>` endpoint when `with_counts` is `true`
+	approximate_presence_count ?int
+	// approximate count of total members, returned from the `GET /invites/<code>` endpoint when `with_counts` is `true`
+	approximate_member_count ?int
+	// the expiration date of this invite, returned from the `GET /invites/<code>` endpoint when `with_expiration` is `true`
+	expires_at ?time.Time
+	// guild scheduled event data, only included if `guild_scheduled_event_id` contains a valid guild scheduled event id
+	// guild_scheduled_event? GuildScheduledEvent
+}
 ```
-
+Represents a code that when used, adds a user to a guild or group DM channel.
 
 [[Return to contents]](#Contents)
 
@@ -1954,6 +2354,42 @@ pub:
 
 [[Return to contents]](#Contents)
 
+## CreateApplicationCommandParams
+```v
+struct CreateApplicationCommandParams {
+pub:
+	// Name of command, 1-32 characters
+	name string
+	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
+	name_localizations ?map[Locale]string
+	// 1-100 character description for `.chat_input` commands
+	description ?string
+	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
+	description_localizations ?map[Locale]string
+	// the parameters for the command
+	options ?[]ApplicationCommandOption
+	// Set of permissions represented as a bit set
+	default_member_permissions ?Permissions
+	// Indicates whether the command is available in DMs with the app, only for globally-scoped commands. By default, commands are visible.
+	dm_permission ?bool
+	// Type of command, defaults `.chat_input` if not set
+	typ ?ApplicationCommandType
+	// Indicates whether the command is age-restricted
+	nsfw ?bool
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (params CreateApplicationCommandParams) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
 ## Interaction
 ```v
 struct Interaction {
@@ -1979,28 +2415,6 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## InstallParams
-```v
-struct InstallParams {
-pub:
-	// Scopes to add the application to the server with
-	scopes []string
-	// Permissions to request for the bot role
-	permissions Permissions
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (ip InstallParams) build() json2.Any
-```
-
-
-[[Return to contents]](#Contents)
-
 ## PartialApplication
 ```v
 struct PartialApplication {
@@ -2013,34 +2427,12 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## GuildMember
+## CreateGroupDMParams
 ```v
-struct GuildMember {
+struct CreateGroupDMParams {
 pub:
-	// the user this guild member represents
-	user ?User
-	// this user's guild nickname
-	nick ?string
-	// the member's guild avatar hash
-	avatar ?string
-	// array of role object ids
-	roles []Snowflake
-	// when the user joined the guild
-	joined_at time.Time
-	// when the user started boosting the guild
-	premium_since ?time.Time
-	// whether the user is deafened in voice channels
-	deaf bool
-	// whether the user is muted in voice channels
-	mute bool
-	// guild member flags represented as a bit set, defaults to 0
-	flags GuildMemberFlags
-	// whether the user has not yet passed the guild's Membership Screening requirements
-	pending ?bool
-	// total permissions of the member in the channel, including overwrites, returned when in the interaction object
-	permissions ?Permissions
-	// when the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
-	communication_disabled_until ?time.Time
+	access_tokens []string
+	nicks         map[Snowflake]string
 }
 ```
 
@@ -2086,19 +2478,33 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## GuildApplicationCommandPermissions
+## ChannelSelect
 ```v
-struct GuildApplicationCommandPermissions {
+struct ChannelSelect {
 pub:
-	// ID of the command or the application ID
-	id Snowflake
-	// ID of the application the command belongs to
-	application_id Snowflake
-	// ID of the guild
-	guild_id Snowflake
-	// Permissions for the command in the guild, max of 100
-	permissions []ApplicationCommandPermission
+	// ID for the select menu; max 100 characters
+	custom_id string
+	// List of channel types to include in the channel select component
+	channel_types ?[]ChannelType
+	// Placeholder text if nothing is selected; max 150 characters
+	placeholder ?string
+	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
+	default_values ?[]Snowflake
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to false)
+	disabled bool
 }
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (cs ChannelSelect) build() json2.Any
 ```
 
 
@@ -2116,6 +2522,203 @@ pub:
 	discriminator string
 	// the user's avatar hash
 	avatar ?string
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## InstallParams
+```v
+struct InstallParams {
+pub:
+	// Scopes to add the application to the server with
+	scopes []string
+	// Permissions to request for the bot role
+	permissions Permissions
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (ip InstallParams) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
+## CreateTestEntitlementParams
+```v
+struct CreateTestEntitlementParams {
+pub:
+	// ID of the SKU to grant the entitlement to
+	sku_id Snowflake @[required]
+	// ID of the guild or user to grant the entitlement to
+	owner_id Snowflake @[required]
+	// `.guild` for a guild subscription, `.user` for a user subscription
+	owner_type OwnerType @[required]
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## Button
+```v
+struct Button {
+pub:
+	// A button style, default is `.secondary`
+	style ButtonStyle = .secondary
+	// Text that appears on the button; max 80 characters
+	label ?string
+	// `name`, `id`, and `animated`
+	emoji ?PartialEmoji
+	// Developer-defined identifier for the button; max 100 characters
+	custom_id ?string
+	// URL for link-style buttons
+	url ?string
+	// Whether the button is disabled (defaults to false)
+	disabled bool
+}
+```
+Buttons are interactive components that render in messages. They can be clicked by users, and send an interaction to your app when clicked.
+
+- Buttons must be sent inside an Action Row
+- An Action Row can contain up to 5 buttons
+- An Action Row containing buttons cannot also contain any select menu components
+<br/>
+
+Buttons come in a variety of styles to convey different types of actions. These styles also define what fields are valid for a button.
+
+- Non-link buttons must have a custom_id, and cannot have a url
+- Link buttons must have a url, and cannot have a custom_id
+- Link buttons do not send an interaction to your app when clicked
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (b Button) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
+## BotConfig
+```v
+struct BotConfig {
+	ClientConfig
+pub:
+	properties Properties
+	intents    Intents
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## BaseEvent
+```v
+struct BaseEvent {
+pub mut:
+	creator &GatewayClient
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## GuildMember
+```v
+struct GuildMember {
+pub:
+	// the user this guild member represents
+	user ?User
+	// this user's guild nickname
+	nick ?string
+	// the member's guild avatar hash
+	avatar ?string
+	// array of role object ids
+	roles []Snowflake
+	// when the user joined the guild
+	joined_at time.Time
+	// when the user started boosting the guild
+	premium_since ?time.Time
+	// whether the user is deafened in voice channels
+	deaf bool
+	// whether the user is muted in voice channels
+	mute bool
+	// guild member flags represented as a bit set, defaults to 0
+	flags GuildMemberFlags
+	// whether the user has not yet passed the guild's Membership Screening requirements
+	pending ?bool
+	// total permissions of the member in the channel, including overwrites, returned when in the interaction object
+	permissions ?Permissions
+	// when the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
+	communication_disabled_until ?time.Time
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## PngImage
+```v
+struct PngImage {
+pub:
+	data []u8 @[required]
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (pi PngImage) build() string
+```
+
+
+[[Return to contents]](#Contents)
+
+## DefaultValue
+```v
+struct DefaultValue {
+pub:
+	// ID of a user, role, or channel
+	id Snowflake @[required]
+	// Type of value that `id` represents. Either `.user`, `.role`, or `.channel`
+	typ DefaultValueType @[required]
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (dv DefaultValue) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
+## GuildApplicationCommandPermissions
+```v
+struct GuildApplicationCommandPermissions {
+pub:
+	// ID of the command or the application ID
+	id Snowflake
+	// ID of the application the command belongs to
+	application_id Snowflake
+	// ID of the guild
+	guild_id Snowflake
+	// Permissions for the command in the guild, max of 100
+	permissions []ApplicationCommandPermission
 }
 ```
 
@@ -2212,170 +2815,6 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## GifImage
-```v
-struct GifImage {
-pub:
-	data []u8 @[required]
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (gi GifImage) build() string
-```
-
-
-[[Return to contents]](#Contents)
-
-## GatewayClient
-```v
-struct GatewayClient {
-	Client
-pub:
-	intents     int
-	properties  ?Properties
-	gateway_url string = 'wss://gateway.discord.gg'
-mut:
-	ws       &websocket.Client = unsafe { nil }
-	ready    bool
-	sequence ?int
-pub mut:
-	// === events ====
-	events Events
-	// on_raw_event EventController[DispatchEvent[GatewayClient]]
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## launch
-```v
-fn (mut c GatewayClient) launch() !
-```
-
-
-[[Return to contents]](#Contents)
-
-## process_dispatch
-```v
-fn (mut c GatewayClient) process_dispatch(event DispatchEvent) !
-```
-
-
-[[Return to contents]](#Contents)
-
-## run
-```v
-fn (mut c GatewayClient) run() !
-```
-
-
-[[Return to contents]](#Contents)
-
-## init
-```v
-fn (mut c GatewayClient) init() !
-```
-
-
-[[Return to contents]](#Contents)
-
-## Forbidden
-```v
-struct Forbidden {
-	RestError
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## FetchMyGuildsParams
-```v
-struct FetchMyGuildsParams {
-pub:
-	before      ?Snowflake
-	after       ?Snowflake
-	limit       ?int
-	with_counts ?bool
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## FetchGlobalApplicationCommandsParams
-```v
-struct FetchGlobalApplicationCommandsParams {
-pub:
-	with_localizations ?bool
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## PngImage
-```v
-struct PngImage {
-pub:
-	data []u8 @[required]
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (pi PngImage) build() string
-```
-
-
-[[Return to contents]](#Contents)
-
-## EventWaitParams
-```v
-struct EventWaitParams[T] {
-pub:
-	check   ?Check[T]
-	timeout ?time.Duration
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## Events
-```v
-struct Events {
-pub mut:
-	on_raw_event   EventController[DispatchEvent]
-	on_ready_event EventController[ReadyEvent]
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## EventController
-```v
-struct EventController[T] {
-mut:
-	id        int
-	wait_fors map[int]EventWaiter[T]
-	listeners map[int]EventListener[T]
-}
-```
-
-
-[[Return to contents]](#Contents)
-
 ## Properties
 ```v
 struct Properties {
@@ -2416,28 +2855,13 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## Entitlement
+## Awaitable
 ```v
-struct Entitlement {
-pub:
-	// ID of the entitlement
-	id Snowflake
-	// ID of the SKU
-	sku_id Snowflake
-	// ID of the parent application
-	application_id Snowflake
-	// ID of the user that is granted access to the entitlement's sku
-	user_id ?Snowflake
-	// Type of entitlement
-	typ EntitlementType
-	// Whether entitlement was deleted
-	deleted bool
-	// Start date at which the entitlement is valid. Not present when using test entitlements.
-	starts_at ?time.Time
-	// Date at which the entitlement is no longer valid. Not present when using test entitlements.
-	ends_at ?time.Time
-	// ID of the guild that is granted access to the entitlement's sku
-	guild_id ?Snowflake
+struct Awaitable[T] {
+	id      int
+	timeout ?time.Duration
+mut:
+	controller &EventController[T]
 }
 ```
 
@@ -2523,30 +2947,32 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## Emoji
+## AvatarDecorationData
 ```v
-struct Emoji {
+struct AvatarDecorationData {
 pub:
-	id             ?Snowflake
-	name           ?string
-	roles          ?[]Snowflake
-	user           ?User
-	require_colons ?bool
-	managed        ?bool
-	animated       ?bool
-	available      ?bool
+	asset  string
+	sku_id Snowflake
 }
 ```
 
 
 [[Return to contents]](#Contents)
 
-## EmitOptions
+## GifImage
 ```v
-struct EmitOptions {
+struct GifImage {
 pub:
-	error_handler ?fn (int, IError)
+	data []u8 @[required]
 }
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (gi GifImage) build() string
 ```
 
 
@@ -2604,37 +3030,55 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## EditApplicationParams
+## GatewayClient
 ```v
-struct EditApplicationParams {
+struct GatewayClient {
+	Client
 pub:
-	// Default custom authorization URL for the app, if enabled
-	custom_install_url ?string
-	// Description of the app
-	description ?string
-	// Role connection verification URL for the app
-	role_connections_verification_url ?string
-	// Settings for the app's default in-app authorization link, if enabled
-	install_params ?InstallParams
-	// App's public flags
-	flags ?ApplicationFlags
-	// Icon for the app
-	icon ?Image = discord.sentinel_image
-	// Default rich presence invite cover image for the app
-	cover_image ?Image = discord.sentinel_image
-	// Interactions endpoint URL for the app
-	interactions_endpoint_url ?string
-	// List of tags describing the content and functionality of the app (max of 20 characters per tag). Max of 5 tags.
-	tags ?[]string
+	intents     int
+	properties  ?Properties
+	gateway_url string = 'wss://gateway.discord.gg'
+mut:
+	ws       &websocket.Client = unsafe { nil }
+	ready    bool
+	sequence ?int
+pub mut:
+	// === events ====
+	events Events
+	// on_raw_event EventController[DispatchEvent[GatewayClient]]
 }
 ```
 
 
 [[Return to contents]](#Contents)
 
-## build
+## launch
 ```v
-fn (params EditApplicationParams) build() json2.Any
+fn (mut c GatewayClient) launch() !
+```
+
+
+[[Return to contents]](#Contents)
+
+## process_dispatch
+```v
+fn (mut c GatewayClient) process_dispatch(event DispatchEvent) !
+```
+
+
+[[Return to contents]](#Contents)
+
+## run
+```v
+fn (mut c GatewayClient) run() !
+```
+
+
+[[Return to contents]](#Contents)
+
+## init
+```v
+fn (mut c GatewayClient) init() !
 ```
 
 
@@ -2690,12 +3134,79 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## EditApplicationCommandPermissionsParams
+## Forbidden
 ```v
-struct EditApplicationCommandPermissionsParams {
+struct Forbidden {
+	RestError
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## FetchMyGuildsParams
+```v
+struct FetchMyGuildsParams {
 pub:
-	// Permissions for the command in the guild
-	permissions []ApplicationCommandPermission
+	before      ?Snowflake
+	after       ?Snowflake
+	limit       ?int
+	with_counts ?bool
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## FetchInviteParams
+```v
+struct FetchInviteParams {
+pub:
+	// whether the invite should contain approximate member counts
+	with_counts ?bool
+	// whether the invite should contain the expiration date
+	with_expiration ?bool
+	// the guild scheduled event to include with the invite
+	guild_scheduled_event_id ?Snowflake
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## FetchGlobalApplicationCommandsParams
+```v
+struct FetchGlobalApplicationCommandsParams {
+pub:
+	with_localizations ?bool
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## EventWaitParams
+```v
+struct EventWaitParams[T] {
+pub:
+	check   ?Check[T]
+	timeout ?time.Duration
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## ApplicationCommandPermission
+```v
+struct ApplicationCommandPermission {
+pub:
+	// ID of the role, user, or channel. It can also be a permission constant
+	id Snowflake
+	// role (`.role`), user (`.user`), or channel (`.channel`)
+	typ ApplicationCommandPermissionType
+	// `true` to allow, `false`, to disallow
+	permission bool
 }
 ```
 
@@ -2704,140 +3215,19 @@ pub:
 
 ## build
 ```v
-fn (params EditApplicationCommandPermissionsParams) build() json2.Any
+fn (acp ApplicationCommandPermission) build() json2.Any
 ```
 
 
 [[Return to contents]](#Contents)
 
-## EditApplicationCommandParams
+## Events
 ```v
-struct EditApplicationCommandParams {
-pub:
-	// Name of command, 1-32 characters
-	name ?string
-	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?map[Locale]string
-	// 1-100 character description
-	description ?string
-	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
-	description_localizations ?map[Locale]string
-	// the parameters for the command
-	options ?[]ApplicationCommandOption
-	// Set of permissions represented as a bit set
-	default_member_permissions ?Permissions = discord.sentinel_permissions
-	// Indicates whether the command is available in DMs with the app, only for globally-scoped commands. By default, commands are visible.
-	dm_permission ?bool
-	// Indicates whether the command is age-restricted
-	nsfw ?bool
+struct Events {
+pub mut:
+	on_raw_event   EventController[DispatchEvent]
+	on_ready_event EventController[ReadyEvent]
 }
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (params EditApplicationCommandParams) build() json2.Any
-```
-
-
-[[Return to contents]](#Contents)
-
-## DispatchEvent
-```v
-struct DispatchEvent {
-	BaseEvent
-pub:
-	name string
-	data json2.Any
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## DefaultValue
-```v
-struct DefaultValue {
-pub:
-	// ID of a user, role, or channel
-	id Snowflake @[required]
-	// Type of value that `id` represents. Either `.user`, `.role`, or `.channel`
-	typ DefaultValueType @[required]
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (dv DefaultValue) build() json2.Any
-```
-
-
-[[Return to contents]](#Contents)
-
-## CreateTestEntitlementParams
-```v
-struct CreateTestEntitlementParams {
-pub:
-	// ID of the SKU to grant the entitlement to
-	sku_id Snowflake @[required]
-	// ID of the guild or user to grant the entitlement to
-	owner_id Snowflake @[required]
-	// `.guild` for a guild subscription, `.user` for a user subscription
-	owner_type OwnerType @[required]
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## CreateGroupDMParams
-```v
-struct CreateGroupDMParams {
-pub:
-	access_tokens []string
-	nicks         map[Snowflake]string
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## CreateApplicationCommandParams
-```v
-struct CreateApplicationCommandParams {
-pub:
-	// Name of command, 1-32 characters
-	name string
-	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?map[Locale]string
-	// 1-100 character description for `.chat_input` commands
-	description ?string
-	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
-	description_localizations ?map[Locale]string
-	// the parameters for the command
-	options ?[]ApplicationCommandOption
-	// Set of permissions represented as a bit set
-	default_member_permissions ?Permissions
-	// Indicates whether the command is available in DMs with the app, only for globally-scoped commands. By default, commands are visible.
-	dm_permission ?bool
-	// Type of command, defaults `.chat_input` if not set
-	typ ?ApplicationCommandType
-	// Indicates whether the command is age-restricted
-	nsfw ?bool
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (params CreateApplicationCommandParams) build() json2.Any
 ```
 
 
@@ -2864,329 +3254,53 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## ClientConfig
+## EventController
 ```v
-struct ClientConfig {
-pub:
-	user_agent string = discord.default_user_agent
-	debug      bool
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## Client
-```v
-struct Client {
-pub:
-	token string
-
-	base_url   string = 'https://discord.com/api/v10'
-	user_agent string = discord.default_user_agent
+struct EventController[T] {
 mut:
-	logger log.Logger
-pub mut:
-	user_data voidptr
+	id        int
+	wait_fors map[int]EventWaiter[T]
+	listeners map[int]EventListener[T]
 }
 ```
 
 
 [[Return to contents]](#Contents)
 
-## bulk_overwrite_global_application_commands
+## DeleteInviteParams
 ```v
-fn (c Client) bulk_overwrite_global_application_commands(application_id Snowflake, commands []CreateApplicationCommandParams) ![]ApplicationCommand
-```
-Takes a list of application commands, overwriting the existing global command list for this application. Returns 200 and a list of application command objects. Commands that do not already exist will count toward daily application command create limits.
-
-[[Return to contents]](#Contents)
-
-## bulk_overwrite_guild_application_commands
-```v
-fn (c Client) bulk_overwrite_guild_application_commands(application_id Snowflake, guild_id Snowflake, commands []CreateApplicationCommandParams) ![]ApplicationCommand
-```
-Takes a list of application commands, overwriting the existing command list for this application for the targeted guild. Returns 200 and a list of application command objects.
-
-[[Return to contents]](#Contents)
-
-## create_dm
-```v
-fn (c Client) create_dm(recipient_id Snowflake) !
-```
-
-
-[[Return to contents]](#Contents)
-
-## create_global_application_command
-```v
-fn (c Client) create_global_application_command(application_id Snowflake, params CreateApplicationCommandParams) !ApplicationCommand
-```
-Create a new global command. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
-
-[[Return to contents]](#Contents)
-
-## create_group_dm
-```v
-fn (c Client) create_group_dm(params CreateGroupDMParams) !
-```
-
-
-[[Return to contents]](#Contents)
-
-## create_guild_application_command
-```v
-fn (c Client) create_guild_application_command(application_id Snowflake, guild_id Snowflake, params CreateApplicationCommandParams) !ApplicationCommand
-```
-Create a new guild command. New guild commands will be available in the guild immediately. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
-
-[[Return to contents]](#Contents)
-
-## create_interaction_response
-```v
-fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response IInteractionResponse) !
-```
-
-
-[[Return to contents]](#Contents)
-
-## create_test_entitlement
-```v
-fn (c Client) create_test_entitlement(application_id Snowflake, params CreateTestEntitlementParams) !Entitlement
-```
-Creates a test entitlement to a given SKU for a given guild or user. Discord will act as though that user or guild has entitlement to your premium offering. After creating a test entitlement, you'll need to reload your Discord client. After doing so, you'll see that your server or user now has premium access.
-
-[[Return to contents]](#Contents)
-
-## delete_channel
-```v
-fn (c Client) delete_channel(id Snowflake, config WithReason) !
-```
-Delete a channel, or close a private message. Requires the `MANAGE_CHANNELS` permission for the guild, or `MANAGE_THREADS` if the channel is a thread. Deleting a category does not delete its child channels; they will have their parent_id removed and a Channel Update Gateway event will fire for each of them. Returns a channel object on success. Fires a Channel Delete Gateway event (or Thread Delete if the channel was a thread).
-
-[[Return to contents]](#Contents)
-
-## delete_global_application_command
-```v
-fn (c Client) delete_global_application_command(application_id Snowflake, command_id Snowflake) !
-```
-Deletes a global command. Returns 204 No Content on success.
-
-[[Return to contents]](#Contents)
-
-## delete_guild_application_command
-```v
-fn (c Client) delete_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake) !
-```
-Delete a guild command. Returns 204 No Content on success.
-
-[[Return to contents]](#Contents)
-
-## delete_message
-```v
-fn (c Client) delete_message(channel_id Snowflake, id Snowflake, config WithReason) !
-```
-
-
-[[Return to contents]](#Contents)
-
-## delete_test_entitlement
-```v
-fn (c Client) delete_test_entitlement(application_id Snowflake, entitlement_id Snowflake) !
-```
-Deletes a currently-active test entitlement. Discord will act as though that user or guild no longer has entitlement to your premium offering.
-
-[[Return to contents]](#Contents)
-
-## edit_application_command_permissions
-```v
-fn (c Client) edit_application_command_permissions(application_id Snowflake, guild_id Snowflake, command_id Snowflake, params EditApplicationCommandPermissionsParams) !GuildApplicationCommandPermissions
-```
-Edits command permissions for a specific command for your application in a guild and returns a guild application command permissions object. Fires an Application Command Permissions Update Gateway event.
-
-You can add up to 100 permission overwrites for a command.
-
-[[Return to contents]](#Contents)
-
-## edit_global_application_command
-```v
-fn (c Client) edit_global_application_command(application_id Snowflake, command_id Snowflake, params EditApplicationCommandParams) !ApplicationCommand
-```
-Edit a global command. Returns application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
-
-[[Return to contents]](#Contents)
-
-## edit_guild_application_command
-```v
-fn (c Client) edit_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake, params EditApplicationCommandParams) !ApplicationCommand
-```
-Edit a guild command. Updates for guild commands will be available immediately. Returns application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
-
-[[Return to contents]](#Contents)
-
-## edit_my_application
-```v
-fn (c Client) edit_my_application(params EditApplicationParams) !Application
-```
-Edit properties of the app associated with the requesting bot user. Only properties that are passed will be updated. Returns the updated application object on success.
-
-[[Return to contents]](#Contents)
-
-## edit_my_user
-```v
-fn (c Client) edit_my_user(params MyUserEdit) !User
-```
-Modify the requester's user account settings. Returns a user object on success. Fires a User Update Gateway event.
-
-[[Return to contents]](#Contents)
-
-## fetch_application_command_permissions
-```v
-fn (c Client) fetch_application_command_permissions(application_id Snowflake, guild_id Snowflake, command_id Snowflake) !GuildApplicationCommandPermissions
-```
-Fetches permissions for a specific command for your application in a guild. Returns a guild application command permissions object.
-
-[[Return to contents]](#Contents)
-
-## fetch_global_application_command
-```v
-fn (c Client) fetch_global_application_command(application_id Snowflake, command_id Snowflake) !ApplicationCommand
-```
-Fetch a global command for your application. Returns an application command object.
-
-[[Return to contents]](#Contents)
-
-## fetch_global_application_commands
-```v
-fn (c Client) fetch_global_application_commands(application_id Snowflake, params FetchGlobalApplicationCommandsParams) ![]ApplicationCommand
-```
-Fetch all of the global commands for your application. Returns an array of application command objects.
-
-[[Return to contents]](#Contents)
-
-## fetch_guild
-```v
-fn (c Client) fetch_guild(guild_id Snowflake) !Guild
-```
-
-
-[[Return to contents]](#Contents)
-
-## fetch_guild_application_command
-```v
-fn (c Client) fetch_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake) !ApplicationCommand
-```
-Fetch a guild command for your application. Returns an application command object.
-
-[[Return to contents]](#Contents)
-
-## fetch_guild_application_command_permissions
-```v
-fn (c Client) fetch_guild_application_command_permissions(application_id Snowflake, guild_id Snowflake) ![]GuildApplicationCommandPermissions
-```
-Fetches permissions for all commands for your application in a guild. Returns an array of guild application command permissions objects.
-
-[[Return to contents]](#Contents)
-
-## fetch_my_application
-```v
-fn (c Client) fetch_my_application() !Application
-```
-Returns the application object associated with the requesting bot user.
-
-[[Return to contents]](#Contents)
-
-## fetch_my_guild_member
-```v
-fn (c Client) fetch_my_guild_member(guild_id Snowflake) !GuildMember
-```
-Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
-
-[[Return to contents]](#Contents)
-
-## fetch_my_guilds
-```v
-fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild
-```
-
-
-[[Return to contents]](#Contents)
-
-## fetch_my_user
-```v
-fn (c Client) fetch_my_user() !User
-```
-Returns the user object of the requester's account. For OAuth2, this requires the `identify` scope, which will return the object without an email, and optionally the `email` scope, which returns the object _with_ an email.
-
-[[Return to contents]](#Contents)
-
-## fetch_user
-```v
-fn (c Client) fetch_user(user_id Snowflake) !User
-```
-Returns a user object for a given user ID.
-
-[[Return to contents]](#Contents)
-
-## leave_guild
-```v
-fn (c Client) leave_guild(guild_id Snowflake) !
-```
-Leave a guild. Fires a Guild Delete Gateway event and a Guild Member Remove Gateway event.
-
-[[Return to contents]](#Contents)
-
-## list_entitlements
-```v
-fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement
-```
-Returns all entitlements for a given app, active and expired.
-
-[[Return to contents]](#Contents)
-
-## list_skus
-```v
-fn (c Client) list_skus(application_id Snowflake) ![]Sku
-```
-
-
-[[Return to contents]](#Contents)
-
-## request
-```v
-fn (c Client) request(method http.Method, route string, options RequestOptions) !http.Response
-```
-
-
-[[Return to contents]](#Contents)
-
-## ChannelSelect
-```v
-struct ChannelSelect {
+struct DeleteInviteParams {
 pub:
-	// ID for the select menu; max 100 characters
-	custom_id string
-	// List of channel types to include in the channel select component
-	channel_types ?[]ChannelType
-	// Placeholder text if nothing is selected; max 150 characters
-	placeholder ?string
-	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
-	default_values ?[]Snowflake
-	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
-	min_values ?int
-	// Maximum number of items that can be chosen (defaults to 1); max 25
-	max_values ?int
-	// Whether select menu is disabled (defaults to false)
-	disabled bool
+	reason ?string
 }
 ```
 
 
 [[Return to contents]](#Contents)
 
-## build
+## Entitlement
 ```v
-fn (cs ChannelSelect) build() json2.Any
+struct Entitlement {
+pub:
+	// ID of the entitlement
+	id Snowflake
+	// ID of the SKU
+	sku_id Snowflake
+	// ID of the parent application
+	application_id Snowflake
+	// ID of the user that is granted access to the entitlement's sku
+	user_id ?Snowflake
+	// Type of entitlement
+	typ EntitlementType
+	// Whether entitlement was deleted
+	deleted bool
+	// Start date at which the entitlement is valid. Not present when using test entitlements.
+	starts_at ?time.Time
+	// Date at which the entitlement is no longer valid. Not present when using test entitlements.
+	ends_at ?time.Time
+	// ID of the guild that is granted access to the entitlement's sku
+	guild_id ?Snowflake
+}
 ```
 
 
@@ -3222,43 +3336,14 @@ fn (ss StringSelect) build() json2.Any
 
 [[Return to contents]](#Contents)
 
-## Button
+## DispatchEvent
 ```v
-struct Button {
+struct DispatchEvent {
+	BaseEvent
 pub:
-	// A button style, default is `.secondary`
-	style ButtonStyle = .secondary
-	// Text that appears on the button; max 80 characters
-	label ?string
-	// `name`, `id`, and `animated`
-	emoji ?PartialEmoji
-	// Developer-defined identifier for the button; max 100 characters
-	custom_id ?string
-	// URL for link-style buttons
-	url ?string
-	// Whether the button is disabled (defaults to false)
-	disabled bool
+	name string
+	data json2.Any
 }
-```
-Buttons are interactive components that render in messages. They can be clicked by users, and send an interaction to your app when clicked.
-
-- Buttons must be sent inside an Action Row
-- An Action Row can contain up to 5 buttons
-- An Action Row containing buttons cannot also contain any select menu components
-<br/>
-
-Buttons come in a variety of styles to convey different types of actions. These styles also define what fields are valid for a button.
-
-- Non-link buttons must have a custom_id, and cannot have a url
-- Link buttons must have a url, and cannot have a custom_id
-- Link buttons do not send an interaction to your app when clicked
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (b Button) build() json2.Any
 ```
 
 
@@ -3284,197 +3369,6 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## BotConfig
-```v
-struct BotConfig {
-	ClientConfig
-pub:
-	properties Properties
-	intents    Intents
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## TeamMember
-```v
-struct TeamMember {
-pub:
-	// User's membership state on the team
-	membership_state MembershipState
-	// ID of the parent team of which they are a member
-	team_id Snowflake
-	// Avatar, discriminator, ID, and username of the user
-	user PartialUser
-	// Role of the team member
-	role TeamMemberRole
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## BaseEvent
-```v
-struct BaseEvent {
-pub mut:
-	creator &GatewayClient
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## Awaitable
-```v
-struct Awaitable[T] {
-	id      int
-	timeout ?time.Duration
-mut:
-	controller &EventController[T]
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## TextInput
-```v
-struct TextInput {
-pub:
-	// Developer-defined identifier for the input; max 100 characters
-	custom_id string @[required]
-	// The Text Input Style
-	style TextInputStyle = .short
-	// Label for this component; max 45 characters
-	label string @[required]
-	// Minimum input length for a text input; min 0, max 4000
-	min_length ?int
-	// Maximum input length for a text input; min 1, max 4000
-	max_length ?int
-	// Whether this component is required to be filled (defaults to `true`)
-	required bool = true
-	// Pre-filled value for this component; max 4000 characters
-	value ?string
-	// Custom placeholder text if the input is empty; max 100 characters
-	placeholder ?string
-}
-```
-Text inputs are an interactive component that render in modals. They can be used to collect short-form or long-form text. When defining a text input component, you can set attributes to customize the behavior and appearance of it. However, not all attributes will be returned in the text input interaction payload.
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (ti TextInput) build() json2.Any
-```
-
-
-[[Return to contents]](#Contents)
-
-## AvatarDecorationData
-```v
-struct AvatarDecorationData {
-pub:
-	asset  string
-	sku_id Snowflake
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## Unauthorized
-```v
-struct Unauthorized {
-	RestError
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## UnavailableGuild
-```v
-struct UnavailableGuild {
-pub:
-	id          Snowflake
-	unavailable bool
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## ApplicationCommandPermission
-```v
-struct ApplicationCommandPermission {
-pub:
-	// ID of the role, user, or channel. It can also be a permission constant
-	id Snowflake
-	// role (`.role`), user (`.user`), or channel (`.channel`)
-	typ ApplicationCommandPermissionType
-	// `true` to allow, `false`, to disallow
-	permission bool
-}
-```
-
-
-[[Return to contents]](#Contents)
-
-## build
-```v
-fn (acp ApplicationCommandPermission) build() json2.Any
-```
-
-
-[[Return to contents]](#Contents)
-
-## User
-```v
-struct User {
-pub:
-	// the user's id
-	id Snowflake
-	// the user's username, not unique across the platform
-	username string
-	// the user's Discord-tag
-	discriminator string
-	// the user's display name, if it is set. For bots, this is the application name
-	global_name ?string
-	// the user's avatar hash
-	avatar ?string
-	// whether the user belongs to an OAuth2 application
-	bot ?bool
-	// whether the user is an Official Discord System user (part of the urgent message system)
-	system ?bool
-	// whether the user has two factor enabled on their account
-	mfa_enabled ?bool
-	// the user's banner hash
-	banner ?string
-	// the user's banner color encoded as an integer representation of hexadecimal color code
-	accent_color ?int
-	// the user's chosen language option
-	locale ?string
-	// whether the email on this account has been verified
-	verified ?bool
-	// the user's email
-	email ?string
-	// the flags on a user's account
-	flags ?UserFlags
-	// the type of Nitro subscription on a user's account
-	premium_type ?PremiumType
-	// the public flags on a user's account
-	public_flags ?UserFlags
-	// data for the user's avatar decoration
-	avatar_decoration ?AvatarDecorationData
-}
-```
-
-
-[[Return to contents]](#Contents)
-
 ## ApplicationCommandOptionChoice
 ```v
 struct ApplicationCommandOptionChoice {
@@ -3494,6 +3388,24 @@ pub:
 ## build
 ```v
 fn (acoc ApplicationCommandOptionChoice) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
+## TeamMember
+```v
+struct TeamMember {
+pub:
+	// User's membership state on the team
+	membership_state MembershipState
+	// ID of the parent team of which they are a member
+	team_id Snowflake
+	// Avatar, discriminator, ID, and username of the user
+	user PartialUser
+	// Role of the team member
+	role TeamMemberRole
+}
 ```
 
 
@@ -3545,31 +3457,86 @@ fn (aco ApplicationCommandOption) build() json2.Any
 
 [[Return to contents]](#Contents)
 
-## UserSelect
+## Emoji
 ```v
-struct UserSelect {
+struct Emoji {
 pub:
-	// ID for the select menu; max 100 characters
-	custom_id string
-	// Placeholder text if nothing is selected; max 150 characters
-	placeholder ?string
-	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
-	default_values ?[]Snowflake
-	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
-	min_values ?int
-	// Maximum number of items that can be chosen (defaults to 1); max 25
-	max_values ?int
-	// Whether select menu is disabled (defaults to false)
-	disabled bool
+	id             ?Snowflake
+	name           ?string
+	roles          ?[]Snowflake
+	user           ?User
+	require_colons ?bool
+	managed        ?bool
+	animated       ?bool
+	available      ?bool
 }
 ```
 
 
 [[Return to contents]](#Contents)
 
+## TextInput
+```v
+struct TextInput {
+pub:
+	// Developer-defined identifier for the input; max 100 characters
+	custom_id string @[required]
+	// The Text Input Style
+	style TextInputStyle = .short
+	// Label for this component; max 45 characters
+	label string @[required]
+	// Minimum input length for a text input; min 0, max 4000
+	min_length ?int
+	// Maximum input length for a text input; min 1, max 4000
+	max_length ?int
+	// Whether this component is required to be filled (defaults to `true`)
+	required bool = true
+	// Pre-filled value for this component; max 4000 characters
+	value ?string
+	// Custom placeholder text if the input is empty; max 100 characters
+	placeholder ?string
+}
+```
+Text inputs are an interactive component that render in modals. They can be used to collect short-form or long-form text. When defining a text input component, you can set attributes to customize the behavior and appearance of it. However, not all attributes will be returned in the text input interaction payload.
+
+[[Return to contents]](#Contents)
+
 ## build
 ```v
-fn (us UserSelect) build() json2.Any
+fn (ti TextInput) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
+## EmitOptions
+```v
+struct EmitOptions {
+pub:
+	error_handler ?fn (int, IError)
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## Unauthorized
+```v
+struct Unauthorized {
+	RestError
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## UnavailableGuild
+```v
+struct UnavailableGuild {
+pub:
+	id          Snowflake
+	unavailable bool
+}
 ```
 
 
@@ -3609,18 +3576,44 @@ pub:
 
 [[Return to contents]](#Contents)
 
-## WelcomeChannel
+## User
 ```v
-struct WelcomeChannel {
+struct User {
 pub:
-	// the channel's id
-	channel_id ?Snowflake
-	// the description shown for the channel
-	description string
-	// the emoji id, if the emoji is custom
-	emoji_id ?Snowflake
-	// the emoji name if custom, the unicode character if standard, or `none` if no emoji is set
-	emoji_name ?string
+	// the user's id
+	id Snowflake
+	// the user's username, not unique across the platform
+	username string
+	// the user's Discord-tag
+	discriminator string
+	// the user's display name, if it is set. For bots, this is the application name
+	global_name ?string
+	// the user's avatar hash
+	avatar ?string
+	// whether the user belongs to an OAuth2 application
+	bot ?bool
+	// whether the user is an Official Discord System user (part of the urgent message system)
+	system ?bool
+	// whether the user has two factor enabled on their account
+	mfa_enabled ?bool
+	// the user's banner hash
+	banner ?string
+	// the user's banner color encoded as an integer representation of hexadecimal color code
+	accent_color ?int
+	// the user's chosen language option
+	locale ?string
+	// whether the email on this account has been verified
+	verified ?bool
+	// the user's email
+	email ?string
+	// the flags on a user's account
+	flags ?UserFlags
+	// the type of Nitro subscription on a user's account
+	premium_type ?PremiumType
+	// the public flags on a user's account
+	public_flags ?UserFlags
+	// data for the user's avatar decoration
+	avatar_decoration ?AvatarDecorationData
 }
 ```
 
@@ -3689,6 +3682,144 @@ pub:
 
 [[Return to contents]](#Contents)
 
+## EditApplicationParams
+```v
+struct EditApplicationParams {
+pub:
+	// Default custom authorization URL for the app, if enabled
+	custom_install_url ?string
+	// Description of the app
+	description ?string
+	// Role connection verification URL for the app
+	role_connections_verification_url ?string
+	// Settings for the app's default in-app authorization link, if enabled
+	install_params ?InstallParams
+	// App's public flags
+	flags ?ApplicationFlags
+	// Icon for the app
+	icon ?Image = discord.sentinel_image
+	// Default rich presence invite cover image for the app
+	cover_image ?Image = discord.sentinel_image
+	// Interactions endpoint URL for the app
+	interactions_endpoint_url ?string
+	// List of tags describing the content and functionality of the app (max of 20 characters per tag). Max of 5 tags.
+	tags ?[]string
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (params EditApplicationParams) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
+## UserSelect
+```v
+struct UserSelect {
+pub:
+	// ID for the select menu; max 100 characters
+	custom_id string
+	// Placeholder text if nothing is selected; max 150 characters
+	placeholder ?string
+	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
+	default_values ?[]Snowflake
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to false)
+	disabled bool
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (us UserSelect) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
+## EditApplicationCommandPermissionsParams
+```v
+struct EditApplicationCommandPermissionsParams {
+pub:
+	// Permissions for the command in the guild
+	permissions []ApplicationCommandPermission
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (params EditApplicationCommandPermissionsParams) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
+## WelcomeChannel
+```v
+struct WelcomeChannel {
+pub:
+	// the channel's id
+	channel_id ?Snowflake
+	// the description shown for the channel
+	description string
+	// the emoji id, if the emoji is custom
+	emoji_id ?Snowflake
+	// the emoji name if custom, the unicode character if standard, or `none` if no emoji is set
+	emoji_name ?string
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## EditApplicationCommandParams
+```v
+struct EditApplicationCommandParams {
+pub:
+	// Name of command, 1-32 characters
+	name ?string
+	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
+	name_localizations ?map[Locale]string
+	// 1-100 character description
+	description ?string
+	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
+	description_localizations ?map[Locale]string
+	// the parameters for the command
+	options ?[]ApplicationCommandOption
+	// Set of permissions represented as a bit set
+	default_member_permissions ?Permissions = discord.sentinel_permissions
+	// Indicates whether the command is available in DMs with the app, only for globally-scoped commands. By default, commands are visible.
+	dm_permission ?bool
+	// Indicates whether the command is age-restricted
+	nsfw ?bool
+}
+```
+
+
+[[Return to contents]](#Contents)
+
+## build
+```v
+fn (params EditApplicationCommandParams) build() json2.Any
+```
+
+
+[[Return to contents]](#Contents)
+
 ## WelcomeScreen
 ```v
 struct WelcomeScreen {
@@ -3749,4 +3880,4 @@ pub:
 
 [[Return to contents]](#Contents)
 
-#### Powered by vdoc. Generated on: 12 Dec 2023 17:15:11
+#### Powered by vdoc. Generated on: 12 Dec 2023 17:44:36
