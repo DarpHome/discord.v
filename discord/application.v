@@ -61,7 +61,7 @@ pub fn PartialApplication.parse(j json2.Any) !PartialApplication {
 }
 
 pub enum MembershipState {
-	invited = 1
+	invited  = 1
 	accepted
 }
 
@@ -159,7 +159,7 @@ pub fn InstallParams.parse(j json2.Any) !InstallParams {
 
 pub fn (ip InstallParams) build() json2.Any {
 	return {
-		'scopes': json2.Any(ip.scopes.map(json2.Any(it)))
+		'scopes':      json2.Any(ip.scopes.map(json2.Any(it)))
 		'permissions': u64(ip.permissions).str()
 	}
 }
@@ -410,5 +410,7 @@ pub fn (params EditApplicationParams) build() json2.Any {
 
 // Edit properties of the app associated with the requesting bot user. Only properties that are passed will be updated. Returns the updated application object on success.
 pub fn (c Client) edit_my_application(params EditApplicationParams) !Application {
-	return Application.parse(json2.raw_decode(c.request(.patch, '/applications/@me', json: params.build())!.body)!)!
+	return Application.parse(json2.raw_decode(c.request(.patch, '/applications/@me',
+		json: params.build()
+	)!.body)!)!
 }

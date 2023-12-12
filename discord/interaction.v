@@ -93,6 +93,7 @@ pub:
 }
 
 fn (_ InteractionResponse) is_interaction_response() {}
+
 pub fn (ir InteractionResponse) build() json2.Any {
 	mut r := {
 		'type': json2.Any(int(ir.typ))
@@ -114,6 +115,7 @@ pub:
 }
 
 fn (_ ModalInteractionResponse) is_interaction_response() {}
+
 pub fn (mir ModalInteractionResponse) build() json2.Any {
 	return InteractionResponse{
 		typ: .modal
