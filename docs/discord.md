@@ -561,7 +561,9 @@ const snowflake_epoch = u64(1420070400000)
 ```v
 fn bot(token string, config BotConfig) GatewayClient
 ```
+`bot` creates a new [GatewayClient] that can be used to listen events. Use `launch` to connect to gateway.
 
+Note: token should not contain `Bot` prefix
 
 [[Return to contents]](#Contents)
 
@@ -569,7 +571,9 @@ fn bot(token string, config BotConfig) GatewayClient
 ```v
 fn bearer(token string, config ClientConfig) Client
 ```
+`bearer` accepts access token and returns Client that can be used to fetch user data
 
+Note: token should not contain `Bearer` prefix
 
 [[Return to contents]](#Contents)
 
@@ -593,7 +597,7 @@ fn combine_intents(list ...Intents) int
 ```v
 fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig) Client
 ```
-
+`oauth2_app` accepts client ID and secret and returns Client with Basic token
 
 [[Return to contents]](#Contents)
 
@@ -910,7 +914,7 @@ interface Component {
 	build() json2.Any
 }
 ```
-
+ignore is_component(), it is used to differ interfaces
 
 [[Return to contents]](#Contents)
 
@@ -999,7 +1003,7 @@ type Prepare = fn (mut http.Request) !
 ```v
 fn (mut ec EventController[T]) emit(e T, options EmitOptions)
 ```
-
+`emit` broadcasts passed object to all listeners
 
 [[Return to contents]](#Contents)
 
@@ -1007,7 +1011,7 @@ fn (mut ec EventController[T]) emit(e T, options EmitOptions)
 ```v
 fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T]
 ```
-
+`wait` returns Awaitable that can be used to get event
 
 [[Return to contents]](#Contents)
 
@@ -1015,7 +1019,7 @@ fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T]
 ```v
 fn (mut ec EventController[T]) override(listener EventListener[T]) EventController[T]
 ```
-
+`override` removes all listeners and inserts `listener`
 
 [[Return to contents]](#Contents)
 
@@ -1023,7 +1027,7 @@ fn (mut ec EventController[T]) override(listener EventListener[T]) EventControll
 ```v
 fn (mut ec EventController[T]) listen(listener EventListener[T]) EventController[T]
 ```
-
+`listen` adds function to listener list
 
 [[Return to contents]](#Contents)
 
@@ -1040,7 +1044,7 @@ type EventListener[T] = fn (T) !
 ```v
 fn (mut a Awaitable[T]) do() ?T
 ```
-
+`do` waits for event and returns it. After it returned event, it will return none If timeout is exceeded, it returns none
 
 [[Return to contents]](#Contents)
 
@@ -1125,10 +1129,15 @@ enum StickerType {
 ## ButtonStyle
 ```v
 enum ButtonStyle {
+	// blurple
 	primary   = 1
+	// grey
 	secondary = 2
+	// green
 	success   = 3
+	// red
 	danger    = 4
+	// grey, navigates to a URL
 	link      = 5
 }
 ```
@@ -1295,7 +1304,9 @@ enum EntitlementType {
 ## TextInputStyle
 ```v
 enum TextInputStyle {
+	// Single-line input
 	short     = 1
+	// Multi-line input
 	paragraph = 2
 }
 ```
@@ -1414,13 +1425,21 @@ enum GuildMemberFlags {
 ## ComponentType
 ```v
 enum ComponentType {
+	// Container for other components
 	action_row         = 1
+	// Button object
 	button             = 2
+	// Select menu for picking from defined text options
 	string_select      = 3
+	// Text input object
 	text_input         = 4
+	// Select menu for users
 	user_select        = 5
+	// Select menu for roles
 	role_select        = 6
+	// Select menu for mentionables (users *and roles*)
 	mentionable_select = 7
+	// Select menu for channels
 	channel_select     = 8
 }
 ```
@@ -1763,12 +1782,17 @@ fn (ji JpegImage) build() string
 ```v
 struct MentionableSelect {
 pub:
-	custom_id      string
-	placeholder    ?string
+	// ID for the select menu; max 100 characters
+	custom_id   string
+	placeholder ?string
+	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
 	default_values ?[]DefaultValue
-	min_values     ?int
-	max_values     ?int
-	disabled       bool
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to `false`)
+	disabled bool
 }
 ```
 
@@ -2532,12 +2556,18 @@ pub:
 ```v
 struct RoleSelect {
 pub:
-	custom_id      string
-	placeholder    ?string
+	// ID for the select menu; max 100 characters
+	custom_id string
+	// Placeholder text if nothing is selected; max 150 characters
+	placeholder ?string
+	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
 	default_values ?[]Snowflake
-	min_values     ?int
-	max_values     ?int
-	disabled       bool
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to false)
+	disabled bool
 }
 ```
 
@@ -2614,11 +2644,16 @@ fn (params EditApplicationParams) build() json2.Any
 ```v
 struct SelectOption {
 pub:
-	label       string
-	value       string
+	// User-facing name of the option; max 100 characters
+	label string
+	// Dev-defined value of the option; max 100 characters
+	value string
+	// Additional description of the option; max 100 characters
 	description ?string
-	emoji       ?PartialEmoji
-	default     ?bool
+	// `id`, `name`, and `animated`
+	emoji ?PartialEmoji
+	// Will show this option as selected by default
+	default ?bool
 }
 ```
 
@@ -2726,7 +2761,9 @@ pub:
 ```v
 struct DefaultValue {
 pub:
-	id  Snowflake        @[required]
+	// ID of a user, role, or channel
+	id Snowflake @[required]
+	// Type of value that `id` represents. Either `.user`, `.role`, or `.channel`
 	typ DefaultValueType @[required]
 }
 ```
@@ -3127,13 +3164,20 @@ fn (c Client) request(method http.Method, route string, options RequestOptions) 
 ```v
 struct ChannelSelect {
 pub:
-	custom_id      string
-	channel_types  ?[]ChannelType
-	placeholder    ?string
+	// ID for the select menu; max 100 characters
+	custom_id string
+	// List of channel types to include in the channel select component
+	channel_types ?[]ChannelType
+	// Placeholder text if nothing is selected; max 150 characters
+	placeholder ?string
+	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
 	default_values ?[]Snowflake
-	min_values     ?int
-	max_values     ?int
-	disabled       bool
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to false)
+	disabled bool
 }
 ```
 
@@ -3152,12 +3196,18 @@ fn (cs ChannelSelect) build() json2.Any
 ```v
 struct StringSelect {
 pub:
-	custom_id   string
-	options     []SelectOption
+	// ID for the select menu; max 100 characters
+	custom_id string
+	// Specified choices in a select menu (only required and available for string selects (type 3); max 25
+	options []SelectOption
+	// Placeholder text if nothing is selected; max 150 characters
 	placeholder ?string
-	min_values  ?int
-	max_values  ?int
-	disabled    bool
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to false)
+	disabled bool
 }
 ```
 
@@ -3176,14 +3226,32 @@ fn (ss StringSelect) build() json2.Any
 ```v
 struct Button {
 pub:
-	style     ButtonStyle = .secondary
-	label     ?string
-	emoji     ?PartialEmoji
+	// A button style, default is `.secondary`
+	style ButtonStyle = .secondary
+	// Text that appears on the button; max 80 characters
+	label ?string
+	// `name`, `id`, and `animated`
+	emoji ?PartialEmoji
+	// Developer-defined identifier for the button; max 100 characters
 	custom_id ?string
-	url       ?string
-	disabled  ?bool
+	// URL for link-style buttons
+	url ?string
+	// Whether the button is disabled (defaults to false)
+	disabled bool
 }
 ```
+Buttons are interactive components that render in messages. They can be clicked by users, and send an interaction to your app when clicked.
+
+- Buttons must be sent inside an Action Row
+- An Action Row can contain up to 5 buttons
+- An Action Row containing buttons cannot also contain any select menu components
+<br/>
+
+Buttons come in a variety of styles to convey different types of actions. These styles also define what fields are valid for a button.
+
+- Non-link buttons must have a custom_id, and cannot have a url
+- Link buttons must have a url, and cannot have a custom_id
+- Link buttons do not send an interaction to your app when clicked
 
 
 [[Return to contents]](#Contents)
@@ -3263,7 +3331,6 @@ pub mut:
 struct Awaitable[T] {
 	id      int
 	timeout ?time.Duration
-	c       Chan[T]
 mut:
 	controller &EventController[T]
 }
@@ -3276,17 +3343,25 @@ mut:
 ```v
 struct TextInput {
 pub:
-	custom_id   string         @[required]
-	style       TextInputStyle = .short
-	label       string         @[required]
-	min_length  ?int
-	max_length  ?int
-	required    bool
-	value       ?string
+	// Developer-defined identifier for the input; max 100 characters
+	custom_id string @[required]
+	// The Text Input Style
+	style TextInputStyle = .short
+	// Label for this component; max 45 characters
+	label string @[required]
+	// Minimum input length for a text input; min 0, max 4000
+	min_length ?int
+	// Maximum input length for a text input; min 1, max 4000
+	max_length ?int
+	// Whether this component is required to be filled (defaults to `true`)
+	required bool = true
+	// Pre-filled value for this component; max 4000 characters
+	value ?string
+	// Custom placeholder text if the input is empty; max 100 characters
 	placeholder ?string
 }
 ```
-
+Text inputs are an interactive component that render in modals. They can be used to collect short-form or long-form text. When defining a text input component, you can set attributes to customize the behavior and appearance of it. However, not all attributes will be returned in the text input interaction payload.
 
 [[Return to contents]](#Contents)
 
@@ -3474,12 +3549,18 @@ fn (aco ApplicationCommandOption) build() json2.Any
 ```v
 struct UserSelect {
 pub:
-	custom_id      string
-	placeholder    ?string
+	// ID for the select menu; max 100 characters
+	custom_id string
+	// Placeholder text if nothing is selected; max 150 characters
+	placeholder ?string
+	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
 	default_values ?[]Snowflake
-	min_values     ?int
-	max_values     ?int
-	disabled       bool
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to false)
+	disabled bool
 }
 ```
 
@@ -3629,7 +3710,9 @@ pub:
 	components []Component
 }
 ```
-ignore is_component(), it is used to differ interfaces
+An Action Row is a non-interactive container component for other types of components. It has a sub-array of components of other types.- You can have up to 5 Action Rows per message
+- An Action Row cannot contain another Action Row
+
 
 [[Return to contents]](#Contents)
 
@@ -3666,4 +3749,4 @@ pub:
 
 [[Return to contents]](#Contents)
 
-#### Powered by vdoc. Generated on: 12 Dec 2023 15:30:11
+#### Powered by vdoc. Generated on: 12 Dec 2023 17:15:11

@@ -13,8 +13,17 @@ pub type Check[T] = fn (T) bool
 
 struct EventWaiter[T] {
 	check ?Check[T]
-	c     &Chan[T]
+	c     Chan[T]
 }
+
+/*
+// Not sure about this
+@[unsafe]
+fn (mut ew EventWaiter[T]) free() {
+	unsafe {
+		ew.c.free()
+	}
+} */
 
 pub struct EventController[T] {
 mut:
@@ -33,6 +42,7 @@ pub:
 	error_handler ?fn (int, IError)
 }
 
+// `emit` broadcasts passed object to all listeners
 pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 	for i, w in ec.wait_fors {
 		mut b := false
@@ -71,49 +81,51 @@ pub:
 pub struct Awaitable[T] {
 	id      int
 	timeout ?time.Duration
-	c       Chan[T]
 mut:
 	controller &EventController[T]
 }
 
-struct Zero[T] {
-	e T
-}
-
+// `do` waits for event and returns it.
+// After it returned event, it will return none
+// If timeout is exceeded, it returns none
 pub fn (mut a Awaitable[T]) do() ?T {
-	defer {
-		a.controller.wait_fors.delete(a.id)
-	}
-	if timeout := a.timeout {
-		mut e := Zero[T]{}.e
-		select {
-			e = <-a.c.c {
-				r := e
-				return r
-			}
-			timeout.nanoseconds() {
-				return none
+	if w := a.controller.wait_fors[a.id] {
+		defer {
+			// unsafe {
+			//	w.free()
+			//}
+			a.controller.wait_fors.delete(a.id)
+		}
+		if timeout := a.timeout {
+			select {
+				r := <-w.c.c {
+					return r
+				}
+				timeout.nanoseconds() {
+					return none
+				}
 			}
 		}
+		return <-w.c.c
 	}
-	return <-a.c.c
+	return none
 }
 
+// `wait` returns Awaitable that can be used to get event
 pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] {
-	mut c := Chan[T]{}
 	id := ec.generate_id()
 	ec.wait_fors[id] = EventWaiter[T]{
 		check: params.check
-		c: &mut c
+		c: Chan[T]{}
 	}
 	return Awaitable[T]{
 		id: id
 		timeout: params.timeout
 		controller: unsafe { &mut ec }
-		c: c
 	}
 }
 
+// `override` removes all listeners and inserts `listener`
 pub fn (mut ec EventController[T]) override(listener EventListener[T]) EventController[T] {
 	ec.listeners = {
 		ec.generate_id(): listener
@@ -121,6 +133,7 @@ pub fn (mut ec EventController[T]) override(listener EventListener[T]) EventCont
 	return ec
 }
 
+// `listen` adds function to listener list
 pub fn (mut ec EventController[T]) listen(listener EventListener[T]) EventController[T] {
 	ec.listeners[ec.generate_id()] = listener
 	return ec

@@ -49,6 +49,9 @@ pub:
 	intents    Intents
 }
 
+// `bot` creates a new [GatewayClient] that can be used to listen events.
+// Use `launch` to connect to gateway.
+// note: token should not contain `Bot` prefix
 pub fn bot(token string, config BotConfig) GatewayClient {
 	return GatewayClient{
 		token: 'Bot ${token}'
@@ -62,6 +65,8 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 	}
 }
 
+// `bearer` accepts access token and returns Client that can be used to fetch user data
+// note: token should not contain `Bearer` prefix
 pub fn bearer(token string, config ClientConfig) Client {
 	return Client{
 		token: 'Bearer ${token}'
@@ -73,6 +78,7 @@ pub fn bearer(token string, config ClientConfig) Client {
 	}
 }
 
+// `oauth2_app` accepts client ID and secret and returns Client with Basic token
 pub fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig) Client {
 	return Client{
 		token: 'Basic ' + base64.encode_str('${client_id.build()}:${client_secret}')
