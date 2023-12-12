@@ -4,6 +4,12 @@ import net.urllib
 import time
 import x.json2
 
+pub enum InviteType {
+	guild
+	group_dm
+	friend	
+}
+
 pub enum InviteTargetType {
 	stream               = 1
 	embedded_application
@@ -12,6 +18,8 @@ pub enum InviteTargetType {
 // Represents a code that when used, adds a user to a guild or group DM channel.
 pub struct Invite {
 pub:
+	// the type of invite
+	typ InviteType
 	// the invite code (unique ID)
 	code string
 	// the guild this invite is for
