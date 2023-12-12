@@ -98,15 +98,10 @@ pub fn (c Client) fetch_invite(code string, params FetchInviteParams) !Invite {
 	return Invite.parse(c.request(.get, '/invites/${urllib.path_escape(code)}${encode_query(query_params)}')!.body)!
 }
 
-@[params]
-pub struct DeleteInviteParams {
-pub:
-	reason ?string
-}
 
 // Delete an invite. Requires the `.manage_channels` permission on the channel this invite belongs to, or `.manage_guild` to remove any invite across the guild. Returns an [Invite] object on success. Fires an Invite Delete Gateway event.
 
-pub fn (c Client) delete_invite(code string, params DeleteInviteParams) !Invite {
+pub fn (c Client) delete_invite(code string, params ReasonParam) !Invite {
 	return Invite.parse(c.request(.delete, '/invites/${urllib.path_escape(code)}',
 		reason: params.reason
 	)!.body)!

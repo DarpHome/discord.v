@@ -3,7 +3,7 @@ module discord
 import net.urllib
 
 @[params]
-pub struct WithReason {
+pub struct ReasonParam {
 pub:
 	reason ?string
 }
@@ -41,6 +41,6 @@ pub enum ChannelType {
 // the channel is a thread. Deleting a category does not delete its child channels; they will have their parent_id removed and a
 // Channel Update Gateway event will fire for each of them. Returns a channel object on success. Fires a Channel Delete Gateway
 // event (or Thread Delete if the channel was a thread).
-pub fn (c Client) delete_channel(id Snowflake, config WithReason) ! {
+pub fn (c Client) delete_channel(id Snowflake, config ReasonParam) ! {
 	c.request(.delete, '/channels/${urllib.path_escape(id.build())}', reason: config.reason)!
 }
