@@ -24,4 +24,4 @@ jobs:
 
 
       - name: Test library
-        run: v test .
+        run: v test discord/
