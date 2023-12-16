@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  tests:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    # commented until api coverage
+    #env:
+    #  TEST_TOKEN: ${{ secrets.TEST_TOKEN }}
+    steps:
+      - name: Setup V
+        uses: nocturlab/setup-vlang-action@v1
+        with:
+          id: v
+          v-version: master
+
+
+      - name: Test library
+        run: v test .

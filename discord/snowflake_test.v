@@ -1,7 +1,5 @@
 module discord
 
-import time
-
 fn test_snowflake() {
 	me := Snowflake(1073325901825187841)
 	assert me.raw_timestamp() == 1675971236426
