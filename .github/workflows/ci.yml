@@ -21,4 +21,4 @@ jobs:
 
 
       - name: Test library
-        run: cd ../.. && ls -lh
+        run: cd ../../.. && ls -lh
