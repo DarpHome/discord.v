@@ -5,27 +5,27 @@ import x.json2
 
 pub enum WSMessageOpcode {
 	// An event was dispatched.
-	dispatch = 0
+	dispatch              = 0
 	// Fired periodically by the client to keep the connection alive.
-	heartbeat = 1
+	heartbeat             = 1
 	// Starts a new session during the initial handshake.
-	identify = 2
+	identify              = 2
 	// Update the client's presence.
-	update_presence = 3
+	update_presence       = 3
 	// Used to join/leave or move between voice channels.
-	voice_state_update = 4
+	voice_state_update    = 4
 	// Resume a previous session that was disconnected.
-	resume = 6
+	resume                = 6
 	// You should attempt to reconnect and resume immediately.
-	reconnect = 7
+	reconnect             = 7
 	// Request information about offline guild members in a large guild.
 	request_guild_members = 8
 	// The session has been invalidated. You should reconnect and identify/resume accordingly.
-	invalid_session = 9
+	invalid_session       = 9
 	// Sent immediately after connecting, contains the `heartbeat_interval` to use.
-	hello = 10
+	hello                 = 10
 	// Sent in response to receiving a heartbeat to acknowledge that it has been received.
-	heartbeat_ack = 11
+	heartbeat_ack         = 11
 }
 
 pub struct WSMessage {

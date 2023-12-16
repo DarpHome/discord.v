@@ -15,7 +15,7 @@ fn main() {
 					typ: .custom
 					name: 'Custom Status'
 					state: 'Testing discord.v'
-				}
+				},
 			]
 			status: .dnd
 		}
@@ -25,17 +25,17 @@ fn main() {
 	app := c.fetch_my_application() or { discord.Application{} }
 	c.bulk_overwrite_global_application_commands(app.id, [
 		discord.CreateApplicationCommandParams{
-			name: 'greet',
-			description: 'Greet',
+			name: 'greet'
+			description: 'Greet'
 			options: [
 				discord.ApplicationCommandOption{
-					name: 'user',
+					name: 'user'
 					description: 'The user to greet'
 					typ: .user
-				}
+				},
 			]
 		},
-	]) or { }
+	]) or {}
 	c.events.on_ready.listen(fn (event discord.ReadyEvent) ! {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})

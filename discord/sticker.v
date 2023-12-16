@@ -96,7 +96,7 @@ pub:
 
 pub fn StickerItem.parse(j json2.Any) !StickerItem {
 	match j {
-		map[string]json2.Any{
+		map[string]json2.Any {
 			return StickerItem{
 				id: Snowflake.parse(j['id']!)!
 				name: j['name']! as string

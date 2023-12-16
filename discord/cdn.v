@@ -12,7 +12,7 @@ pub:
 @[params]
 pub struct NewCDNParams {
 pub:
-	base string = default_cdn_url
+	base string = discord.default_cdn_url
 }
 
 pub fn new_cdn(params NewCDNParams) CDN {
@@ -56,7 +56,7 @@ fn cdn_build_filename(filename string, format ?ImageFormat) string {
 pub struct CDNGetParams {
 pub:
 	format ?ImageFormat
-	size ?int
+	size   ?int
 }
 
 pub fn (params CDNGetParams) build() string {
@@ -65,7 +65,11 @@ pub fn (params CDNGetParams) build() string {
 		vs.set('size', size.str())
 	}
 	s := vs.encode()
-	return '.${cdn_build_ext(params.format)}' + (if s == '' { '' } else { '?' + s })
+	return '.${cdn_build_ext(params.format)}' + (if s == '' {
+		''
+	} else {
+		'?' + s
+	})
 }
 
 pub fn (c CDN) custom_emoji(emoji_id Snowflake, params CDNGetParams) string {

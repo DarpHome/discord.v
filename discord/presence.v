@@ -5,7 +5,7 @@ import x.json2
 
 pub enum ActivityType {
 	// Playing {name}: "Playing Rocket League"
-	game = 0
+	game      = 0
 	// Streaming {details}: "Streaming Rocket League"
 	streaming
 	// Listening to {name}: "Listening to Spotify"
@@ -172,13 +172,13 @@ pub:
 
 pub fn (p Presence) build() json2.Any {
 	return dump({
-		'since': if since := p.since {
+		'since':      if since := p.since {
 			json2.Any(since.unix_time_milli())
 		} else {
 			json2.Any(json2.Null{})
 		}
 		'activities': p.activities.map(it.build())
-		'status': p.status.build()
-		'afk': p.afk
+		'status':     p.status.build()
+		'afk':        p.afk
 	})
 }

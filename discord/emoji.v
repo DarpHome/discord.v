@@ -109,5 +109,4 @@ pub fn Emoji.parse(j json2.Any) !Emoji {
 }
 
 pub struct Reaction {
-	
 }

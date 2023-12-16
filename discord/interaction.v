@@ -13,17 +13,17 @@ pub enum InteractionType {
 
 pub struct Interaction {
 pub:
-	id             Snowflake
-	application_id Snowflake
-	typ            InteractionType
-	data           json2.Any
-	guild_id       ?Snowflake
-	channel ?Channel
-	channel_id ?Snowflake
-	member     ?GuildMember
-	user       ?User
-	token      string
-	message ?Message
+	id              Snowflake
+	application_id  Snowflake
+	typ             InteractionType
+	data            json2.Any
+	guild_id        ?Snowflake
+	channel         ?Channel
+	channel_id      ?Snowflake
+	member          ?GuildMember
+	user            ?User
+	token           string
+	message         ?Message
 	app_permissions ?Permissions
 	locale          ?string
 	guild_locale    ?string

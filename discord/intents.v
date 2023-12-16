@@ -29,9 +29,11 @@ pub enum Intents {
 }
 
 pub fn combine_intents(list ...Intents) Intents {
-	return unsafe { Intents(arrays.fold(list, 0, fn (x int, y Intents) int {
-		return x | int(y)
-	})) }
+	return unsafe {
+		Intents(arrays.fold(list, 0, fn (x int, y Intents) int {
+			return x | int(y)
+		}))
+	}
 }
 
 pub const all_intents = combine_intents(.guilds, .guild_members, .guild_moderation, .guild_emojis_and_stickers,

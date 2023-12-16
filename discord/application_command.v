@@ -114,7 +114,7 @@ pub const locale_ko = Locale('ko')
 pub type LocaleMapping = map[Locale]string
 
 pub enum ApplicationCommandOptionType {
-	sub_command = 1
+	sub_command       = 1
 	sub_command_group
 	string
 	// Any integer between -2^53 and 2^53

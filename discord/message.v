@@ -4,15 +4,12 @@ import net.urllib
 import time
 
 pub struct ChannelMention {
-
 }
 
 pub struct Attachment {
-
 }
 
 pub struct Embed {
-
 }
 
 pub type Nonce = int | string
@@ -31,7 +28,7 @@ pub enum MessageType {
 	guild_boost_tier_2
 	guild_boost_tier_3
 	channel_follow_add
-	guild_discovery_disqualified = 14
+	guild_discovery_disqualified                = 14
 	guild_discovery_requalified
 	guild_discovery_grace_period_inital_warning
 	guild_discovery_grace_period_final_warning
@@ -47,12 +44,12 @@ pub enum MessageType {
 	stage_start
 	stage_end
 	stage_speaker
-	stage_topic = 31
+	stage_topic                                 = 31
 	guild_application_premium_subscription
 }
 
 pub enum MessageActivityType {
-	join = 1
+	join         = 1
 	spectate
 	listen
 	join_request
@@ -97,43 +94,40 @@ pub enum MessageFlags {
 }
 
 pub struct MessageInteraction {
-
 }
 
 pub struct Message {
 pub:
-	id Snowflake
-	channel_id Snowflake
-	author User
-	content string
-	timestamp time.Time
-	edited_timestamp ?time.Time
-	tts bool
-	mention_everyone bool
-	mentions []User
-	mention_roles []Snowflake
-	mention_channels ?[]ChannelMention
-	attachments []Attachment
-	embeds []Embed
-	reactions ?[]Reaction
-	nonce ?Nonce
-	pinned bool
-	webhook_id ?Snowflake
-	typ MessageType
-	activity ?MessageActivity
-	application ?PartialApplication
-	application_id ?Snowflake
-	message_reference ?MessageReference
-	flags ?MessageFlags
+	id                 Snowflake
+	channel_id         Snowflake
+	author             User
+	content            string
+	timestamp          time.Time
+	edited_timestamp   ?time.Time
+	tts                bool
+	mention_everyone   bool
+	mentions           []User
+	mention_roles      []Snowflake
+	mention_channels   ?[]ChannelMention
+	attachments        []Attachment
+	embeds             []Embed
+	reactions          ?[]Reaction
+	nonce              ?Nonce
+	pinned             bool
+	webhook_id         ?Snowflake
+	typ                MessageType
+	activity           ?MessageActivity
+	application        ?PartialApplication
+	application_id     ?Snowflake
+	message_reference  ?MessageReference
+	flags              ?MessageFlags
 	referenced_message ?&Message
-	interaction ?MessageInteraction
-	thread ?Channel
-	components ?[]Component
-	
+	interaction        ?MessageInteraction
+	thread             ?Channel
+	components         ?[]Component
 
 	guild_id ?Snowflake
-	member ?GuildMember
-
+	member   ?GuildMember
 }
 
 pub fn (c Client) delete_message(channel_id Snowflake, id Snowflake, config ReasonParam) ! {

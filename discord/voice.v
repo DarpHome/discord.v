@@ -17,17 +17,16 @@ pub:
 
 pub fn (vsu VoiceStateUpdate) build() json2.Any {
 	return {
-		'guild_id': json2.Any(vsu.guild_id.build())
+		'guild_id':   json2.Any(vsu.guild_id.build())
 		'channel_id': if s := vsu.channel_id {
 			json2.Any(s.build())
 		} else {
 			json2.Null{}
 		}
-		'self_mute': vsu.self_mute
-		'self_deaf': vsu.self_deaf
+		'self_mute':  vsu.self_mute
+		'self_deaf':  vsu.self_deaf
 	}
 }
-
 
 pub fn (mut gc GatewayClient) update_voice_state(params VoiceStateUpdate) ! {
 	gc.send(WSMessage{

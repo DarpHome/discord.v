@@ -22,15 +22,15 @@ pub:
 
 pub fn GuildCreateEvent.parse(j json2.Any, base BaseEvent) !GuildCreateEvent {
 	return GuildCreateEvent{
-		BaseEvent: base,
+		BaseEvent: base
 		guild: Guild.parse(j)!
 	}
 }
 
 pub struct Events {
 pub mut:
-	on_raw_event   EventController[DispatchEvent]
-	on_ready       EventController[ReadyEvent]
+	on_raw_event    EventController[DispatchEvent]
+	on_ready        EventController[ReadyEvent]
 	on_guild_create EventController[GuildCreateEvent]
 }
 
@@ -49,7 +49,7 @@ fn event_process_guild_create(mut gc GatewayClient, data json2.Any) ! {
 type EventsTable = map[string]fn (mut GatewayClient, json2.Any) !
 
 const events_table = EventsTable({
-	'READY': event_process_ready
+	'READY':        event_process_ready
 	'GUILD_CREATE': event_process_guild_create
 })
 

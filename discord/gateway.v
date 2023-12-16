@@ -20,14 +20,14 @@ pub:
 	properties  ?Properties
 	gateway_url string = 'wss://gateway.discord.gg'
 mut:
-	ws       &websocket.Client = unsafe { nil }
-	presence ?Presence
-	ready    bool
-	sequence ?int
+	ws                 &websocket.Client = unsafe { nil }
+	presence           ?Presence
+	ready              bool
+	sequence           ?int
 	last_heartbeat_req ?time.Time
 	last_heartbeat_res ?time.Time
-	close_code ?int
-	session_id string
+	close_code         ?int
+	session_id         string
 	resume_gateway_url string
 pub mut:
 	events Events
@@ -112,7 +112,7 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 	}(mut c, interval * time.millisecond)
 }
 
-fn (mut c GatewayClient) init_ws(mut ws &websocket.Client) {
+fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, r voidptr) ! {
 		mut client := unsafe { &GatewayClient(r) }
 		if reason != 'closed by client' {
@@ -133,9 +133,9 @@ fn (mut c GatewayClient) init_ws(mut ws &websocket.Client) {
 				client.send(WSMessage{
 					opcode: .resume
 					data: json2.Any({
-						'token': json2.Any(client.token)
+						'token':      json2.Any(client.token)
 						'session_id': client.session_id
-						'seq': seq
+						'seq':        seq
 					})
 				})!
 				client.logger.info('Sent RESUME')
@@ -179,7 +179,11 @@ fn (mut c GatewayClient) init_ws(mut ws &websocket.Client) {
 				if client.settings.has(.dont_cut_debug) {
 					client.logger.debug('Dispatch ${message.event}: ${data}')
 				} else {
-					client.logger.debug('Dispatch ${message.event}: ${if data.len < 100 { data } else { data[..100] + '... ' + (data.len - 100).str() + ' chars' }}')
+					client.logger.debug('Dispatch ${message.event}: ${if data.len < 100 {
+						data
+					} else {
+						data[..100] + '... ' + (data.len - 100).str() + ' chars'
+					}}')
 				}
 				if seq := message.seq {
 					client.sequence = seq
@@ -197,21 +201,21 @@ fn (mut c GatewayClient) init_ws(mut ws &websocket.Client) {
 }
 
 struct GatewayCloseCode {
-	message string
+	message   string
 	reconnect bool
 }
 
 const gateway_close_code_table = {
 	4000: GatewayCloseCode{
-		message: 'Unknown error: We\'re not sure what went wrong. Try reconnecting?'
+		message: "Unknown error: We're not sure what went wrong. Try reconnecting?"
 		reconnect: true
 	}
 	4001: GatewayCloseCode{
-		message: 'Unknown opcode: You sent an invalid Gateway opcode or an invalid payload for an opcode. Don\'t do that!'
+		message: "Unknown opcode: You sent an invalid Gateway opcode or an invalid payload for an opcode. Don't do that!"
 		reconnect: true
 	}
 	4002: GatewayCloseCode{
-		message: 'Decode error: You sent an invalid payload to Dicsord. Don\'t do that!'
+		message: "Decode error: You sent an invalid payload to Dicsord. Don't do that!"
 		reconnect: true
 	}
 	4003: GatewayCloseCode{
@@ -223,7 +227,7 @@ const gateway_close_code_table = {
 		reconnect: false
 	}
 	4005: GatewayCloseCode{
-		message: 'Already authenticated: You sent more than one identify payload. Don\'t do that!'
+		message: "Already authenticated: You sent more than one identify payload. Don't do that!"
 		reconnect: true
 	}
 	4007: GatewayCloseCode{
@@ -231,7 +235,7 @@ const gateway_close_code_table = {
 		reconnect: true
 	}
 	4008: GatewayCloseCode{
-		message: 'Rate limited: Woah nelly! You\'re sending payloads to us too quickly. Slow it down! You will be disconnected on receiving this.'
+		message: "Rate limited: Woah nelly! You're sending payloads to us too quickly. Slow it down! You will be disconnected on receiving this."
 		reconnect: true
 	}
 	4009: GatewayCloseCode{
@@ -274,10 +278,12 @@ pub fn (mut c GatewayClient) run() ! {
 		c.ws.connect()!
 		c.ws.listen()! // blocks
 		close_code := c.close_code or { 0 }
-		cc := gateway_close_code_table[close_code] or { GatewayCloseCode{
-			message: 'Unknown websocket close code ${close_code}'
-			reconnect: false
-		} }
+		cc := discord.gateway_close_code_table[close_code] or {
+			GatewayCloseCode{
+				message: 'Unknown websocket close code ${close_code}'
+				reconnect: false
+			}
+		}
 		c.logger.error('Recieved close code ${close_code}: ${cc.message}')
 		c.ready = false
 		if !cc.reconnect {
@@ -286,7 +292,8 @@ pub fn (mut c GatewayClient) run() ! {
 		if c.resume_gateway_url != '' {
 			// resume
 			c.ready = false
-			mut ws := websocket.new_client(c.resume_gateway_url.trim_right('/?') + '?v=10&encoding=json')!
+			mut ws := websocket.new_client(c.resume_gateway_url.trim_right('/?') +
+				'?v=10&encoding=json')!
 			c.ws = ws
 			c.init_ws(mut ws)
 		}

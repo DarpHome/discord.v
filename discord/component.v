@@ -104,8 +104,8 @@ fn (_ Button) is_component() {}
 
 pub fn (b Button) build() json2.Any {
 	mut r := {
-		'type':     ComponentType.button.build()
-		'style':    b.style.build()
+		'type':  ComponentType.button.build()
+		'style': b.style.build()
 	}
 	if label := b.label {
 		r['label'] = label
@@ -328,9 +328,15 @@ pub fn DefaultValue.parse(j json2.Any) !DefaultValue {
 			return DefaultValue{
 				id: Snowflake.parse(j['id']!)!
 				typ: match typ {
-					'user' { .user }
-					'role' { .role }
-					'channel' { .channel }
+					'user' {
+						.user
+					}
+					'role' {
+						.role
+					}
+					'channel' {
+						.channel
+					}
 					else {
 						return error('expected user/role/channel default value type, got ${typ}')
 					}
@@ -510,7 +516,7 @@ pub fn RoleSelect.parse(j json2.Any) !RoleSelect {
 pub struct MentionableSelect {
 pub:
 	// ID for the select menu; max 100 characters
-	custom_id   string
+	custom_id string
 	// Placeholder text if nothing is selected; max 150 characters
 	placeholder ?string
 	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
@@ -547,7 +553,6 @@ pub fn (ms MentionableSelect) build() json2.Any {
 	}
 	return r
 }
-
 
 pub fn MentionableSelect.parse(j json2.Any) !MentionableSelect {
 	match j {
