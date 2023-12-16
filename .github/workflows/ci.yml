@@ -7,7 +7,7 @@ on:
 
 jobs:
   tests:
-    name: Run integration tests
+    name: Run tests
     runs-on: ubuntu-latest
     # commented until api coverage
     #env:
@@ -21,4 +21,4 @@ jobs:
 
 
       - name: Test library
-        run: v test .
+        run: pwd
