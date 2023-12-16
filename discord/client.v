@@ -45,8 +45,10 @@ fn (config ClientConfig) get_level() log.Level {
 pub struct BotConfig {
 	ClientConfig
 pub:
+	presence   ?Presence
 	properties Properties
 	intents    Intents
+	settings   GatewayClientSettings
 }
 
 // `bot` creates a new [GatewayClient] that can be used to listen events.
@@ -56,11 +58,13 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 	return GatewayClient{
 		token: 'Bot ${token}'
 		intents: int(config.intents)
+		presence: config.presence
 		properties: config.properties
 		logger: log.Log{
 			level: config.get_level()
 			output_label: 'discord.v'
 		}
+		settings: config.settings
 		user_agent: config.user_agent
 	}
 }

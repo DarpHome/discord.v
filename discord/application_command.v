@@ -33,6 +33,9 @@ pub const locale_en_us = Locale('en-US')
 // Spanish (Español)
 pub const locale_es_es = Locale('es-ES')
 
+// Spanish, LATAM (Español, LATAM)
+pub const locale_es_419 = Locale('es-419')
+
 // French (Français)
 pub const locale_fr = Locale('fr')
 
@@ -108,8 +111,10 @@ pub const locale_zh_tw = Locale('zh-TW')
 // Korean (한국어)
 pub const locale_ko = Locale('ko')
 
+pub type LocaleMapping = map[Locale]string
+
 pub enum ApplicationCommandOptionType {
-	sub_command
+	sub_command = 1
 	sub_command_group
 	string
 	// Any integer between -2^53 and 2^53
@@ -133,7 +138,7 @@ pub:
 	// 1-100 character choice name
 	name string
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?map[Locale]string
+	name_localizations ?LocaleMapping
 	// Value for the choice, up to 100 characters if string
 	value ApplicationCommandOptionChoiceValue
 }
@@ -145,10 +150,10 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 			return ApplicationCommandOptionChoice{
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
-					maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+					?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
 						fn (k string, v json2.Any) (Locale, string) {
 						return k, v as string
-					})
+					}))
 					// as map[Locale]string
 					// i was trying to fix
 				} else {
@@ -158,11 +163,11 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 					string {
 						ApplicationCommandOptionChoiceValue(value)
 					}
-					i64 {
+					int, i64 {
 						ApplicationCommandOptionChoiceValue(int(value))
 					}
-					f64 {
-						ApplicationCommandOptionChoiceValue(value)
+					f32, f64 {
+						ApplicationCommandOptionChoiceValue(f64(value))
 					}
 					else {
 						return error('expected application command option choice value to be string/i64/f64, got ${value.type_name()}')
@@ -177,12 +182,13 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 }
 
 pub fn (acoc ApplicationCommandOptionChoice) build() json2.Any {
+	value := acoc.value
 	mut r := {
 		'name':  json2.Any(acoc.name)
-		'value': match acoc.value {
-			string { json2.Any(acoc.value) }
-			int { json2.Any(acoc.value) }
-			f64 { json2.Any(acoc.value) }
+		'value': match value {
+			string { value }
+			int { value }
+			f64 { value }
 		}
 	}
 	if name_localizations := acoc.name_localizations {
@@ -201,14 +207,14 @@ pub:
 	// 1-32 character name
 	name string
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?map[Locale]string
+	name_localizations ?LocaleMapping
 	// 1-100 character description
 	description string
 	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
-	description_localizations ?map[Locale]string
+	description_localizations ?LocaleMapping
 	// If the parameter is required or optional--default `false`
 	required ?bool
-	// Choices for `.string_`, `.integer`, and `.number` types for the user to pick from, max 25
+	// Choices for `.string`, `.integer`, and `.number` types for the user to pick from, max 25
 	choices ?[]ApplicationCommandOptionChoice
 	// If the option is a subcommand or subcommand group type, these nested options will be the parameters
 	options ?[]ApplicationCommandOption
@@ -218,11 +224,11 @@ pub:
 	min_value ?int
 	// If the option is an `.integer` or `.number` type, the maximum value permitted
 	max_value ?int
-	// For option type `.string_`, the minimum allowed length (minimum of `0`, maximum of `6000`)
+	// For option type `.string`, the minimum allowed length (minimum of `0`, maximum of `6000`)
 	min_length ?int
-	// For option type `.string_`, the maximum allowed length (minimum of `1`, maximum of `6000`)
+	// For option type `.string`, the maximum allowed length (minimum of `1`, maximum of `6000`)
 	max_length ?int
-	// If autocomplete interactions are enabled for this `.string_`, `.integer`, or `.number` type option
+	// If autocomplete interactions are enabled for this `.string`, `.integer`, or `.number` type option
 	autocomplete ?bool
 }
 
@@ -230,14 +236,14 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 	match j {
 		map[string]json2.Any {
 			return ApplicationCommandOption{
-				typ: unsafe { ApplicationCommandOptionType(j['type']! as i64) }
+				typ: unsafe { ApplicationCommandOptionType(j['type']!.int()) }
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
 					if m !is json2.Null {
-						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+						?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
 							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
-						})
+						}))
 					} else {
 						none
 					}
@@ -247,10 +253,10 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 				description: j['description']! as string
 				description_localizations: if m := j['description_localizations'] {
 					if m !is json2.Null {
-						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+						?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
 							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
-						})
+						}))
 					} else {
 						none
 					}
@@ -278,22 +284,22 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 					none
 				}
 				min_value: if i := j['min_value'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
 				max_value: if i := j['max_value'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
 				min_length: if i := j['min_length'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
 				max_length: if i := j['max_length'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
@@ -371,11 +377,11 @@ pub:
 	// Name of command, 1-32 characters
 	name string
 	// Localization dictionary for `name` field. Values follow the same restrictions as `name`
-	name_localizations ?map[Locale]string
+	name_localizations ?LocaleMapping
 	// Description for `.chat_input` commands, 1-100 characters. Empty string for `.user` and `.message` commands
 	description string
 	// Localization dictionary for `description` field. Values follow the same restrictions as `description`
-	description_localizations ?map[Locale]string
+	description_localizations ?LocaleMapping
 	// Parameters for the command, max of 25
 	options ?[]ApplicationCommandOption
 	// Set of permissions represented as a bit set
@@ -389,9 +395,10 @@ pub:
 pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 	match j {
 		map[string]json2.Any {
+			default_member_permissions := j['default_member_permissions']!
 			return ApplicationCommand{
 				id: Snowflake.parse(j['id']!)!
-				typ: unsafe { ApplicationCommandType(j['type']! as i64) }
+				typ: unsafe { ApplicationCommandType(j['type']!.int()) }
 				application_id: Snowflake.parse(j['application_id']!)!
 				guild_id: if s := j['guild_id'] {
 					?Snowflake(Snowflake.parse(s)!)
@@ -401,10 +408,10 @@ pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
 					if m !is json2.Null {
-						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+						?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
 							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
-						})
+						}))
 					} else {
 						none
 					}
@@ -414,10 +421,10 @@ pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 				description: j['description']! as string
 				description_localizations: if m := j['description_localizations'] {
 					if m !is json2.Null {
-						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+						?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
 							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
-						})
+						}))
 					} else {
 						none
 					}
@@ -429,7 +436,7 @@ pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 				} else {
 					none
 				}
-				default_member_permissions: if default_member_permissions := j['default_member_permissions'] {
+				default_member_permissions: if default_member_permissions !is json2.Null {
 					?Permissions(Permissions.parse(default_member_permissions)!)
 				} else {
 					none
@@ -473,11 +480,11 @@ pub:
 	// Name of command, 1-32 characters
 	name string
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?map[Locale]string
+	name_localizations ?LocaleMapping
 	// 1-100 character description for `.chat_input` commands
 	description ?string
 	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
-	description_localizations ?map[Locale]string
+	description_localizations ?LocaleMapping
 	// the parameters for the command
 	options ?[]ApplicationCommandOption
 	// Set of permissions represented as a bit set
@@ -545,11 +552,11 @@ pub:
 	// Name of command, 1-32 characters
 	name ?string
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?map[Locale]string
+	name_localizations ?LocaleMapping
 	// 1-100 character description
 	description ?string
 	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
-	description_localizations ?map[Locale]string
+	description_localizations ?LocaleMapping
 	// the parameters for the command
 	options ?[]ApplicationCommandOption
 	// Set of permissions represented as a bit set
@@ -649,7 +656,7 @@ pub fn (c Client) bulk_overwrite_guild_application_commands(application_id Snowf
 	)!.body)! as []json2.Any).map(ApplicationCommand.parse(it)!)
 }
 
-// Guild Application Command Permissions Structure
+// Application Command Permission Type
 pub enum ApplicationCommandPermissionType {
 	role    = 1
 	user
@@ -679,7 +686,7 @@ pub fn ApplicationCommandPermission.parse(j json2.Any) !ApplicationCommandPermis
 		map[string]json2.Any {
 			return ApplicationCommandPermission{
 				id: Snowflake.parse(j['id']!)!
-				typ: unsafe { ApplicationCommandPermissionType(j['type']! as i64) }
+				typ: unsafe { ApplicationCommandPermissionType(j['type']!.int()) }
 				permission: j['permission']! as bool
 			}
 		}

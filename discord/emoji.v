@@ -14,7 +14,7 @@ pub fn (pe PartialEmoji) build() json2.Any {
 		'id':   if id := pe.id {
 			json2.Any(id.build())
 		} else {
-			json2.Any(json2.Null{})
+			json2.Any(json2.null)
 		}
 		'name': pe.name
 	}
@@ -22,6 +22,30 @@ pub fn (pe PartialEmoji) build() json2.Any {
 		r['animated'] = pe.animated
 	}
 	return r
+}
+
+pub fn PartialEmoji.parse(j json2.Any) !PartialEmoji {
+	match j {
+		map[string]json2.Any {
+			id := j['id']!
+			return PartialEmoji{
+				id: if id !is json2.Null {
+					?Snowflake(Snowflake.parse(id)!)
+				} else {
+					none
+				}
+				name: j['name']! as string
+				animated: if b := j['animated'] {
+					b as bool
+				} else {
+					false
+				}
+			}
+		}
+		else {
+			return error('expected partial emoji to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 pub struct Emoji {
@@ -82,4 +106,8 @@ pub fn Emoji.parse(j json2.Any) !Emoji {
 			return error('expected emoji to be object, got ${j.type_name()}')
 		}
 	}
+}
+
+pub struct Reaction {
+	
 }

@@ -55,9 +55,9 @@ pub fn InviteMetadata.parse(j json2.Any) !InviteMetadata {
 	match j {
 		map[string]json2.Any {
 			return InviteMetadata{
-				uses: int(j['uses']! as i64)
-				max_uses: int(j['max_uses']! as i64)
-				max_age: j['max_age']! as i64 * time.second
+				uses: j['uses']!.int()
+				max_uses: j['max_uses']!.int()
+				max_age: j['max_age']!.int() * time.second
 				temporary: j['temporary']! as bool
 				created_at: time.parse_iso8601(j['created_at']! as string)!
 			}
@@ -98,8 +98,7 @@ pub fn (c Client) fetch_invite(code string, params FetchInviteParams) !Invite {
 	return Invite.parse(c.request(.get, '/invites/${urllib.path_escape(code)}${encode_query(query_params)}')!.body)!
 }
 
-// Delete an invite. Requires the `.manage_channels` permission on the channel this invite belongs to, or `.manage_guild` to remove any invite across the guild. Returns an [Invite] object on success. Fires an Invite Delete Gateway event.
-
+// Delete an invite. Requires the `.manage_channels` permission on the channel this invite belongs to, or `.manage_guild` to remove any invite across the guild. Returns an [`Invite`](#Invite) object on success. Fires an Invite Delete Gateway event.
 pub fn (c Client) delete_invite(code string, params ReasonParam) !Invite {
 	return Invite.parse(c.request(.delete, '/invites/${urllib.path_escape(code)}',
 		reason: params.reason

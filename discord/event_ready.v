@@ -36,7 +36,7 @@ pub fn ReadyEvent.parse(j json2.Any, base BaseEvent) !ReadyEvent {
 	match j {
 		map[string]json2.Any {
 			return ReadyEvent{
-				creator: base.creator
+				BaseEvent: base
 				user: User.parse(j['user']!)!
 				guilds: (j['guilds']! as []json2.Any).map(UnavailableGuild.parse(it)!)
 				session_id: j['session_id']! as string

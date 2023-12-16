@@ -108,11 +108,10 @@ pub:
 	// the public flags on a user's account
 	public_flags ?UserFlags
 	// data for the user's avatar decoration
-	avatar_decoration ?AvatarDecorationData
+	avatar_decoration_data ?AvatarDecorationData
 }
 
 pub fn User.parse(j json2.Any) !User {
-	dump(j)
 	match j {
 		map[string]json2.Any {
 			id := Snowflake.parse(j['id']!)!
@@ -135,8 +134,8 @@ pub fn User.parse(j json2.Any) !User {
 				none
 			}
 			accent_color := if i := j['accent_color'] {
-				if i is i64 {
-					?int(i)
+				if i !is json2.Null {
+					?int(i.int())
 				} else {
 					none
 				}
@@ -163,25 +162,20 @@ pub fn User.parse(j json2.Any) !User {
 				none
 			}
 			flags := if i := j['flags'] {
-				unsafe { ?UserFlags(i as i64) }
+				unsafe { ?UserFlags(i.int()) }
 			} else {
 				none
 			}
 			premium_type := if i := j['premium_type'] {
-				unsafe { ?PremiumType(i as i64) }
+				unsafe { ?PremiumType(i.int()) }
 			} else {
 				none
 			}
-			public_flags := if i := j['public_flags'] {
-				unsafe { ?UserFlags(i as i64) }
-			} else {
-				none
-			}
-			avatar_decoration := if o := j['avatar_decoration_data'] {
-				if o is json2.Null {
-					?AvatarDecorationData(none)
+			avatar_decoration_data := if o := j['avatar_decoration_data'] {
+				if o !is json2.Null {
+					?AvatarDecorationData(AvatarDecorationData.parse(o)!)
 				} else {
-					AvatarDecorationData.parse(o)!
+					none
 				}
 			} else {
 				none
@@ -202,8 +196,12 @@ pub fn User.parse(j json2.Any) !User {
 				email: email
 				flags: flags
 				premium_type: premium_type
-				public_flags: public_flags
-				avatar_decoration: avatar_decoration
+				public_flags: if i := j['public_flags'] {
+					unsafe { ?UserFlags(i.int()) }
+				} else {
+					none
+				}
+				avatar_decoration_data: avatar_decoration_data
 			}
 		}
 		else {
@@ -287,9 +285,9 @@ pub:
 	// the user's id
 	id Snowflake
 	// the user's username, not unique across the platform
-	username string
+	username ?string
 	// the user's Discord-tag
-	discriminator string
+	discriminator ?string
 	// the user's avatar hash
 	avatar ?string
 }
@@ -300,8 +298,16 @@ pub fn PartialUser.parse(j json2.Any) !PartialUser {
 			avatar := j['avatar']!
 			return PartialUser{
 				id: Snowflake.parse(j['id']!)!
-				username: j['username']! as string
-				discriminator: j['discriminator']! as string
+				username: if s := j['username'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				discriminator: if s := j['discriminator'] {
+					?string(s as string)
+				} else {
+					none
+				}
 				avatar: if avatar !is json2.Null {
 					?string(avatar as string)
 				} else {

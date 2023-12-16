@@ -18,12 +18,12 @@ pub:
 	typ            InteractionType
 	data           json2.Any
 	guild_id       ?Snowflake
-	// channel ?Channel
+	channel ?Channel
 	channel_id ?Snowflake
 	member     ?GuildMember
 	user       ?User
 	token      string
-	// message ?Message
+	message ?Message
 	app_permissions ?Permissions
 	locale          ?string
 	guild_locale    ?string

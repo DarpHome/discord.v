@@ -28,10 +28,10 @@ pub enum Intents {
 	auto_moderation_execution
 }
 
-pub fn combine_intents(list ...Intents) int {
-	return arrays.fold(list, 0, fn (x int, y Intents) int {
+pub fn combine_intents(list ...Intents) Intents {
+	return unsafe { Intents(arrays.fold(list, 0, fn (x int, y Intents) int {
 		return x | int(y)
-	})
+	})) }
 }
 
 pub const all_intents = combine_intents(.guilds, .guild_members, .guild_moderation, .guild_emojis_and_stickers,

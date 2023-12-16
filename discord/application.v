@@ -116,7 +116,7 @@ pub fn PartialApplication.parse(j json2.Any) !PartialApplication {
 				} else {
 					none
 				}
-				flags: unsafe { ApplicationFlags(j['flags']! as i64) }
+				flags: unsafe { ApplicationFlags(j['flags']!.int()) }
 				tags: if a := j['tags'] {
 					?[]string((a as []json2.Any).map(it as string))
 				} else {
@@ -157,7 +157,7 @@ pub fn TeamMember.parse(j json2.Any) !TeamMember {
 	match j {
 		map[string]json2.Any {
 			return TeamMember{
-				membership_state: unsafe { MembershipState(j['membership_state']! as i64) }
+				membership_state: unsafe { MembershipState(j['membership_state']!.int()) }
 				team_id: Snowflake.parse(j['team_id']!)!
 				user: PartialUser.parse(j['user']!)!
 				role: TeamMemberRole(j['role']! as string)
@@ -363,12 +363,12 @@ pub fn Application.parse(j json2.Any) !Application {
 					none
 				}
 				flags: if i := j['flags'] {
-					unsafe { ApplicationFlags(i as i64) }
+					unsafe { ApplicationFlags(i.int()) }
 				} else {
 					none
 				}
 				approximate_guild_count: if i := j['approximate_guild_count'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
@@ -378,12 +378,20 @@ pub fn Application.parse(j json2.Any) !Application {
 					none
 				}
 				interactions_endpoint_url: if s := j['interactions_endpoint_url'] {
-					?string(s as string)
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
 				} else {
 					none
 				}
 				role_connections_verification_url: if s := j['role_connections_verification_url'] {
-					?string(s as string)
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
 				} else {
 					none
 				}

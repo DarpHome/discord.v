@@ -49,6 +49,12 @@ pub fn (ar ActionRow) build() json2.Any {
 	}
 }
 
+pub fn ActionRow.parse(j map[string]json2.Any) !ActionRow {
+	return ActionRow{
+		components: (j['components']! as []json2.Any).map(Component.parse(it)!)
+	}
+}
+
 pub enum ButtonStyle {
 	// blurple
 	primary   = 1
@@ -91,7 +97,7 @@ pub:
 	// URL for link-style buttons
 	url ?string
 	// Whether the button is disabled (defaults to false)
-	disabled bool
+	disabled ?bool
 }
 
 fn (_ Button) is_component() {}
@@ -100,7 +106,6 @@ pub fn (b Button) build() json2.Any {
 	mut r := {
 		'type':     ComponentType.button.build()
 		'style':    b.style.build()
-		'disabled': b.disabled
 	}
 	if label := b.label {
 		r['label'] = label
@@ -114,7 +119,48 @@ pub fn (b Button) build() json2.Any {
 	if url := b.url {
 		r['url'] = url
 	}
+	if disabled := b.disabled {
+		r['disabled'] = disabled
+	}
 	return r
+}
+
+pub fn Button.parse(j json2.Any) !Button {
+	match j {
+		map[string]json2.Any {
+			return Button{
+				style: unsafe { ButtonStyle(j['style']!.int()) }
+				label: if s := j['label'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				emoji: if o := j['emoji'] {
+					?PartialEmoji(PartialEmoji.parse(o)!)
+				} else {
+					none
+				}
+				custom_id: if s := j['custom_id'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				url: if s := j['url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				disabled: if b := j['disabled'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected button to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 pub struct SelectOption {
@@ -148,6 +194,35 @@ pub fn (so SelectOption) build() json2.Any {
 	return r
 }
 
+pub fn SelectOption.parse(j json2.Any) !SelectOption {
+	match j {
+		map[string]json2.Any {
+			return SelectOption{
+				label: j['label']! as string
+				value: j['value']! as string
+				description: if s := j['description'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				emoji: if o := j['emoji'] {
+					?PartialEmoji(PartialEmoji.parse(o)!)
+				} else {
+					none
+				}
+				default: if b := j['default'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected select option to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct StringSelect {
 pub:
 	// ID for the select menu; max 100 characters
@@ -161,7 +236,7 @@ pub:
 	// Maximum number of items that can be chosen (defaults to 1); max 25
 	max_values ?int
 	// Whether select menu is disabled (defaults to false)
-	disabled bool
+	disabled ?bool
 }
 
 fn (_ StringSelect) is_component() {}
@@ -171,7 +246,6 @@ pub fn (ss StringSelect) build() json2.Any {
 		'type':      ComponentType.string_select.build()
 		'custom_id': ss.custom_id
 		'options':   ss.options.map(it.build())
-		'disabled':  ss.disabled
 	}
 	if placeholder := ss.placeholder {
 		r['placeholder'] = placeholder
@@ -182,91 +256,44 @@ pub fn (ss StringSelect) build() json2.Any {
 	if max_values := ss.max_values {
 		r['max_values'] = max_values
 	}
-	return r
-}
-
-pub struct UserSelect {
-pub:
-	// ID for the select menu; max 100 characters
-	custom_id string
-	// Placeholder text if nothing is selected; max 150 characters
-	placeholder ?string
-	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
-	default_values ?[]Snowflake
-	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
-	min_values ?int
-	// Maximum number of items that can be chosen (defaults to 1); max 25
-	max_values ?int
-	// Whether select menu is disabled (defaults to false)
-	disabled bool
-}
-
-fn (_ UserSelect) is_component() {}
-
-pub fn (us UserSelect) build() json2.Any {
-	mut r := {
-		'type':      ComponentType.user_select.build()
-		'custom_id': us.custom_id
-		'disabled':  us.disabled
-	}
-	if placeholder := us.placeholder {
-		r['placeholder'] = placeholder
-	}
-	if default_values := us.default_values {
-		r['default_values'] = default_values.map(json2.Any({
-			'id':   json2.Any(it.build())
-			'type': 'user'
-		}))
-	}
-	if min_values := us.min_values {
-		r['min_values'] = min_values
-	}
-	if max_values := us.max_values {
-		r['max_values'] = max_values
+	if disabled := ss.disabled {
+		r['disabled'] = disabled
 	}
 	return r
 }
 
-pub struct RoleSelect {
-pub:
-	// ID for the select menu; max 100 characters
-	custom_id string
-	// Placeholder text if nothing is selected; max 150 characters
-	placeholder ?string
-	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
-	default_values ?[]Snowflake
-	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
-	min_values ?int
-	// Maximum number of items that can be chosen (defaults to 1); max 25
-	max_values ?int
-	// Whether select menu is disabled (defaults to false)
-	disabled bool
-}
-
-fn (_ RoleSelect) is_component() {}
-
-pub fn (rs RoleSelect) build() json2.Any {
-	mut r := {
-		'type':      ComponentType.role_select.build()
-		'custom_id': rs.custom_id
-		'disabled':  rs.disabled
+pub fn StringSelect.parse(j json2.Any) !StringSelect {
+	match j {
+		map[string]json2.Any {
+			return StringSelect{
+				custom_id: j['custom_id']! as string
+				options: (j['options']! as []json2.Any).map(SelectOption.parse(it)!)
+				placeholder: if s := j['placeholder'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				min_values: if i := j['min_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				max_values: if i := j['max_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				disabled: if b := j['disabled'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected string select to be object, got ${j.type_name()}')
+		}
 	}
-	if placeholder := rs.placeholder {
-		r['placeholder'] = placeholder
-	}
-	if default_values := rs.default_values {
-		r['default_values'] = default_values.map(json2.Any({
-			'id':   json2.Any(it.build())
-			'type': 'role'
-		}))
-	}
-	if min_values := rs.min_values {
-		r['min_values'] = min_values
-	}
-	if max_values := rs.max_values {
-		r['max_values'] = max_values
-	}
-	return r
 }
 
 pub enum DefaultValueType {
@@ -294,10 +321,197 @@ pub fn (dv DefaultValue) build() json2.Any {
 	}
 }
 
+pub fn DefaultValue.parse(j json2.Any) !DefaultValue {
+	match j {
+		map[string]json2.Any {
+			typ := j['type']! as string
+			return DefaultValue{
+				id: Snowflake.parse(j['id']!)!
+				typ: match typ {
+					'user' { .user }
+					'role' { .role }
+					'channel' { .channel }
+					else {
+						return error('expected user/role/channel default value type, got ${typ}')
+					}
+				}
+			}
+		}
+		else {
+			return error('expected default value to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct UserSelect {
+pub:
+	// ID for the select menu; max 100 characters
+	custom_id string
+	// Placeholder text if nothing is selected; max 150 characters
+	placeholder ?string
+	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
+	default_values ?[]Snowflake
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to false)
+	disabled ?bool
+}
+
+fn (_ UserSelect) is_component() {}
+
+pub fn (us UserSelect) build() json2.Any {
+	mut r := {
+		'type':      ComponentType.user_select.build()
+		'custom_id': us.custom_id
+	}
+	if placeholder := us.placeholder {
+		r['placeholder'] = placeholder
+	}
+	if default_values := us.default_values {
+		r['default_values'] = default_values.map(json2.Any({
+			'id':   json2.Any(it.build())
+			'type': 'user'
+		}))
+	}
+	if min_values := us.min_values {
+		r['min_values'] = min_values
+	}
+	if max_values := us.max_values {
+		r['max_values'] = max_values
+	}
+	if disabled := us.disabled {
+		r['disabled'] = disabled
+	}
+	return r
+}
+
+pub fn UserSelect.parse(j json2.Any) !UserSelect {
+	match j {
+		map[string]json2.Any {
+			return UserSelect{
+				custom_id: j['custom_id']! as string
+				placeholder: if s := j['placeholder'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				default_values: if a := j['default_values'] {
+					?[]Snowflake((a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .user).map(it.id))
+				} else {
+					none
+				}
+				min_values: if i := j['min_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				max_values: if i := j['max_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				disabled: if b := j['disabled'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected string select to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct RoleSelect {
+pub:
+	// ID for the select menu; max 100 characters
+	custom_id string
+	// Placeholder text if nothing is selected; max 150 characters
+	placeholder ?string
+	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
+	default_values ?[]Snowflake
+	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
+	min_values ?int
+	// Maximum number of items that can be chosen (defaults to 1); max 25
+	max_values ?int
+	// Whether select menu is disabled (defaults to false)
+	disabled ?bool
+}
+
+fn (_ RoleSelect) is_component() {}
+
+pub fn (rs RoleSelect) build() json2.Any {
+	mut r := {
+		'type':      ComponentType.role_select.build()
+		'custom_id': rs.custom_id
+	}
+	if placeholder := rs.placeholder {
+		r['placeholder'] = placeholder
+	}
+	if default_values := rs.default_values {
+		r['default_values'] = default_values.map(json2.Any({
+			'id':   json2.Any(it.build())
+			'type': 'role'
+		}))
+	}
+	if min_values := rs.min_values {
+		r['min_values'] = min_values
+	}
+	if max_values := rs.max_values {
+		r['max_values'] = max_values
+	}
+	if disabled := rs.disabled {
+		r['disabled'] = disabled
+	}
+	return r
+}
+
+pub fn RoleSelect.parse(j json2.Any) !RoleSelect {
+	match j {
+		map[string]json2.Any {
+			return RoleSelect{
+				custom_id: j['custom_id']! as string
+				placeholder: if s := j['placeholder'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				default_values: if a := j['default_values'] {
+					?[]Snowflake((a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .role).map(it.id))
+				} else {
+					none
+				}
+				min_values: if i := j['min_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				max_values: if i := j['max_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				disabled: if b := j['disabled'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected string select to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct MentionableSelect {
 pub:
 	// ID for the select menu; max 100 characters
 	custom_id   string
+	// Placeholder text if nothing is selected; max 150 characters
 	placeholder ?string
 	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
 	default_values ?[]DefaultValue
@@ -306,7 +520,7 @@ pub:
 	// Maximum number of items that can be chosen (defaults to 1); max 25
 	max_values ?int
 	// Whether select menu is disabled (defaults to `false`)
-	disabled bool
+	disabled ?bool
 }
 
 fn (_ MentionableSelect) is_component() {}
@@ -315,7 +529,6 @@ pub fn (ms MentionableSelect) build() json2.Any {
 	mut r := {
 		'type':      ComponentType.mentionable_select.build()
 		'custom_id': ms.custom_id
-		'disabled':  ms.disabled
 	}
 	if placeholder := ms.placeholder {
 		r['placeholder'] = placeholder
@@ -329,7 +542,49 @@ pub fn (ms MentionableSelect) build() json2.Any {
 	if max_values := ms.max_values {
 		r['max_values'] = max_values
 	}
+	if disabled := ms.disabled {
+		r['disabled'] = disabled
+	}
 	return r
+}
+
+
+pub fn MentionableSelect.parse(j json2.Any) !MentionableSelect {
+	match j {
+		map[string]json2.Any {
+			return MentionableSelect{
+				custom_id: j['custom_id']! as string
+				placeholder: if s := j['placeholder'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				default_values: if a := j['default_values'] {
+					?[]DefaultValue((a as []json2.Any).map(DefaultValue.parse(it)!))
+				} else {
+					none
+				}
+				min_values: if i := j['min_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				max_values: if i := j['max_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				disabled: if b := j['disabled'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected string select to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 pub struct ChannelSelect {
@@ -347,7 +602,7 @@ pub:
 	// Maximum number of items that can be chosen (defaults to 1); max 25
 	max_values ?int
 	// Whether select menu is disabled (defaults to false)
-	disabled bool
+	disabled ?bool
 }
 
 fn (_ ChannelSelect) is_component() {}
@@ -356,7 +611,6 @@ pub fn (cs ChannelSelect) build() json2.Any {
 	mut r := {
 		'type':      ComponentType.channel_select.build()
 		'custom_id': cs.custom_id
-		'disabled':  cs.disabled
 	}
 	if channel_types := cs.channel_types {
 		r['channel_types'] = channel_types.map(json2.Any(int(it)))
@@ -376,7 +630,53 @@ pub fn (cs ChannelSelect) build() json2.Any {
 	if max_values := cs.max_values {
 		r['max_values'] = max_values
 	}
+	if disabled := cs.disabled {
+		r['disabled'] = disabled
+	}
 	return r
+}
+
+pub fn ChannelSelect.parse(j json2.Any) !ChannelSelect {
+	match j {
+		map[string]json2.Any {
+			return ChannelSelect{
+				custom_id: j['custom_id']! as string
+				channel_types: if a := j['channel_types'] {
+					?[]ChannelType((a as []json2.Any).map(unsafe { ChannelType(it as i64) }))
+				} else {
+					none
+				}
+				placeholder: if s := j['placeholder'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				default_values: if a := j['default_values'] {
+					?[]Snowflake((a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .channel).map(it.id))
+				} else {
+					none
+				}
+				min_values: if i := j['min_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				max_values: if i := j['max_values'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				disabled: if b := j['disabled'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected string select to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 pub enum TextInputStyle {
@@ -405,7 +705,7 @@ pub:
 	// Maximum input length for a text input; min 1, max 4000
 	max_length ?int
 	// Whether this component is required to be filled (defaults to `true`)
-	required bool = true
+	required ?bool
 	// Pre-filled value for this component; max 4000 characters
 	value ?string
 	// Custom placeholder text if the input is empty; max 100 characters
@@ -420,13 +720,15 @@ pub fn (ti TextInput) build() json2.Any {
 		'custom_id': ti.custom_id
 		'style':     ti.style.build()
 		'label':     ti.label
-		'required':  ti.required
 	}
 	if min_length := ti.min_length {
 		r['min_length'] = min_length
 	}
 	if max_length := ti.max_length {
 		r['max_length'] = max_length
+	}
+	if required := ti.required {
+		r['required'] = required
 	}
 	if value := ti.value {
 		r['value'] = value
@@ -435,4 +737,81 @@ pub fn (ti TextInput) build() json2.Any {
 		r['placeholder'] = placeholder
 	}
 	return r
+}
+
+pub fn TextInput.parse(j json2.Any) !TextInput {
+	match j {
+		map[string]json2.Any {
+			return TextInput{
+				custom_id: j['custom_id']! as string
+				style: unsafe { TextInputStyle(j['style']! as i64) }
+				label: j['label']! as string
+				min_length: if i := j['min_length'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				max_length: if i := j['max_length'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				required: if b := j['required'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				value: if s := j['value'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				placeholder: if s := j['placeholder'] {
+					?string(s as string)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected text input to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn Component.parse(j json2.Any) !Component {
+	match j {
+		map[string]json2.Any {
+			typ := unsafe { ComponentType(j['type']!.int()) }
+			match typ {
+				.action_row {
+					return ActionRow.parse(j)!
+				}
+				.button {
+					return Button.parse(j)!
+				}
+				.string_select {
+					return StringSelect.parse(j)!
+				}
+				.text_input {
+					return TextInput.parse(j)!
+				}
+				.user_select {
+					return UserSelect.parse(j)!
+				}
+				.role_select {
+					return RoleSelect.parse(j)!
+				}
+				.mentionable_select {
+					return MentionableSelect.parse(j)!
+				}
+				.channel_select {
+					return ChannelSelect.parse(j)!
+				}
+			}
+		}
+		else {
+			return error('expected component to be object, got ${j.type_name()}')
+		}
+	}
 }

@@ -41,8 +41,8 @@ pub fn Sticker.parse(j json2.Any) !Sticker {
 			name := j['name']! as string
 			description := j['description']!
 			tags := j['tags']! as string
-			typ := unsafe { StickerType(j['type']! as i64) }
-			format_type := unsafe { StickerFormatType(j['format_type']! as i64) }
+			typ := unsafe { StickerType(j['type']!.int()) }
+			format_type := unsafe { StickerFormatType(j['format_type']!.int()) }
 			available := if b := j['available'] {
 				?bool(b as bool)
 			} else {
@@ -79,6 +79,32 @@ pub fn Sticker.parse(j json2.Any) !Sticker {
 		}
 		else {
 			return error('expected sticker to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// The smallest amount of data required to render a sticker. A partial sticker object.
+pub struct StickerItem {
+pub:
+	// id of the sticker
+	id Snowflake
+	// name of the sticker
+	name string
+	// type of sticker format
+	format_type StickerFormatType
+}
+
+pub fn StickerItem.parse(j json2.Any) !StickerItem {
+	match j {
+		map[string]json2.Any{
+			return StickerItem{
+				id: Snowflake.parse(j['id']!)!
+				name: j['name']! as string
+				format_type: unsafe { StickerFormatType(j['format_type']!.int()) }
+			}
+		}
+		else {
+			return error('expected sticker item to be object, got ${j.type_name()}')
 		}
 	}
 }

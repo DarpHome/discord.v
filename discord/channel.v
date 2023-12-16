@@ -65,7 +65,7 @@ pub fn PartialChannel.parse(j json2.Any) !PartialChannel {
 		map[string]json2.Any {
 			return PartialChannel{
 				id: Snowflake.parse(j['id']!)!
-				typ: unsafe { ChannelType(j['type']! as i64) }
+				typ: unsafe { ChannelType(j['type']!.int()) }
 				name: j['name']! as string
 			}
 		}

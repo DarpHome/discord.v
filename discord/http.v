@@ -52,7 +52,14 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 	if res.status_code >= 400 {
 		status := res.status()
 		er := json2.raw_decode(res.body)! as map[string]json2.Any
-		code := int(er['code'] or { 0 } as i64)
+		tmp := er['code'] or { json2.Any(0) }
+		code := int(match tmp {
+			int { i64(tmp) }
+			i64 { tmp }
+			else {
+				return error('expected error.code to be int, got ${tmp.type_name()}')
+			}
+		})
 		message := er['message'] or { '' } as string
 		errors := er['errors'] or {
 			map[string]json2.Any{}
@@ -96,7 +103,7 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 					message: message
 					errors: errors
 					status: status
-					retry_after: er['retry_after']! as f32
+					retry_after: er['retry_after']!.f32()
 				}
 			}
 			else {

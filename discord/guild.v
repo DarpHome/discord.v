@@ -42,12 +42,12 @@ pub fn PartialGuild.parse(j json2.Any) !PartialGuild {
 				}
 				features: (j['features']! as []json2.Any).map(GuildFeature(it as string))
 				approximate_member_count: if i := j['approximate_member_count'] {
-					?int(i as int)
+					?int(i.int())
 				} else {
 					none
 				}
 				approximate_presence_count: if i := j['approximate_presence_count'] {
-					?int(i as int)
+					?int(i.int())
 				} else {
 					none
 				}
@@ -209,7 +209,7 @@ pub fn Role.parse(j json2.Any) !Role {
 			return Role{
 				id: Snowflake.parse(j['id']!)!
 				name: j['name']! as string
-				color: int(j['color']! as i64)
+				color: j['color']!.int()
 				hoist: j['hoist']! as bool
 				icon: if s := j['icon'] {
 					if s is string {
@@ -229,7 +229,7 @@ pub fn Role.parse(j json2.Any) !Role {
 				} else {
 					none
 				}
-				position: int(j['position']! as i64)
+				position: j['position']!.int()
 				permissions: Permissions.parse(j['permissions']!)!
 				managed: j['managed']! as bool
 				mentionable: j['mentionable']! as bool
@@ -475,7 +475,7 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				} else {
 					none
 				}
-				afk_timeout: j['afk_timeout']! as i64 * time.second
+				afk_timeout: j['afk_timeout']!.int() * time.second
 				widget_enabled: if b := j['widget_enabled'] {
 					?bool(b as bool)
 				} else {
@@ -490,12 +490,12 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				} else {
 					none
 				}
-				verification_level: unsafe { VerificationLevel(j['verification_level']! as i64) }
-				explicit_content_filter: unsafe { ExplicitContentFilterLevel(j['explicit_content_filter']! as i64) }
+				verification_level: unsafe { VerificationLevel(j['verification_level']!.int()) }
+				explicit_content_filter: unsafe { ExplicitContentFilterLevel(j['explicit_content_filter']!.int()) }
 				roles: (j['roles']! as []json2.Any).map(Role.parse(it)!)
 				emojis: (j['emojis']! as []json2.Any).map(Emoji.parse(it)!)
 				features: (j['features']! as []json2.Any).map(GuildFeature(it as string))
-				mfa_level: unsafe { MFALevel(j['mfa_level']! as i64) }
+				mfa_level: unsafe { MFALevel(j['mfa_level']!.int()) }
 				application_id: if application_id !is json2.Null {
 					?Snowflake(Snowflake.parse(application_id)!)
 				} else {
@@ -506,15 +506,15 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				} else {
 					none
 				}
-				system_channel_flags: unsafe { SystemChannelFlags(j['system_channel_flags']! as i64) }
+				system_channel_flags: unsafe { SystemChannelFlags(j['system_channel_flags']!.int()) }
 				rules_channel_id: if rules_channel_id !is json2.Null {
 					?Snowflake(Snowflake.parse(rules_channel_id)!)
 				} else {
 					none
 				}
 				max_presences: if i := j['max_presences'] {
-					if i is int {
-						?int(i)
+					if i !is json2.Null {
+						?int(i.int())
 					} else {
 						none
 					}
@@ -522,8 +522,8 @@ pub fn Guild.parse(j json2.Any) !Guild {
 					none
 				}
 				max_members: if i := j['max_members'] {
-					if i is int {
-						?int(i)
+					if i !is json2.Null {
+						?int(i.int())
 					} else {
 						none
 					}
@@ -545,9 +545,9 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				} else {
 					none
 				}
-				premium_tier: unsafe { PremiumTier(j['premium_tier']! as i64) }
+				premium_tier: unsafe { PremiumTier(j['premium_tier']!.int()) }
 				premium_subscription_count: if i := j['premium_subscription_count'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
@@ -558,22 +558,22 @@ pub fn Guild.parse(j json2.Any) !Guild {
 					none
 				}
 				max_video_channel_users: if i := j['max_video_channel_users'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
 				max_stage_video_channel_users: if i := j['max_stage_video_channel_users'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
 				approximate_member_count: if i := j['approximate_member_count'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
 				approximate_presence_count: if i := j['approximate_presence_count'] {
-					?int(i as i64)
+					?int(i.int())
 				} else {
 					none
 				}
@@ -582,7 +582,7 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				} else {
 					none
 				}
-				nsfw_level: unsafe { NSFWLevel(j['nsfw_level']! as i64) }
+				nsfw_level: unsafe { NSFWLevel(j['nsfw_level']!.int()) }
 				stickers: ((j['stickers'] or { []json2.Any{} }) as []json2.Any).map(Sticker.parse(it)!)
 				premium_progress_bar_enabled: j['premium_progress_bar_enabled']! as bool
 				safety_alerts_channel_id: if safety_alerts_channel_id !is json2.Null {
