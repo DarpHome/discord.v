@@ -13,6 +13,9 @@ jobs:
     #env:
     #  TEST_TOKEN: ${{ secrets.TEST_TOKEN }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Setup V
         uses: nocturlab/setup-vlang-action@v1
         with:
@@ -21,4 +24,4 @@ jobs:
 
 
       - name: Test library
-        run: cd ../../.. && ls -lh
+        run: v test .
