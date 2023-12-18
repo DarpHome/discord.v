@@ -37,7 +37,8 @@ fn main() {
 		},
 	]) or {}
 	c.events.on_interaction_create.listen(fn (event discord.InteractionCreateEvent) ! {
-		event.creator.create_interaction_response(event.interaction.id, event.interaction.token, discord.ModalInteractionResponse{
+		event.creator.create_interaction_response(event.interaction.id, event.interaction.token,
+			discord.ModalInteractionResponse{
 			title: 'Your favorites?'
 			custom_id: 'my_modal'
 			components: [
@@ -47,7 +48,7 @@ fn main() {
 							label: 'Favorite color'
 							custom_id: 'favorite_color'
 						},
-					],
+					]
 				},
 				discord.ActionRow{
 					components: [
@@ -55,7 +56,7 @@ fn main() {
 							label: 'Favorite programming language'
 							custom_id: 'favorite_programming_language'
 						},
-					],
+					]
 				},
 			]
 		})!

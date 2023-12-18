@@ -130,7 +130,6 @@ pub fn (ard AutocompleteResponseData) build() json2.Any {
 	}
 }
 
-
 pub struct ModalResponseData {
 pub:
 	// a developer-defined identifier for the modal, max 100 characters
@@ -175,8 +174,6 @@ pub fn (ir InteractionResponse) build() json2.Any {
 	}
 	return r
 }
-
-
 
 pub struct AutocompleteInteractionResponse {
 pub:
