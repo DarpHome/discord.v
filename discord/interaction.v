@@ -16,23 +16,80 @@ pub:
 	id              Snowflake
 	application_id  Snowflake
 	typ             InteractionType
-	data            json2.Any
+	data            ?json2.Any
 	guild_id        ?Snowflake
-	channel         ?Channel
+	channel         ?PartialChannel
 	channel_id      ?Snowflake
 	member          ?GuildMember
 	user            ?User
 	token           string
 	message         ?Message
 	app_permissions ?Permissions
-	locale          ?string
-	guild_locale    ?string
+	locale          ?Locale
+	guild_locale    ?Locale
 	entitlements    []Entitlement
 }
 
 pub fn Interaction.parse(j json2.Any) !Interaction {
-	// TODO: implement this
-	panic('TODO')
+	match j {
+		map[string]json2.Any {
+			return Interaction{
+				id: Snowflake.parse(j['id']!)!
+				application_id: Snowflake.parse(j['application_id']!)!
+				typ: unsafe { InteractionType(j['type']!.int()) }
+				data: if o := j['data'] {
+					?json2.Any(o)
+				} else {
+					none
+				}
+				guild_id: if s := j['guild_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+				channel: if o := j['channel'] {
+					?PartialChannel(PartialChannel.parse(o)!)
+				} else {
+					none
+				}
+				channel_id: if s := j['channel_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+				member: if o := j['member'] {
+					?GuildMember(GuildMember.parse(o)!)
+				} else {
+					none
+				}
+				user: if o := j['user'] {
+					?User(User.parse(o)!)
+				} else {
+					none
+				}
+				token: j['token']! as string
+				app_permissions: if s := j['app_permissions'] {
+					?Permissions(Permissions.parse(s)!)
+				} else {
+					none
+				}
+				locale: if s := j['locale'] {
+					?Locale(s as string)
+				} else {
+					none
+				}
+				guild_locale: if s := j['guild_locale'] {
+					?Locale(s as string)
+				} else {
+					none
+				}
+				entitlements: (j['entitlements']! as []json2.Any).map(Entitlement.parse(it)!)
+			}
+		}
+		else {
+			return error('expected interaction to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 pub enum InteractionResponseType {
@@ -59,6 +116,21 @@ pub interface InteractionResponseData {
 	build() json2.Any
 }
 
+pub struct AutocompleteResponseData {
+pub:
+	// autocomplete choices (max of 25 choices)
+	choices []ApplicationCommandOptionChoice
+}
+
+pub fn (_ AutocompleteResponseData) is_interaction_response_data() {}
+
+pub fn (ard AutocompleteResponseData) build() json2.Any {
+	return {
+		'choices': json2.Any(ard.choices.map(|choice| choice.build()))
+	}
+}
+
+
 pub struct ModalResponseData {
 pub:
 	// a developer-defined identifier for the modal, max 100 characters
@@ -75,7 +147,7 @@ pub fn (mrd ModalResponseData) build() json2.Any {
 	return {
 		'custom_id':  json2.Any(mrd.custom_id)
 		'title':      mrd.title
-		'components': mrd.components.map(it.build())
+		'components': mrd.components.map(|component| component.build())
 	}
 }
 
@@ -104,6 +176,25 @@ pub fn (ir InteractionResponse) build() json2.Any {
 	return r
 }
 
+
+
+pub struct AutocompleteInteractionResponse {
+pub:
+	// autocomplete choices (max of 25 choices)
+	choices []ApplicationCommandOptionChoice
+}
+
+fn (_ AutocompleteInteractionResponse) is_interaction_response() {}
+
+pub fn (air AutocompleteInteractionResponse) build() json2.Any {
+	return {
+		'type': json2.Any(int(InteractionResponseType.application_command_autocomplete_result))
+		'data': {
+			'choices': json2.Any(air.choices.map(|choice| choice.build()))
+		}
+	}
+}
+
 pub struct ModalInteractionResponse {
 pub:
 	// a developer-defined identifier for the modal, max 100 characters
@@ -122,7 +213,7 @@ pub fn (mir ModalInteractionResponse) build() json2.Any {
 		'data': {
 			'custom_id':  json2.Any(mir.custom_id)
 			'title':      mir.title
-			'components': mir.components.map(it.build())
+			'components': mir.components.map(|component| component.build())
 		}
 	}
 }
@@ -131,9 +222,4 @@ pub fn (c Client) create_interaction_response(interaction_id Snowflake, interact
 	c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
 		json: response.build()
 	)!
-}
-
-pub struct InteractionCreateEvent {
-pub:
-	interaction Interaction
 }

@@ -36,6 +36,30 @@ fn main() {
 			]
 		},
 	]) or {}
+	c.events.on_interaction_create.listen(fn (event discord.InteractionCreateEvent) ! {
+		event.creator.create_interaction_response(event.interaction.id, event.interaction.token, discord.ModalInteractionResponse{
+			title: 'Your favorites?'
+			custom_id: 'my_modal'
+			components: [
+				discord.ActionRow{
+					components: [
+						discord.TextInput{
+							label: 'Favorite color'
+							custom_id: 'favorite_color'
+						},
+					],
+				},
+				discord.ActionRow{
+					components: [
+						discord.TextInput{
+							label: 'Favorite programming language'
+							custom_id: 'favorite_programming_language'
+						},
+					],
+				},
+			]
+		})!
+	})
 	c.events.on_ready.listen(fn (event discord.ReadyEvent) ! {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})

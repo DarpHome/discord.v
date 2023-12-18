@@ -38,7 +38,6 @@ fn (mut c GatewayClient) recv() !WSMessage {
 }
 
 fn (mut c GatewayClient) send(message WSMessage) ! {
-	c.logger.debug('Sending message: ')
 	ws_send_message(mut c.ws, message)!
 }
 
@@ -50,9 +49,9 @@ fn (mut c GatewayClient) heartbeat() ! {
 }
 
 fn (mut c GatewayClient) error_logger() fn (int, IError) {
-	mut cr := &mut c
-	return fn [mut cr] (i int, e IError) {
-		cr.logger.error('Error on listener ${i}: ${e}')
+	mut lr := &mut c.logger
+	return fn [mut lr] (i int, e IError) {
+		lr.error('Error on listener ${i}: ${e}')
 	}
 }
 

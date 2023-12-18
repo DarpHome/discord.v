@@ -171,7 +171,7 @@ pub:
 }
 
 pub fn (p Presence) build() json2.Any {
-	return dump({
+	return {
 		'since':      if since := p.since {
 			json2.Any(since.unix_time_milli())
 		} else {
@@ -180,5 +180,5 @@ pub fn (p Presence) build() json2.Any {
 		'activities': p.activities.map(it.build())
 		'status':     p.status.build()
 		'afk':        p.afk
-	})
+	}
 }
