@@ -454,7 +454,7 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				recipients: if a := j['recipients'] {
-					(a as []json2.Any).map(User.parse(it)!)
+					?[]User((a as []json2.Any).map(User.parse(it)!))
 				} else {
 					none
 				}
