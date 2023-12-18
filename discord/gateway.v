@@ -300,6 +300,7 @@ pub fn (mut c GatewayClient) run() ! {
 }
 
 pub fn (mut c GatewayClient) launch() ! {
+	c.logger.debug('\nRunning with user-agent: ${c.user_agent}')
 	c.init()!
 	c.run()!
 }

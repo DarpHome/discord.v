@@ -5,7 +5,8 @@
 
 Discord API implementation library written in V
 
-[Support server](https://discord.gg/PhSXRegtKj)
+[Support server](https://discord.gg/k7rvtQ43cu)
+[Documentation](https://darphome.github.io/discord.v/discord.html)
 
 </div>
 

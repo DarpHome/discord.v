@@ -11,7 +11,7 @@ pub:
 	device  string = 'discord.v'
 }
 
-pub const default_user_agent = 'DiscordBot (https://github.com/DarpHome/discord.v, 10.0.0) V ${@VHASH}'
+pub const default_user_agent = 'DiscordBot (https://github.com/DarpHome/discord.v, 1.10.0) V ${@VHASH}'
 
 @[heap]
 pub struct Client {
