@@ -104,6 +104,8 @@ pub enum SortOrderType {
 	creation_date
 }
 
+pub const sentinel_sort_order_type = unsafe { SortOrderType(sentinel_int) }
+
 pub enum ForumLayoutType {
 	// No default has been set for forum channel
 	not_set
@@ -126,9 +128,9 @@ pub:
 	// either 0 (role) or 1 (member)
 	typ PermissionOverwriteType
 	// permission bit set
-	allow Permissions
+	allow Permissions = sentinel_permissions
 	// permission bit set
-	deny Permissions
+	deny Permissions = sentinel_permissions
 }
 
 pub fn PermissionOverwrite.parse(j json2.Any) !PermissionOverwrite {
@@ -146,6 +148,22 @@ pub fn PermissionOverwrite.parse(j json2.Any) !PermissionOverwrite {
 		}
 	}
 }
+
+pub fn (po PermissionOverwrite) build() json2.Any {
+	mut r := {
+		'id': json2.Any(po.id.build())
+		'type': int(po.typ)
+	}
+	if !is_sentinel(po.allow) {
+		r['allow'] = u64(po.allow).str()
+	}
+	if !is_sentinel(po.deny) {
+		r['deny'] = u64(po.deny).str()
+	}
+	return r
+}
+
+pub const sentinel_permission_overwrites = []PermissionOverwrite{}
 
 pub struct ThreadMetadata {
 pub:
@@ -277,6 +295,47 @@ pub fn ForumTag.parse(j json2.Any) !ForumTag {
 	}
 }
 
+pub struct EditForumTag {
+pub:
+	// the id of the tag
+	id Snowflake
+	// the name of the tag (0-20 characters)
+	name ?string
+	// whether this tag can only be added to or removed from threads by a member with the MANAGE_THREADS permission
+	moderated ?bool
+	// the id of a guild's custom emoji
+	emoji_id ?Snowflake = sentinel_snowflake
+	// the unicode character of the emoji
+	emoji_name ?string = sentinel_string
+}
+
+pub fn (eft EditForumTag) build() json2.Any {
+	mut r := {
+		'id': json2.Any(eft.id.build())
+	}
+	if name := eft.name {
+		r['name'] = name
+	}
+	if moderated := eft.moderated {
+		r['moderated'] = moderated
+	}
+	if emoji_id := eft.emoji_id {
+		if !is_sentinel(emoji_id) {
+			r['emoji_id'] = emoji_id.build()
+		}
+	} else {
+		r['emoji_id'] = json2.null
+	}
+	if emoji_name := eft.emoji_name {
+		if !is_sentinel(emoji_name) {
+			r['emoji_name'] = emoji_name
+		}
+	} else {
+		r['emoji_name'] = json2.null
+	}
+	return r
+}
+
 pub struct DefaultReaction {
 pub:
 	// the id of a guild's custom emoji
@@ -307,6 +366,29 @@ pub fn DefaultReaction.parse(j json2.Any) !DefaultReaction {
 			return error('expected default reaction to be object, got ${j.type_name()}')
 		}
 	}
+}
+
+pub fn (dr DefaultReaction) build() json2.Any {
+	return {
+		'emoji_id': if s := dr.emoji_id {
+			json2.Any(s.build())
+		} else {
+			json2.null
+		}
+		'emoji_name': if s := dr.emoji_name {
+			json2.Any(s)
+		} else {
+			json2.null
+		}
+	}
+}
+
+pub const sentinel_default_reaction = DefaultReaction{emoji_id: sentinel_snowflake}
+
+pub fn (dr DefaultReaction) is_sentinel() bool {
+	return is_sentinel(dr.emoji_id or {
+		return false
+	})
 }
 
 pub struct Channel {
@@ -614,10 +696,10 @@ pub interface EditChannelParams {
 @[params]
 pub struct EditGroupDMChannelParams {
 pub:
+	reason ?string
 	// 1-100 character channel name
 	name   ?string
 	icon   ?Image
-	reason ?string
 }
 
 fn (_ EditGroupDMChannelParams) is_edit_channel_params() {}
@@ -629,6 +711,162 @@ pub fn (params EditGroupDMChannelParams) build() json2.Any {
 	}
 	if icon := params.icon {
 		r['icon'] = icon.build()
+	}
+	return r
+}
+
+@[params]
+pub struct EditGuildChannelParams {
+pub:
+	reason ?string
+	// 1-100 character channel name
+	name ?string
+	// the type of channel; only conversion between text and announcement is supported and only in guilds with the "NEWS" feature
+	typ ?ChannelType
+	// the position of the channel in the left-hand listing
+	position ?int = sentinel_int
+	// 0-1024 character channel topic (0-4096 characters for GUILD_FORUM and GUILD_MEDIA channels)	
+	topic ?string = sentinel_string
+	// whether the channel is nsfw
+	nsfw ?bool = sentinel_bool
+	// amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected
+	rate_limit_per_user ?time.Duration = sentinel_duration
+	// the bitrate (in bits) of the voice or stage channel; min 8000
+	bitrate ?int = sentinel_int
+	// the user limit of the voice or stage channel, max 99 for voice channels and 10,000 for stage channels (0 refers to no limit)
+	user_limit ?int = sentinel_int
+	// channel or category-specific permissions
+	permission_overwrites ?[]PermissionOverwrite = sentinel_permission_overwrites
+	// id of the new parent category for a channel
+	parent_id ?Snowflake = sentinel_snowflake
+	// channel voice region id, automatic when set to none
+	rtc_region ?string = sentinel_string
+	// the camera video quality mode of the voice channel
+	video_quality_mode ?VideoQualityMode
+	// the default duration that the clients use (not the API) for newly created threads in the channel, in minutes, to automatically archive the thread after recent activity
+	default_auto_archive_duration ?time.Duration = sentinel_duration
+	// channel flags combined as a bitfield. Currently only REQUIRE_TAG (1 << 4) is supported by GUILD_FORUM and GUILD_MEDIA channels. HIDE_MEDIA_DOWNLOAD_OPTIONS (1 << 15) is supported only by GUILD_MEDIA channels
+	flags ?ChannelFlags
+	// the set of tags that can be used in a GUILD_FORUM or a GUILD_MEDIA channel; limited to 20
+	available_tags ?[]EditForumTag
+	// the emoji to show in the add reaction button on a thread in a GUILD_FORUM or a GUILD_MEDIA channel
+	default_reaction_emoji ?DefaultReaction = sentinel_default_reaction
+	// the initial rate_limit_per_user to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update.
+	default_thread_rate_limit_per_user ?time.Duration
+	// the default sort order type used to order posts in GUILD_FORUM and GUILD_MEDIA channels
+	default_sort_order ?SortOrderType
+	// the default forum layout type used to display posts in GUILD_FORUM channels
+	default_forum_layout ?ForumLayoutType
+}
+
+fn (_ EditGuildChannelParams) is_edit_channel_params() {}
+
+pub fn (params EditGuildChannelParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if name := params.name {
+		r['name'] = name
+	}
+	if typ := params.typ {
+		r['type'] = int(typ)
+	}
+	if position := params.position {
+		if !is_sentinel(position) {
+			r['position'] = position
+		}
+	} else {
+		r['position'] = json2.null
+	}
+	if topic := params.topic {
+		if !is_sentinel(topic) {
+			r['topic'] = topic
+		}
+	} else {
+		r['topic'] = json2.null
+	}
+	if nsfw := params.nsfw {
+		if !is_sentinel(nsfw) {
+			r['nsfw'] = nsfw
+		}
+	} else {
+		r['nsfw'] = json2.null
+	}
+	if rate_limit_per_user := params.rate_limit_per_user {
+		if !is_sentinel(rate_limit_per_user) {
+			r['rate_limit_per_user'] = rate_limit_per_user / time.minute
+		}
+	} else {
+		r['rate_limit_per_user'] = json2.null
+	}
+	if bitrate := params.bitrate {
+		if !is_sentinel(bitrate) {
+			r['bitrate'] = bitrate
+		}
+	} else {
+		r['bitrate'] = json2.null
+	}
+	if user_limit := params.user_limit {
+		if !is_sentinel(user_limit) {
+			r['user_limit'] = user_limit
+		}
+	} else {
+		r['user_limit'] = json2.null
+	}
+	if permission_overwrites := params.permission_overwrites {
+		if permission_overwrites.data != sentinel_permission_overwrites.data {
+			r['permission_overwrites'] = permission_overwrites.map(|po| po.build())
+		}
+	} else {
+		r['permission_overwrites'] = json2.null
+	}
+	if parent_id := params.parent_id {
+		if !is_sentinel(parent_id) {
+			r['parent_id'] = parent_id.build()
+		}
+	} else {
+		r['parent_id'] = json2.null
+	}
+	if rtc_region := params.rtc_region {
+		if !is_sentinel(rtc_region) {
+			r['rtc_region'] = rtc_region
+		}
+	} else {
+		r['rtc_region'] = json2.null
+	}
+	if video_quality_mode := params.video_quality_mode {
+		r['video_quality_mode'] = int(video_quality_mode)
+	}
+	if default_auto_archive_duration := params.default_auto_archive_duration {
+		if !is_sentinel(default_auto_archive_duration) {
+			r['default_auto_archive_duration'] = default_auto_archive_duration / time.minute
+		}
+	} else {
+		r['default_auto_archive_duration'] = json2.null
+	}
+	if flags := params.flags {
+		r['flags'] = int(flags)
+	}
+	if available_tags := params.available_tags {
+		r['available_tags'] = available_tags.map(|eft| eft.build())
+	}
+	if default_reaction_emoji := params.default_reaction_emoji {
+		if !default_reaction_emoji.is_sentinel() {
+			r['default_reaction_emoji'] = default_reaction_emoji.build()
+		}
+	} else {
+		r['default_reaction_emoji'] = json2.null
+	}
+	if default_thread_rate_limit_per_user := params.default_thread_rate_limit_per_user {
+		r['default_thread_rate_limit_per_user'] = default_thread_rate_limit_per_user / time.second
+	}
+	if default_sort_order := params.default_sort_order {
+		if default_sort_order != sentinel_sort_order_type {
+			r['default_sort_order'] = int(default_sort_order)
+		}
+	} else {
+		r['default_sort_order'] = json2.null
+	}
+	if default_forum_layout := params.default_forum_layout {
+		r['default_forum_layout'] = int(default_forum_layout)
 	}
 	return r
 }
@@ -686,6 +924,11 @@ pub fn (c Client) edit_channel(channel_id Snowflake, params EditChannelParams) !
 
 // Update a group DM channel's settings. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters. All JSON parameters are optional.
 pub fn (c Client) edit_group_dm_channel(channel_id Snowflake, params EditGroupDMChannelParams) !Channel {
+	return c.edit_channel(channel_id, params)!
+}
+
+// Update a guild channel's settings. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters. All JSON parameters are optional.
+pub fn (c Client) edit_guild_channel(channel_id Snowflake, params EditGuildChannelParams) !Channel {
 	return c.edit_channel(channel_id, params)!
 }
 

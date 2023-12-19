@@ -16,9 +16,10 @@ pub const sentinel_string = 'darp'
 pub const sentinel_number = math.nan()
 
 pub const sentinel_snowflake = Snowflake(0)
-pub const sentinel_permissions = unsafe { Permissions(math.max_u64) }
+pub const sentinel_permissions = unsafe { Permissions(max_u64) }
 pub const sentinel_image = Image(NoneImage{})
 pub const sentinel_duration = time.infinite
+pub const sentinel_bool = unsafe { bool(126) }
 
 pub struct None {}
 
@@ -50,6 +51,8 @@ pub fn is_sentinel[T](target T) bool {
 		return target == None{}
 	} $else $if T is time.Duration {
 		return target == discord.sentinel_duration
+	} $else $if T is bool {
+		return target == discord.sentinel_bool
 	} $else {
 		$compile_error('Unknown type')
 	}
