@@ -96,6 +96,18 @@ pub enum MessageFlags {
 pub struct MessageInteraction {
 }
 
+pub struct RoleSubscriptionData {
+pub:
+	// the id of the [Sku](#Sku) and listing that the user is subscribed to
+	role_subscription_listing_id Snowflake
+	// the name of the tier that the user is subscribed to
+	tier_name string
+	// the cumulative number of months that the user has been subscribed for
+	total_months_subscribed int
+	// whether this notification is for a renewal rather than a new purchase
+	is_renewal bool
+}
+
 pub struct Message {
 pub:
 	id                 Snowflake
@@ -125,9 +137,9 @@ pub:
 	interaction        ?MessageInteraction
 	thread             ?Channel
 	components         ?[]Component
-
-	guild_id ?Snowflake
-	member   ?GuildMember
+	sticker_items      ?[]StickerItem
+	position ?int
+	role_subscription_data ?RoleSubscriptionData
 }
 
 pub fn (c Client) delete_message(channel_id Snowflake, id Snowflake, config ReasonParam) ! {

@@ -919,6 +919,7 @@ pub fn (params EditThreadChannelParams) build() json2.Any {
 pub fn (c Client) edit_channel(channel_id Snowflake, params EditChannelParams) !Channel {
 	return Channel.parse(json2.raw_decode(c.request(.patch, '/channels/${urllib.path_escape((channel_id.build()))}',
 		reason: params.reason
+		json: params.build()
 	)!.body)!)!
 }
 
