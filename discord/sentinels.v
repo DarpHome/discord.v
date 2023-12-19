@@ -21,7 +21,8 @@ pub const sentinel_image = Image(NoneImage{})
 pub const sentinel_duration = time.infinite
 
 pub struct None {}
-pub type Option[T] = T | None
+
+pub type Option[T] = None | T
 
 // is_sentinel reports whether `target` is sentinel
 pub fn is_sentinel[T](target T) bool {
@@ -48,7 +49,7 @@ pub fn is_sentinel[T](target T) bool {
 	} $else $if T is Option {
 		return target == None{}
 	} $else $if T is time.Duration {
-		return target == sentinel_duration
+		return target == discord.sentinel_duration
 	} $else {
 		$compile_error('Unknown type')
 	}

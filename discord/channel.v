@@ -615,12 +615,13 @@ pub interface EditChannelParams {
 pub struct EditGroupDMChannelParams {
 pub:
 	// 1-100 character channel name
-	name ?string
-	icon ?Image
+	name   ?string
+	icon   ?Image
 	reason ?string
 }
 
 fn (_ EditGroupDMChannelParams) is_edit_channel_params() {}
+
 pub fn (params EditGroupDMChannelParams) build() json2.Any {
 	mut r := map[string]json2.Any{}
 	if name := params.name {
@@ -655,6 +656,7 @@ pub:
 }
 
 fn (_ EditThreadChannelParams) is_edit_channel_params() {}
+
 pub fn (params EditThreadChannelParams) build() json2.Any {
 	mut r := map[string]json2.Any{}
 	if name := params.name {
@@ -691,7 +693,6 @@ pub fn (c Client) edit_group_dm_channel(channel_id Snowflake, params EditGroupDM
 pub fn (c Client) edit_thread_channel(channel_id Snowflake, params EditThreadChannelParams) !Channel {
 	return c.edit_channel(channel_id, params)!
 }
-
 
 // Delete a channel, or close a private message. Requires the `MANAGE_CHANNELS` permission for the guild, or `MANAGE_THREADS` if
 // the channel is a thread. Deleting a category does not delete its child channels; they will have their parent_id removed and a
