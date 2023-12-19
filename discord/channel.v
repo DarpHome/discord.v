@@ -151,7 +151,7 @@ pub fn PermissionOverwrite.parse(j json2.Any) !PermissionOverwrite {
 
 pub fn (po PermissionOverwrite) build() json2.Any {
 	mut r := {
-		'id': json2.Any(po.id.build())
+		'id':   json2.Any(po.id.build())
 		'type': int(po.typ)
 	}
 	if !is_sentinel(po.allow) {
@@ -370,7 +370,7 @@ pub fn DefaultReaction.parse(j json2.Any) !DefaultReaction {
 
 pub fn (dr DefaultReaction) build() json2.Any {
 	return {
-		'emoji_id': if s := dr.emoji_id {
+		'emoji_id':   if s := dr.emoji_id {
 			json2.Any(s.build())
 		} else {
 			json2.null
@@ -383,12 +383,12 @@ pub fn (dr DefaultReaction) build() json2.Any {
 	}
 }
 
-pub const sentinel_default_reaction = DefaultReaction{emoji_id: sentinel_snowflake}
+pub const sentinel_default_reaction = DefaultReaction{
+	emoji_id: sentinel_snowflake
+}
 
 pub fn (dr DefaultReaction) is_sentinel() bool {
-	return is_sentinel(dr.emoji_id or {
-		return false
-	})
+	return is_sentinel(dr.emoji_id or { return false })
 }
 
 pub struct Channel {
@@ -698,8 +698,8 @@ pub struct EditGroupDMChannelParams {
 pub:
 	reason ?string
 	// 1-100 character channel name
-	name   ?string
-	icon   ?Image
+	name ?string
+	icon ?Image
 }
 
 fn (_ EditGroupDMChannelParams) is_edit_channel_params() {}
@@ -736,7 +736,7 @@ pub:
 	// the user limit of the voice or stage channel, max 99 for voice channels and 10,000 for stage channels (0 refers to no limit)
 	user_limit ?int = sentinel_int
 	// channel or category-specific permissions
-	permission_overwrites ?[]PermissionOverwrite = sentinel_permission_overwrites
+	permission_overwrites ?[]PermissionOverwrite = discord.sentinel_permission_overwrites
 	// id of the new parent category for a channel
 	parent_id ?Snowflake = sentinel_snowflake
 	// channel voice region id, automatic when set to none
@@ -750,7 +750,7 @@ pub:
 	// the set of tags that can be used in a GUILD_FORUM or a GUILD_MEDIA channel; limited to 20
 	available_tags ?[]EditForumTag
 	// the emoji to show in the add reaction button on a thread in a GUILD_FORUM or a GUILD_MEDIA channel
-	default_reaction_emoji ?DefaultReaction = sentinel_default_reaction
+	default_reaction_emoji ?DefaultReaction = discord.sentinel_default_reaction
 	// the initial rate_limit_per_user to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update.
 	default_thread_rate_limit_per_user ?time.Duration
 	// the default sort order type used to order posts in GUILD_FORUM and GUILD_MEDIA channels
@@ -812,7 +812,7 @@ pub fn (params EditGuildChannelParams) build() json2.Any {
 		r['user_limit'] = json2.null
 	}
 	if permission_overwrites := params.permission_overwrites {
-		if permission_overwrites.data != sentinel_permission_overwrites.data {
+		if permission_overwrites.data != discord.sentinel_permission_overwrites.data {
 			r['permission_overwrites'] = permission_overwrites.map(|po| po.build())
 		}
 	} else {
@@ -859,7 +859,7 @@ pub fn (params EditGuildChannelParams) build() json2.Any {
 		r['default_thread_rate_limit_per_user'] = default_thread_rate_limit_per_user / time.second
 	}
 	if default_sort_order := params.default_sort_order {
-		if default_sort_order != sentinel_sort_order_type {
+		if default_sort_order != discord.sentinel_sort_order_type {
 			r['default_sort_order'] = int(default_sort_order)
 		}
 	} else {
