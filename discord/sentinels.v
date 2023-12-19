@@ -18,6 +18,10 @@ pub const sentinel_number = math.nan()
 pub const sentinel_snowflake = Snowflake(0)
 pub const sentinel_permissions = unsafe { Permissions(math.max_u64) }
 pub const sentinel_image = Image(NoneImage{})
+pub const sentinel_duration = time.infinite
+
+pub struct None {}
+pub type Option[T] = T | None
 
 // is_sentinel reports whether `target` is sentinel
 pub fn is_sentinel[T](target T) bool {
@@ -39,6 +43,12 @@ pub fn is_sentinel[T](target T) bool {
 		return target.str == discord.sentinel_string.str
 	} $else $if T is f32 || T is f64 {
 		return math.is_nan(f64(target))
+	} $else $if T is None {
+		return true
+	} $else $if T is Option {
+		return target == None{}
+	} $else $if T is time.Duration {
+		return target == sentinel_duration
 	} $else {
 		$compile_error('Unknown type')
 	}

@@ -605,10 +605,93 @@ pub fn (c Client) fetch_channel(channel_id Snowflake) !Channel {
 	return Channel.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape((channel_id.build()))}')!.body)!)!
 }
 
-// Update a channel's settings. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters. All JSON parameters are optional.
-pub fn (c Client) edit_channel(channel_id Snowflake) !Channel {
-	return error('TODO')
+pub interface EditChannelParams {
+	reason ?string
+	is_edit_channel_params()
+	build() json2.Any
 }
+
+@[params]
+pub struct EditGroupDMChannelParams {
+pub:
+	// 1-100 character channel name
+	name ?string
+	icon ?Image
+	reason ?string
+}
+
+fn (_ EditGroupDMChannelParams) is_edit_channel_params() {}
+pub fn (params EditGroupDMChannelParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if name := params.name {
+		r['name'] = name
+	}
+	if icon := params.icon {
+		r['icon'] = icon.build()
+	}
+	return r
+}
+
+@[params]
+pub struct EditThreadChannelParams {
+pub:
+	reason ?string
+	// 1-100 character channel name
+	name ?string
+	// whether the thread is archived
+	archived ?bool
+	// the thread will stop showing in the channel list after auto_archive_duration minutes of inactivity, can be set to: 60, 1440, 4320, 10080
+	auto_archive_duration ?time.Duration = sentinel_duration
+	// whether the thread is locked; when a thread is locked, only users with MANAGE_THREADS can unarchive it
+	locked ?bool
+	// whether non-moderators can add other non-moderators to a thread; only available on private threads
+	invitable ?bool
+	// amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
+	rate_limit_per_user ?int = sentinel_int
+	// channel flags combined as a bitfield; PINNED can only be set for threads in forum and media channels
+	flags ?ChannelFlags
+	// the IDs of the set of tags that have been applied to a thread in a GUILD_FORUM or a GUILD_MEDIA channel; limited to 5
+	applied_tags ?[]Snowflake
+}
+
+fn (_ EditThreadChannelParams) is_edit_channel_params() {}
+pub fn (params EditThreadChannelParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if name := params.name {
+		r['name'] = name
+	}
+	if archived := params.archived {
+		r['archived'] = archived
+	}
+	if auto_archive_duration := params.auto_archive_duration {
+		r['auto_archive_duration'] = auto_archive_duration / time.minute
+	}
+	if flags := params.flags {
+		r['flags'] = int(flags)
+	}
+	if applied_tags := params.applied_tags {
+		r['applied_tags'] = applied_tags.map(|s| json2.Any(s.build()))
+	}
+	return r
+}
+
+// Update a channel's settings. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters. All JSON parameters are optional.
+pub fn (c Client) edit_channel(channel_id Snowflake, params EditChannelParams) !Channel {
+	return Channel.parse(json2.raw_decode(c.request(.patch, '/channels/${urllib.path_escape((channel_id.build()))}',
+		reason: params.reason
+	)!.body)!)!
+}
+
+// Update a group DM channel's settings. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters. All JSON parameters are optional.
+pub fn (c Client) edit_group_dm_channel(channel_id Snowflake, params EditGroupDMChannelParams) !Channel {
+	return c.edit_channel(channel_id, params)!
+}
+
+// Update a thread's settings. Returns a channel on success, and a 400 BAD REQUEST on invalid parameters. All JSON parameters are optional.
+pub fn (c Client) edit_thread_channel(channel_id Snowflake, params EditThreadChannelParams) !Channel {
+	return c.edit_channel(channel_id, params)!
+}
+
 
 // Delete a channel, or close a private message. Requires the `MANAGE_CHANNELS` permission for the guild, or `MANAGE_THREADS` if
 // the channel is a thread. Deleting a category does not delete its child channels; they will have their parent_id removed and a
