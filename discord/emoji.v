@@ -156,7 +156,8 @@ pub fn Reaction.parse(j json2.Any) !Reaction {
 				me: j['me']! as bool
 				me_burst: j['me_burst']! as bool
 				emoji: PartialEmoji.parse(j['emoji']!)!
-				burst_colors: (j['burst_colors']! as []json2.Any).map(int(strconv.parse_uint((it as string)[1..], 16, 24)!))
+				burst_colors: (j['burst_colors']! as []json2.Any).map(int(strconv.parse_uint((it as string)[1..],
+					16, 24)!))
 			}
 		}
 		else {

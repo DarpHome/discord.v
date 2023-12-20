@@ -712,17 +712,17 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 
 pub struct PartialGuildMember {
 pub:
-	user ?User
-	nick ?string
-	avatar ?string
-	roles ?[]Snowflake
-	joined_at ?time.Time
-	premium_since ?time.Time
-	deaf ?bool
-	mute ?bool
-	flags ?GuildMemberFlags
-	pending ?bool
-	permissions ?Permissions
+	user                         ?User
+	nick                         ?string
+	avatar                       ?string
+	roles                        ?[]Snowflake
+	joined_at                    ?time.Time
+	premium_since                ?time.Time
+	deaf                         ?bool
+	mute                         ?bool
+	flags                        ?GuildMemberFlags
+	pending                      ?bool
+	permissions                  ?Permissions
 	communication_disabled_until ?time.Time
 }
 

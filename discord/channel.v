@@ -754,7 +754,7 @@ pub:
 	// the initial rate_limit_per_user to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update.
 	default_thread_rate_limit_per_user ?time.Duration
 	// the default sort order type used to order posts in GUILD_FORUM and GUILD_MEDIA channels
-	default_sort_order ?SortOrderType = sentinel_sort_order_type
+	default_sort_order ?SortOrderType = discord.sentinel_sort_order_type
 	// the default forum layout type used to display posts in GUILD_FORUM channels
 	default_forum_layout ?ForumLayoutType
 }

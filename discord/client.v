@@ -88,5 +88,6 @@ pub fn bearer(token string, config ClientConfig) Client {
 
 // `oauth2_app` accepts client ID and secret and returns Client with Basic token
 pub fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig) Client {
-	return make_client('Basic ' + base64.encode_str('${client_id.build()}:${client_secret}'), config)
+	return make_client('Basic ' + base64.encode_str('${client_id.build()}:${client_secret}'),
+		config)
 }

@@ -441,7 +441,7 @@ pub fn EmbedField.parse(j json2.Any) !EmbedField {
 
 pub fn (ef EmbedField) build() json2.Any {
 	mut r := {
-		'name': json2.Any(ef.name)
+		'name':  json2.Any(ef.name)
 		'value': ef.value
 	}
 	if inline := ef.inline {
@@ -816,7 +816,6 @@ pub:
 pub fn Message.parse(j json2.Any) !Message {
 	return error('TODO')
 }
-
 
 @[params]
 pub struct GetChannelMessagesParams {
