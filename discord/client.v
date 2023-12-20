@@ -3,6 +3,7 @@ module discord
 import encoding.base64
 import log
 import os as v_os
+import time
 
 pub struct Properties {
 pub:
@@ -49,6 +50,8 @@ pub:
 	properties Properties
 	intents    Intents
 	settings   GatewayClientSettings
+	read_timeout  ?time.Duration
+	write_timeout ?time.Duration
 }
 
 // `bot` creates a new [GatewayClient] that can be used to listen events.
@@ -66,6 +69,8 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 		}
 		settings: config.settings
 		user_agent: config.user_agent
+		read_timeout: config.read_timeout
+		write_timeout: config.write_timeout
 	}
 }
 

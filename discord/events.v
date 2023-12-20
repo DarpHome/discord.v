@@ -30,13 +30,13 @@ pub fn GuildCreateEvent.parse(j json2.Any, base BaseEvent) !GuildCreateEvent {
 pub struct MessageCreateEvent {
 	BaseEvent
 pub:
-	message Message
+	message Message2
 }
 
 pub fn MessageCreateEvent.parse(j json2.Any, base BaseEvent) !MessageCreateEvent {
 	return MessageCreateEvent{
 		BaseEvent: base
-		message: Message.parse(j)!
+		message: Message2.parse(j)!
 	}
 }
 
@@ -96,7 +96,14 @@ const events_table = EventsTable({
 })
 
 pub fn (mut c GatewayClient) process_dispatch(event DispatchEvent) !bool {
-	f := discord.events_table[event.name] or { return false }
+	f := discord.events_table[event.name] or { unsafe {
+		nil
+	} }
+	if isnil(f) {
+		eprintln('jesus')
+		return true
+	}
+	eprintln('wtf ${voidptr(f)}')
 	f(mut c, event.data, error_handler: c.error_logger())!
 	return true
 }

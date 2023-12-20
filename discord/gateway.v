@@ -29,6 +29,8 @@ mut:
 	close_code         ?int
 	session_id         string
 	resume_gateway_url string
+	read_timeout       ?time.Duration
+	write_timeout      ?time.Duration
 pub mut:
 	events Events
 }
@@ -44,7 +46,7 @@ fn (mut c GatewayClient) send(message WSMessage) ! {
 fn (mut c GatewayClient) heartbeat() ! {
 	c.send(WSMessage{
 		opcode: .heartbeat
-		data: if c.sequence == none { json2.Null{} } else { json2.Any(c.sequence) }
+		data: if c.sequence == none { json2.null } else { json2.Any(c.sequence) }
 	})!
 }
 
@@ -71,12 +73,12 @@ fn (mut c GatewayClient) raw_dispatch(name string, data json2.Any) ! {
 		c.events.on_raw_event.emit(event, error_handler: c.error_logger())
 		return
 	}
-	if !c.process_dispatch(event)! {
-		if c.settings.has(.ignore_unknown_events) {
+	if !(c.process_dispatch(event)!) {
+		/* if c.settings.has(.ignore_unknown_events) {
 			return
 		}
-		c.logger.warn('Unknown event ${name}, emitting raw instead')
-		c.events.on_raw_event.emit(event, error_handler: c.error_logger())
+		c.logger.debug('Unknown event ${name}, emitting raw instead')
+		c.events.on_raw_event.emit(event, error_handler: c.error_logger()) */
 	}
 	return
 }
@@ -112,15 +114,13 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 }
 
 fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
-	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, r voidptr) ! {
-		mut client := unsafe { &GatewayClient(r) }
+	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, mut client &GatewayClient) ! {
 		if reason != 'closed by client' {
 			client.close_code = code
 			client.logger.error('Websocket closed with ${code} ${reason}')
 		}
 	}, &mut c)
-	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, r voidptr) ! {
-		mut client := unsafe { &GatewayClient(r) }
+	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, mut client &GatewayClient) ! {
 		message := decode_websocket_message(m)!
 		if !client.ready {
 			if message.opcode != .hello {
@@ -187,9 +187,15 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 				if seq := message.seq {
 					client.sequence = seq
 				}
-				client.raw_dispatch(message.event, message.data) or {
-					client.logger.error('Dispatching ${message.event} failed: ${err}')
-				}
+				fn (creatorp voidptr, msg WSMessage) {
+					mut creator := unsafe { &GatewayClient(creatorp) }
+					creator.raw_dispatch(msg.event, msg.data) or {
+						creator.logger.error('Dispatching ${msg.event} failed: ${err}')
+					}
+					println('blocked??')
+				}(voidptr(client), message)
+				println('no?')
+				return
 			}
 			.reconnect {
 				client.ws.close(1000, 'Discord restarting')!
@@ -263,8 +269,15 @@ const gateway_close_code_table = {
 	}
 }
 
+fn (c GatewayClient) websocket_opts() websocket.ClientOpt {
+	return websocket.ClientOpt{
+		read_timeout: c.read_timeout or { 10 * time.second }
+		write_timeout: c.write_timeout or { 10 * time.second }
+	}
+}
+
 pub fn (mut c GatewayClient) init() ! {
-	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') + '?v=10&encoding=json')!
+	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') + '?v=10&encoding=json', c.websocket_opts())!
 	c.ws = ws
 	c.ready = false
 	c.init_ws(mut ws)
@@ -292,7 +305,7 @@ pub fn (mut c GatewayClient) run() ! {
 			// resume
 			c.ready = false
 			mut ws := websocket.new_client(c.resume_gateway_url.trim_right('/?') +
-				'?v=10&encoding=json')!
+				'?v=10&encoding=json', c.websocket_opts())!
 			c.ws = ws
 			c.init_ws(mut ws)
 		}

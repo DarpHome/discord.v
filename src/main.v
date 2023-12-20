@@ -65,23 +65,15 @@ fn main() {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})
 	c.events.on_message_create.listen(fn (event discord.MessageCreateEvent) ! {
-		dump(event.message)
-	})
-	c.events.on_raw_event.listen(fn (event discord.DispatchEvent) ! {
-		if event.name == 'MESSAGE_CREATE' {
-			d := event.data.as_map()
-			channel_id := d['channel_id']! as string
-			message_id := d['id']! as string
-			content := d['content']! as string
 			prefix := 'dv!'
-			if !content.starts_with(prefix) {
+			if !event.message.content.starts_with(prefix) {
 				return
 			}
-			args := content[prefix.len..].split(' ')
+			args := event.message.content[prefix.len..].split(' ')
 			match args[0] or { '' } {
 				'square' {
 					if args.len != 2 {
-						event.creator.request(.post, '/channels/${channel_id}/messages',
+						event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
 							json: {
 								'content': json2.Any('Specify argument, e.g. !square 7')
 							}
@@ -89,47 +81,59 @@ fn main() {
 						return
 					}
 					i := strconv.atoi(args[1]) or {
-						event.creator.request(.post, '/channels/${channel_id}/messages',
+						event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
 							json: {
 								'content': json2.Any('Invalid integer')
 							}
 						)!
 						return
 					}
-					event.creator.request(.post, '/channels/${channel_id}/messages',
+					event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
 						json: {
 							'content':           json2.Any((i * i).str())
 							'message_reference': {
-								'message_id': json2.Any(message_id)
+								'message_id': json2.Any(event.message.id)
 							}
 						}
 					)!
 				}
 				'ping' {
-					event.creator.request(.post, '/channels/${channel_id}/messages',
+					event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
 						json: {
 							'content':           json2.Any('Pong!')
 							'message_reference': {
-								'message_id': json2.Any(message_id)
+								'message_id': json2.Any(event.message.id)
 							}
 						}
 					)!
 				}
 				'guild' {
-					guild_id := discord.Snowflake.parse(d['guild_id']!)!
-					dump(event.creator.fetch_guild(guild_id)!)
-					event.creator.request(.post, '/channels/${channel_id}/messages',
+					guild_id := event.message.guild_id
+					dump(event.creator.fetch_guild(guild_id or {
+						event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
+							json: {
+								'content':           json2.Any('Not an guild')
+								'message_reference': {
+									'message_id': json2.Any(event.message.id)
+								}
+							}
+						)!
+						return
+					})!)
+					event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
 						json: {
 							'content':           json2.Any('Dumped!')
 							'message_reference': {
-								'message_id': json2.Any(message_id)
+								'message_id': json2.Any(event.message.id)
 							}
 						}
 					)!
 				}
 				else {}
 			}
-		}
 	})
+	/*c.events.on_raw_event.listen(fn (event discord.DispatchEvent) ! {
+		dump(event.name)
+	})*/
 	c.launch()!
 }

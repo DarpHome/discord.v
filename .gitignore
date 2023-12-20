@@ -26,3 +26,4 @@ bin/
 token.txt
 test.v
 *.def
+/*.c
