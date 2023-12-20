@@ -1,5 +1,6 @@
 module discord
 
+import strconv
 import x.json2
 
 pub struct PartialEmoji {
@@ -108,5 +109,58 @@ pub fn Emoji.parse(j json2.Any) !Emoji {
 	}
 }
 
+pub struct ReactionCountDetails {
+pub:
+	// Count of super reactions
+	burst int
+	// Count of normal reactions
+	normal int
+}
+
+pub fn ReactionCountDetails.parse(j json2.Any) !ReactionCountDetails {
+	match j {
+		map[string]json2.Any {
+			return ReactionCountDetails{
+				burst: j['burst']!.int()
+				normal: j['normal']!.int()
+			}
+		}
+		else {
+			return error('expected reaction count details to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct Reaction {
+pub:
+	// Total number of times this emoji has been used to react (including super reacts)
+	count int
+	// Reaction count details object
+	count_details ReactionCountDetails
+	// Whether the current user reacted using this emoji
+	me bool
+	// Whether the current user super-reacted using this emoji
+	me_burst bool
+	// emoji information
+	emoji PartialEmoji
+	// HEX colors used for super reaction
+	burst_colors []int
+}
+
+pub fn Reaction.parse(j json2.Any) !Reaction {
+	match j {
+		map[string]json2.Any {
+			return Reaction{
+				count: j['count']!.int()
+				count_details: ReactionCountDetails.parse(j['count_details']!)!
+				me: j['me']! as bool
+				me_burst: j['me_burst']! as bool
+				emoji: PartialEmoji.parse(j['emoji']!)!
+				burst_colors: (j['burst_colors']! as []json2.Any).map(int(strconv.parse_uint((it as string)[1..], 16, 24)!))
+			}
+		}
+		else {
+			return error('expected reaction to be object, got ${j.type_name()}')
+		}
+	}
 }

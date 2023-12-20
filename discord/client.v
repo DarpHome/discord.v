@@ -69,11 +69,9 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 	}
 }
 
-// `bearer` accepts access token and returns Client that can be used to fetch user data
-// note: token should not contain `Bearer` prefix
-pub fn bearer(token string, config ClientConfig) Client {
+pub fn make_client(token string, config ClientConfig) Client {
 	return Client{
-		token: 'Bearer ${token}'
+		token: token
 		logger: log.Log{
 			level: config.get_level()
 			output_label: 'discord.v'
@@ -82,14 +80,13 @@ pub fn bearer(token string, config ClientConfig) Client {
 	}
 }
 
+// `bearer` accepts access token and returns Client that can be used to fetch user data
+// note: token should not contain `Bearer` prefix
+pub fn bearer(token string, config ClientConfig) Client {
+	return make_client('Bearer ${token}', config)
+}
+
 // `oauth2_app` accepts client ID and secret and returns Client with Basic token
 pub fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig) Client {
-	return Client{
-		token: 'Basic ' + base64.encode_str('${client_id.build()}:${client_secret}')
-		logger: log.Log{
-			level: config.get_level()
-			output_label: 'discord.v'
-		}
-		user_agent: config.user_agent
-	}
+	return make_client('Basic ' + base64.encode_str('${client_id.build()}:${client_secret}'), config)
 }

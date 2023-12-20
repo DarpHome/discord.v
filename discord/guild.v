@@ -709,3 +709,107 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 		}
 	}
 }
+
+pub struct PartialGuildMember {
+pub:
+	user ?User
+	nick ?string
+	avatar ?string
+	roles ?[]Snowflake
+	joined_at ?time.Time
+	premium_since ?time.Time
+	deaf ?bool
+	mute ?bool
+	flags ?GuildMemberFlags
+	pending ?bool
+	permissions ?Permissions
+	communication_disabled_until ?time.Time
+}
+
+pub fn PartialGuildMember.parse(j json2.Any) !PartialGuildMember {
+	match j {
+		map[string]json2.Any {
+			return PartialGuildMember{
+				user: if o := j['user'] {
+					?User(User.parse(o)!)
+				} else {
+					none
+				}
+				nick: if s := j['nick'] {
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				avatar: if s := j['avatar'] {
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				roles: if a := j['roles'] {
+					?[]Snowflake((a as []json2.Any).map(Snowflake.parse(it)!))
+				} else {
+					none
+				}
+				joined_at: if s := j['joined_at'] {
+					?time.Time(time.parse_iso8601(s as string)!)
+				} else {
+					none
+				}
+				premium_since: if s := j['premium_since'] {
+					if s !is json2.Null {
+						?time.Time(time.parse_iso8601(s as string)!)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				deaf: if b := j['deaf'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				mute: if b := j['mute'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				flags: if i := j['flags'] {
+					?GuildMemberFlags(unsafe { GuildMemberFlags(i.int()) })
+				} else {
+					none
+				}
+				pending: if b := j['pending'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				permissions: if s := j['permissions'] {
+					?Permissions(Permissions.parse(s)!)
+				} else {
+					none
+				}
+				communication_disabled_until: if s := j['communication_disabled_until'] {
+					if s !is json2.Null {
+						?time.Time(time.parse_iso8601(s as string)!)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected partial guild member to be object, got ${j.type_name()}')
+		}
+	}
+}

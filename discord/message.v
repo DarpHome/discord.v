@@ -1,15 +1,594 @@
 module discord
 
+import encoding.base64
 import net.urllib
 import time
+import x.json2
 
 pub struct ChannelMention {
+pub:
+	// id of the channel
+	id Snowflake
+	// id of the guild containing the channel
+	guild_id Snowflake
+	// the type of channel
+	typ ChannelType
+	// the name of the channel
+	name string
+}
+
+pub fn ChannelMention.parse(j json2.Any) !ChannelMention {
+	match j {
+		map[string]json2.Any {
+			return ChannelMention{
+				id: Snowflake.parse(j['id']!)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				typ: unsafe { ChannelType(j['type']!.int()) }
+				name: j['name']! as string
+			}
+		}
+		else {
+			return error('expected channel mention to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+@[flag]
+pub enum AttachmentFlags {
+	reserved_0
+	reserved_1
+	// this attachment has been edited using the remix feature on mobile
+	is_remix
 }
 
 pub struct Attachment {
+pub:
+	// attachment id
+	id Snowflake
+	// name of file attached
+	filename string
+	// description for the file (max 1024 characters)
+	description ?string
+	// the attachment's media type
+	content_type ?string
+	// size of file in bytes
+	size int
+	// source url of file
+	url string
+	// a proxied url of file
+	proxy_url string
+	// height of file (if image)
+	height ?int
+	// width of file (if image)
+	width ?int
+	// whether this attachment is ephemeral
+	ephemeral ?bool
+	// the duration of the audio file (currently for voice messages)
+	duration_secs ?time.Duration
+	// base64 encoded bytearray representing a sampled waveform (currently for voice messages)
+	waveform ?[]u8
+	// attachment flags combined as a bitfield
+	flags ?AttachmentFlags
+}
+
+pub fn Attachment.parse(j json2.Any) !Attachment {
+	match j {
+		map[string]json2.Any {
+			return Attachment{
+				id: Snowflake.parse(j['id']!)!
+				filename: j['filename']! as string
+				description: if s := j['description'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				content_type: if s := j['content_type'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				size: j['size']!.int()
+				url: j['url']! as string
+				proxy_url: j['proxy_url']! as string
+				height: if i := j['height'] {
+					if i !is json2.Null {
+						?int(i.int())
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				width: if i := j['width'] {
+					if i !is json2.Null {
+						?int(i.int())
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				ephemeral: if b := j['ephemeral'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				duration_secs: if f := j['duration_secs'] {
+					?time.Duration(i64(f.f64() * f64(time.second)))
+				} else {
+					none
+				}
+				waveform: if s := j['waveform'] {
+					?[]u8(base64.decode(s as string))
+				} else {
+					none
+				}
+				flags: if i := j['flags'] {
+					?AttachmentFlags(unsafe { AttachmentFlags(i.int()) })
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected attachment to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct EmbedThumbnail {
+pub:
+	// source url of thumbnail (only supports http(s) and attachments)
+	url string
+	// a proxied url of the thumbnail
+	proxy_url ?string
+	// height of thumbnail
+	height ?int
+	// width of thumbnail
+	width ?int
+}
+
+pub fn EmbedThumbnail.parse(j json2.Any) !EmbedThumbnail {
+	match j {
+		map[string]json2.Any {
+			return EmbedThumbnail{
+				url: j['url']! as string
+				proxy_url: if s := j['proxy_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				height: if i := j['height'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				width: if i := j['width'] {
+					?int(i.int())
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected embed thumbnail to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (et EmbedThumbnail) build() json2.Any {
+	return {
+		'url': json2.Any(et.url)
+	}
+}
+
+pub struct EmbedVideo {
+pub:
+	// source url of video
+	url ?string
+	// a proxied url of the video
+	proxy_url ?string
+	// height of video
+	height ?int
+	// width of video
+	width ?int
+}
+
+pub fn EmbedVideo.parse(j json2.Any) !EmbedVideo {
+	match j {
+		map[string]json2.Any {
+			return EmbedVideo{
+				url: if s := j['url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				proxy_url: if s := j['proxy_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				height: if i := j['height'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				width: if i := j['width'] {
+					?int(i.int())
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected embed video to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (ev EmbedVideo) build() json2.Any {
+	return {
+		'url': json2.Any(ev.url)
+	}
+}
+
+pub struct EmbedImage {
+pub:
+	// source url of image (only supports http(s) and attachments)
+	url string
+	// a proxied url of the image
+	proxy_url ?string
+	// height of image
+	height ?int
+	// width of image
+	width ?int
+}
+
+pub fn EmbedImage.parse(j json2.Any) !EmbedImage {
+	match j {
+		map[string]json2.Any {
+			return EmbedImage{
+				url: j['url']! as string
+				proxy_url: if s := j['proxy_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				height: if i := j['height'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				width: if i := j['width'] {
+					?int(i.int())
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected embed image to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (ei EmbedImage) build() json2.Any {
+	return {
+		'url': json2.Any(ei.url)
+	}
+}
+
+pub struct EmbedProvider {
+pub:
+	// name of provider
+	name string
+	// url of provider
+	url ?string
+}
+
+pub fn EmbedProvider.parse(j json2.Any) !EmbedProvider {
+	match j {
+		map[string]json2.Any {
+			return EmbedProvider{
+				name: j['name']! as string
+				url: if s := j['url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected embed provider to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (ep EmbedProvider) build() json2.Any {
+	mut r := {
+		'name': json2.Any(ep.name)
+	}
+	if url := ep.url {
+		r['url'] = url
+	}
+	return r
+}
+
+pub struct EmbedAuthor {
+pub:
+	// name of author
+	name string
+	// url of author (only supports http(s))
+	url ?string
+	// url of author icon (only supports http(s) and attachments)
+	icon_url ?string
+	// a proxied url of author icon
+	proxy_icon_url ?string
+}
+
+pub fn EmbedAuthor.parse(j json2.Any) !EmbedAuthor {
+	match j {
+		map[string]json2.Any {
+			return EmbedAuthor{
+				name: j['name']! as string
+				url: if s := j['url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				icon_url: if s := j['icon_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				proxy_icon_url: if s := j['proxy_icon_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected embed author to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (ea EmbedAuthor) build() json2.Any {
+	mut r := {
+		'name': json2.Any(ea.name)
+	}
+	if url := ea.url {
+		r['url'] = url
+	}
+	if icon_url := ea.icon_url {
+		r['icon_url'] = icon_url
+	}
+	return r
+}
+
+pub struct EmbedFooter {
+pub:
+	// footer text
+	text string
+	// url of footer icon (only supports http(s) and attachments)
+	icon_url ?string
+	// a proxied url of footer icon
+	proxy_icon_url ?string
+}
+
+pub fn EmbedFooter.parse(j json2.Any) !EmbedFooter {
+	match j {
+		map[string]json2.Any {
+			return EmbedFooter{
+				text: j['text']! as string
+				icon_url: if s := j['icon_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				proxy_icon_url: if s := j['proxy_icon_url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected embed footer to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (ef EmbedFooter) build() json2.Any {
+	mut r := {
+		'text': json2.Any(ef.text)
+	}
+	if icon_url := ef.icon_url {
+		r['icon_url'] = icon_url
+	}
+	return r
+}
+
+pub struct EmbedField {
+pub:
+	// name of the field
+	name string
+	// value of the field
+	value string
+	// whether or not this field should display inline
+	inline ?bool
+}
+
+pub fn EmbedField.parse(j json2.Any) !EmbedField {
+	match j {
+		map[string]json2.Any {
+			return EmbedField{
+				name: j['name']! as string
+				value: j['value']! as string
+				inline: if b := j['inline'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected embed field to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (ef EmbedField) build() json2.Any {
+	mut r := {
+		'name': json2.Any(ef.name)
+		'value': ef.value
+	}
+	if inline := ef.inline {
+		r['inline'] = inline
+	}
+	return r
 }
 
 pub struct Embed {
+pub:
+	// title of embed
+	title ?string
+	// description of embed
+	description ?string
+	// url of embed
+	url ?string
+	// timestamp of embed content
+	timestamp ?time.Time
+	// color code of the embed
+	color ?int
+	// footer information
+	footer ?EmbedFooter
+	// image information
+	image ?EmbedImage
+	// thumbnail information
+	thumbnail ?EmbedThumbnail
+	// video information
+	video ?EmbedVideo
+	// provider information
+	provider ?EmbedProvider
+	// author information
+	author ?EmbedAuthor
+	// fields information
+	fields ?[]EmbedField
+}
+
+pub fn Embed.parse(j json2.Any) !Embed {
+	match j {
+		map[string]json2.Any {
+			return Embed{
+				title: if s := j['title'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				description: if s := j['description'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				url: if s := j['url'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				timestamp: if s := j['timestamp'] {
+					?time.Time(time.parse_iso8601(s as string)!)
+				} else {
+					none
+				}
+				color: if i := j['color'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				footer: if o := j['footer'] {
+					?EmbedFooter(EmbedFooter.parse(o)!)
+				} else {
+					none
+				}
+				image: if o := j['image'] {
+					?EmbedImage(EmbedImage.parse(o)!)
+				} else {
+					none
+				}
+				thumbnail: if o := j['thumbnail'] {
+					?EmbedThumbnail(EmbedThumbnail.parse(o)!)
+				} else {
+					none
+				}
+				video: if o := j['video'] {
+					?EmbedVideo(EmbedVideo.parse(o)!)
+				} else {
+					none
+				}
+				provider: if o := j['provider'] {
+					?EmbedProvider(EmbedProvider.parse(o)!)
+				} else {
+					none
+				}
+				author: if o := j['author'] {
+					?EmbedAuthor(EmbedAuthor.parse(o)!)
+				} else {
+					none
+				}
+				fields: if a := j['fields'] {
+					?[]EmbedField((a as []json2.Any).map(EmbedField.parse(it)!))
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected embed to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (e Embed) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if title := e.title {
+		r['title'] = title
+	}
+	if description := e.description {
+		r['description'] = description
+	}
+	if url := e.url {
+		r['url'] = url
+	}
+	if timestamp := e.timestamp {
+		r['timestamp'] = format_iso8601(timestamp)
+	}
+	if color := e.color {
+		r['color'] = color
+	}
+	if footer := e.footer {
+		r['footer'] = footer.build()
+	}
+	if image := e.image {
+		r['image'] = image.build()
+	}
+	if thumbnail := e.thumbnail {
+		r['thumbnail'] = thumbnail.build()
+	}
+	if video := e.video {
+		r['video'] = video.build()
+	}
+	if provider := e.provider {
+		r['provider'] = provider.build()
+	}
+	if author := e.author {
+		r['author'] = author.build()
+	}
+	if fields := e.fields {
+		r['fields'] = fields.map(|field| field.build())
+	}
+	return r
 }
 
 pub type Nonce = int | string
@@ -75,6 +654,50 @@ pub:
 	fail_if_not_exists ?bool
 }
 
+pub fn MessageReference.parse(j json2.Any) !MessageReference {
+	match j {
+		map[string]json2.Any {
+			return MessageReference{
+				message_id: if s := j['message_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+				channel_id: if s := j['channel_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+				guild_id: if s := j['guild_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message reference to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (mr MessageReference) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if message_id := mr.message_id {
+		r['message_id'] = message_id.build()
+	}
+	if channel_id := mr.channel_id {
+		r['channel_id'] = channel_id.build()
+	}
+	if guild_id := mr.guild_id {
+		r['guild_id'] = guild_id.build()
+	}
+	if fail_if_not_exists := mr.fail_if_not_exists {
+		r['fail_if_not_exists'] = fail_if_not_exists
+	}
+	return r
+}
+
 @[flags]
 pub enum MessageFlags {
 	crossposted
@@ -94,6 +717,38 @@ pub enum MessageFlags {
 }
 
 pub struct MessageInteraction {
+pub:
+	// ID of the interaction
+	id Snowflake
+	// Type of interaction
+	typ InteractionType
+	// Name of the application command, including subcommands and subcommand groups
+	name string
+	// User who invoked the interaction
+	user User
+	// Member who invoked the interaction in the guild
+	member ?PartialGuildMember
+}
+
+pub fn MessageInteraction.parse(j json2.Any) !MessageInteraction {
+	match j {
+		map[string]json2.Any {
+			return MessageInteraction{
+				id: Snowflake.parse(j['id']!)!
+				typ: unsafe { InteractionType(j['type']!.int()) }
+				name: j['name']! as string
+				user: User.parse(j['user']!)!
+				member: if o := j['member'] {
+					?PartialGuildMember(PartialGuildMember.parse(o)!)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message interaction to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 pub struct RoleSubscriptionData {
@@ -108,42 +763,84 @@ pub:
 	is_renewal bool
 }
 
+pub fn RoleSubscriptionData.parse(j json2.Any) !RoleSubscriptionData {
+	match j {
+		map[string]json2.Any {
+			return RoleSubscriptionData{
+				role_subscription_listing_id: Snowflake.parse(j['role_subscription_listing_id']!)!
+				tier_name: j['tier_name']! as string
+				total_months_subscribed: j['total_months_subscribed']! as int
+				is_renewal: j['is_renewal']! as bool
+			}
+		}
+		else {
+			return error('expected role subscription data to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct Message {
 pub:
-	id                 Snowflake
-	channel_id         Snowflake
-	author             User
-	content            string
-	timestamp          time.Time
-	edited_timestamp   ?time.Time
-	tts                bool
-	mention_everyone   bool
-	mentions           []User
-	mention_roles      []Snowflake
-	mention_channels   ?[]ChannelMention
-	attachments        []Attachment
-	embeds             []Embed
-	reactions          ?[]Reaction
-	nonce              ?Nonce
-	pinned             bool
-	webhook_id         ?Snowflake
-	typ                MessageType
-	activity           ?MessageActivity
-	application        ?PartialApplication
-	application_id     ?Snowflake
-	message_reference  ?MessageReference
-	flags              ?MessageFlags
-	referenced_message ?&Message
-	interaction        ?MessageInteraction
-	thread             ?Channel
-	components         ?[]Component
-	sticker_items      ?[]StickerItem
-	position ?int
+	id                     Snowflake
+	channel_id             Snowflake
+	author                 User
+	content                string
+	timestamp              time.Time
+	edited_timestamp       ?time.Time
+	tts                    bool
+	mention_everyone       bool
+	mentions               []User
+	mention_roles          []Snowflake
+	mention_channels       ?[]ChannelMention
+	attachments            []Attachment
+	embeds                 []Embed
+	reactions              ?[]Reaction
+	nonce                  ?Nonce
+	pinned                 bool
+	webhook_id             ?Snowflake
+	typ                    MessageType
+	activity               ?MessageActivity
+	application            ?PartialApplication
+	application_id         ?Snowflake
+	message_reference      ?MessageReference
+	flags                  ?MessageFlags
+	referenced_message     ?&Message
+	interaction            ?MessageInteraction
+	thread                 ?Channel
+	components             ?[]Component
+	sticker_items          ?[]StickerItem
+	position               ?int
 	role_subscription_data ?RoleSubscriptionData
 }
 
-pub fn (c Client) delete_message(channel_id Snowflake, id Snowflake, config ReasonParam) ! {
-	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(id.build())}',
+pub fn Message.parse(j json2.Any) !Message {
+	return error('TODO')
+}
+
+
+@[params]
+pub struct GetChannelMessagesParams {
+pub:
+	// Get messages around this message ID
+	around ?Snowflake
+	// Get messages before this message ID
+	before ?Snowflake
+	// Get messages after this message ID
+	after ?Snowflake
+	// Max number of messages to return (1-100)
+	limit ?int
+}
+
+pub fn (c Client) fetch_messages(channel_id Snowflake, params GetChannelMessagesParams) ![]Message {
+	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages')!.body)! as []json2.Any).map(Message.parse(it)!)
+}
+
+pub fn (c Client) fetch_message(channel_id Snowflake, message_id Snowflake) !Message {
+	return Message.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}')!.body)!)!
+}
+
+pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, config ReasonParam) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}',
 		reason: config.reason
 	)!
 }
