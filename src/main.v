@@ -64,6 +64,9 @@ fn main() {
 	c.events.on_ready.listen(fn (event discord.ReadyEvent) ! {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})
+	c.events.on_message_create.listen(fn (event discord.MessageCreateEvent) ! {
+		dump(event.message)
+	})
 	c.events.on_raw_event.listen(fn (event discord.DispatchEvent) ! {
 		if event.name == 'MESSAGE_CREATE' {
 			d := event.data.as_map()

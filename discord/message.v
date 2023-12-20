@@ -832,6 +832,7 @@ pub:
 }
 
 pub fn Message.parse(j json2.Any) !Message {
+	dump(j)
 	match j {
 		map[string]json2.Any {
 			edited_timestamp := j['edited_timestamp']!
@@ -864,8 +865,12 @@ pub fn Message.parse(j json2.Any) !Message {
 				}
 				nonce: if o := j['nonce'] {
 					match o {
-						string { ?Nonce(o) }
-						int, i8, i16, i64, u8, u16, u32, u64 { ?Nonce(int(o)) }
+						string {
+							?Nonce(o)
+						}
+						int, i8, i16, i64, u8, u16, u32, u64 {
+							?Nonce(int(o))
+						}
 						else {
 							return error('expected nonce to be int/string, got ${o.type_name()}')
 						}

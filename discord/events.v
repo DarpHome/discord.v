@@ -27,6 +27,24 @@ pub fn GuildCreateEvent.parse(j json2.Any, base BaseEvent) !GuildCreateEvent {
 	}
 }
 
+pub struct MessageCreateEvent {
+	BaseEvent
+pub:
+	message Message
+}
+
+pub fn MessageCreateEvent.parse(j json2.Any, base BaseEvent) !MessageCreateEvent {
+	event := MessageCreateEvent{
+		BaseEvent: base
+		message: Message.parse(j) or {
+			dump(err)
+			Message{}
+		}
+	}
+	dump(j)
+	return dump(event)
+}
+
 pub struct InteractionCreateEvent {
 	BaseEvent
 pub:
@@ -45,6 +63,7 @@ pub mut:
 	on_raw_event          EventController[DispatchEvent]
 	on_ready              EventController[ReadyEvent]
 	on_guild_create       EventController[GuildCreateEvent]
+	on_message_create     EventController[MessageCreateEvent]
 	on_interaction_create EventController[InteractionCreateEvent]
 }
 
@@ -60,6 +79,12 @@ fn event_process_guild_create(mut gc GatewayClient, data json2.Any, options Emit
 	})!, options)
 }
 
+fn event_process_message_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_message_create.emit(MessageCreateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
 fn event_process_interaction_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_interaction_create.emit(InteractionCreateEvent.parse(data, BaseEvent{
 		creator: gc
@@ -71,6 +96,7 @@ type EventsTable = map[string]fn (mut GatewayClient, json2.Any, EmitOptions) !
 const events_table = EventsTable({
 	'READY':              event_process_ready
 	'GUILD_CREATE':       event_process_guild_create
+	'MESSAGE_CREATE':     event_process_message_create
 	'INTERACTION_CREATE': event_process_interaction_create
 })
 
