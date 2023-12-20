@@ -34,15 +34,10 @@ pub:
 }
 
 pub fn MessageCreateEvent.parse(j json2.Any, base BaseEvent) !MessageCreateEvent {
-	event := MessageCreateEvent{
+	return MessageCreateEvent{
 		BaseEvent: base
-		message: Message.parse(j) or {
-			dump(err)
-			Message{}
-		}
+		message: Message.parse(j)!
 	}
-	dump(j)
-	return dump(event)
 }
 
 pub struct InteractionCreateEvent {

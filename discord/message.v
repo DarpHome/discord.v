@@ -832,7 +832,6 @@ pub:
 }
 
 pub fn Message.parse(j json2.Any) !Message {
-	dump(j)
 	match j {
 		map[string]json2.Any {
 			edited_timestamp := j['edited_timestamp']!
@@ -911,7 +910,11 @@ pub fn Message.parse(j json2.Any) !Message {
 					none
 				}
 				referenced_message: if o := j['referenced_message'] {
-					Message.parse(o)!
+					if o !is json2.Null {
+						Message.parse(o)!
+					} else {
+						none
+					}
 				} else {
 					none
 				}
