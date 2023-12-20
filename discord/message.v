@@ -642,6 +642,24 @@ pub:
 	party_id ?Snowflake
 }
 
+pub fn MessageActivity.parse(j json2.Any) !MessageActivity {
+	match j {
+		map[string]json2.Any {
+			return MessageActivity{
+				typ: unsafe { MessageActivityType(j['type']!.int()) }
+				party_id: if s := j['party_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message activity to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct MessageReference {
 pub:
 	// id of the originating message
@@ -814,7 +832,120 @@ pub:
 }
 
 pub fn Message.parse(j json2.Any) !Message {
-	return error('TODO')
+	match j {
+		map[string]json2.Any {
+			edited_timestamp := j['edited_timestamp']!
+			return Message{
+				id: Snowflake.parse(j['id']!)!
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				author: User.parse(j['author']!)!
+				content: j['content']! as string
+				timestamp: time.parse_iso8601(j['timestamp']! as string)!
+				edited_timestamp: if edited_timestamp !is json2.Null {
+					?time.Time(time.parse_iso8601(edited_timestamp as string)!)
+				} else {
+					none
+				}
+				tts: j['tts']! as bool
+				mention_everyone: j['mention_everyone']! as bool
+				mentions: (j['mentions']! as []json2.Any).map(User.parse(it)!)
+				mention_roles: (j['mention_roles']! as []json2.Any).map(Snowflake.parse(it)!)
+				mention_channels: if a := j['mention_channels'] {
+					?[]ChannelMention((a as []json2.Any).map(ChannelMention.parse(it)!))
+				} else {
+					none
+				}
+				attachments: (j['attachments']! as []json2.Any).map(Attachment.parse(it)!)
+				embeds: (j['embeds']! as []json2.Any).map(Embed.parse(it)!)
+				reactions: if a := j['reactions'] {
+					?[]Reaction((a as []json2.Any).map(Reaction.parse(it)!))
+				} else {
+					none
+				}
+				nonce: if o := j['nonce'] {
+					match o {
+						string { ?Nonce(o) }
+						int, i8, i16, i64, u8, u16, u32, u64 { ?Nonce(int(o)) }
+						else {
+							return error('expected nonce to be int/string, got ${o.type_name()}')
+						}
+					}
+				} else {
+					none
+				}
+				pinned: j['pinned']! as bool
+				webhook_id: if s := j['webhook_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+				typ: unsafe { MessageType(j['type']!.int()) }
+				activity: if o := j['activity'] {
+					?MessageActivity(MessageActivity.parse(o)!)
+				} else {
+					none
+				}
+				application: if o := j['application'] {
+					?PartialApplication(PartialApplication.parse(o)!)
+				} else {
+					none
+				}
+				application_id: if s := j['application_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+				message_reference: if o := j['message_reference'] {
+					?MessageReference(MessageReference.parse(o)!)
+				} else {
+					none
+				}
+				flags: if i := j['flags'] {
+					?MessageFlags(unsafe { MessageFlags(i.int()) })
+				} else {
+					none
+				}
+				referenced_message: if o := j['referenced_message'] {
+					Message.parse(o)!
+				} else {
+					none
+				}
+				interaction: if o := j['interaction'] {
+					?MessageInteraction(MessageInteraction.parse(o)!)
+				} else {
+					none
+				}
+				thread: if o := j['thread'] {
+					?Channel(Channel.parse(o)!)
+				} else {
+					none
+				}
+				components: if a := j['components'] {
+					?[]Component((a as []json2.Any).map(Component.parse(it)!))
+				} else {
+					none
+				}
+				sticker_items: if a := j['sticker_items'] {
+					?[]StickerItem((a as []json2.Any).map(StickerItem.parse(it)!))
+				} else {
+					none
+				}
+				position: if i := j['position'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				role_subscription_data: if o := j['role_subscription_data'] {
+					?RoleSubscriptionData(RoleSubscriptionData.parse(o)!)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 @[params]
