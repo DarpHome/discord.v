@@ -87,8 +87,7 @@ pub:
 	exclude_ended ?bool
 }
 
-// Returns all entitlements for a given app, active and expired.
-pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement {
+pub fn (params ListEntitlementParams) build_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if user_id := params.user_id {
 		query_params.add('user_id', user_id.build())
@@ -111,7 +110,12 @@ pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitle
 	if exclude_ended := params.exclude_ended {
 		query_params.add('exclude_ended', exclude_ended.str())
 	}
-	r := json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${encode_query(query_params)}')!.body)!
+	return query_params
+}
+
+// Returns all entitlements for a given app, active and expired.
+pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement {
+	r := json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${encode_query(params.build_values())}')!.body)!
 	return (r as []json2.Any).map(Entitlement.parse(it)!)
 }
 
@@ -133,15 +137,19 @@ pub:
 	owner_type OwnerType @[required]
 }
 
+pub fn (params CreateTestEntitlementParams) build() json2.Any {
+	return {
+		'sku_id':     json2.Any(params.sku_id.build())
+		'owner_id':   params.owner_id.build()
+		'owner_type': int(params.owner_type)
+	}
+}
+
 // Creates a test entitlement to a given SKU for a given guild or user. Discord will act as though that user or guild has entitlement to your premium offering.
 // After creating a test entitlement, you'll need to reload your Discord client. After doing so, you'll see that your server or user now has premium access.
 pub fn (c Client) create_test_entitlement(application_id Snowflake, params CreateTestEntitlementParams) !Entitlement {
 	return Entitlement.parse(json2.raw_decode(c.request(.post, '/applications/${urllib.path_escape(application_id.build())}/entitlements',
-		json: {
-			'sku_id':     json2.Any(params.sku_id.build())
-			'owner_id':   params.owner_id.build()
-			'owner_type': int(params.owner_type)
-		}
+		json: params.build()
 	)!.body)!)!
 }
 

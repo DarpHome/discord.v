@@ -1031,8 +1031,25 @@ pub:
 	limit ?int
 }
 
+pub fn (params GetChannelMessagesParams) build_values() urllib.Values {
+	mut query_params := urllib.new_values()
+	if around := params.around {
+		query_params.add('around', around.build())
+	}
+	if before := params.before {
+		query_params.add('before', before.build())
+	}
+	if after := params.after {
+		query_params.add('after', after.build())
+	}
+	if limit := params.limit {
+		query_params.add('limit', limit.str())
+	}
+	return query_params
+}
+
 pub fn (c Client) fetch_messages(channel_id Snowflake, params GetChannelMessagesParams) ![]Message {
-	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages')!.body)! as []json2.Any).map(Message.parse(it)!)
+	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages${encode_query(params.build_values())}')!.body)! as []json2.Any).map(Message.parse(it)!)
 }
 
 pub fn (c Client) fetch_message(channel_id Snowflake, message_id Snowflake) !Message {
