@@ -27,7 +27,7 @@ pub type UndefinedOr[T] = None | T
 
 // we are not going to support JavaScript
 pub fn undefined[T]() UndefinedOr[T] {
-	return discord.None{}
+	return None{}
 }
 
 // is_sentinel reports whether `target` is sentinel

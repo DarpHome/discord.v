@@ -311,23 +311,23 @@ pub fn (mut c GatewayClient) run() ! {
 }
 
 pub fn (mut c GatewayClient) launch() ! {
-	c.logger.debug(
-		'\n'+
-		'+----- Running discord.v -----+\n'+
-		'|                             |\n'+
-		'| HTTP:                       |-\n'+
-		'| - User agent:               | ${c.user_agent}\n'+
-		'|                             |\n'+
-		'| Gateway:                    |-\n'+
-		'| - Properties:               |--\n'+
-		'| -- Operating system:        | ${c.properties.os}\n'+
-		'| -- Browser:                 | ${c.properties.browser}\n'+
-		'| -- Device:                  | ${c.properties.device}\n'+
-		'|                             |--\n'+
-		'|                             |-\n'+
-		'|                             |\n'+
-		'+-----------------------------+\n'
-	)
+	// vfmt off
+	c.logger.debug('\n' +
+		'+----- Running discord.v -----+\n' +
+		'|                             |\n' +
+		'| HTTP:                       |-\n' +
+		'| - User agent:               | ${c.user_agent}\n' +
+		'|                             |\n' +
+		'| Gateway:                    |-\n' +
+		'| - Properties:               |--\n' +
+		'| -- Operating system:        | ${c.properties.os}\n' +
+		'| -- Browser:                 | ${c.properties.browser}\n' +
+		'| -- Device:                  | ${c.properties.device}\n' +
+		'|                             |--\n' +
+		'|                             |-\n' +
+		'|                             |\n' +
+		'+-----------------------------+\n')
+	// vfmt on
 	c.init()!
 	c.run()!
 }

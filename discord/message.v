@@ -1230,8 +1230,8 @@ pub fn (c Client) crosspost_message(channel_id Snowflake, message_id Snowflake) 
 @[params]
 pub struct ReactionParams {
 pub:
-	id ?Snowflake
-	name string @[required]
+	id   ?Snowflake
+	name string     @[required]
 }
 
 pub fn (params ReactionParams) build() string {

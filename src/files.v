@@ -15,13 +15,15 @@ fn run_files(token string) ! {
 		println('Recieved a message: ${content}')
 		match content {
 			'!spam' {
-				event.creator.create_message(event.message.channel_id, files: [
-					discord.File{
-						filename: 'spam.txt'
-						content_type: 'text/plain'
-						data: spam
-					},
-				])!
+				event.creator.create_message(event.message.channel_id,
+					files: [
+						discord.File{
+							filename: 'spam.txt'
+							content_type: 'text/plain'
+							data: spam
+						},
+					]
+				)!
 			}
 			else {}
 		}
