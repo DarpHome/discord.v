@@ -1036,16 +1036,16 @@ pub:
 pub fn (params GetChannelMessagesParams) build_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if around := params.around {
-		query_params.add('around', around.build())
+		query_params.set('around', around.build())
 	}
 	if before := params.before {
-		query_params.add('before', before.build())
+		query_params.set('before', before.build())
 	}
 	if after := params.after {
-		query_params.add('after', after.build())
+		query_params.set('after', after.build())
 	}
 	if limit := params.limit {
-		query_params.add('limit', limit.str())
+		query_params.set('limit', limit.str())
 	}
 	return query_params
 }
@@ -1190,7 +1190,6 @@ pub fn (params CreateMessageParams) build() json2.Any {
 
 pub fn (c Client) create_message(channel_id Snowflake, params CreateMessageParams) !Message {
 	if files := params.files {
-		println('ok')
 		mut mp := {
 			'payload_json': [
 				http.FileData{
@@ -1209,7 +1208,6 @@ pub fn (c Client) create_message(channel_id Snowflake, params CreateMessageParam
 			]
 		}
 		body, boundary := multipart_form_body(mp)
-		println('sending')
 		return Message.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages',
 			body: body
 			common_headers: {
@@ -1223,8 +1221,89 @@ pub fn (c Client) create_message(channel_id Snowflake, params CreateMessageParam
 	}
 }
 
+// Crosspost a message in an Announcement Channel to following channels. This endpoint requires the SEND_MESSAGES permission, if the current user sent the message, or additionally the `.manage_messages` permission, for all other messages, to be present for the current user.
+// Returns a [`message`](#Message) object. Fires a Message Update Gateway event.
+pub fn (c Client) crosspost_message(channel_id Snowflake, message_id Snowflake) !Message {
+	return Message.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/crosspost')!.body)!)!
+}
+
+@[params]
+pub struct ReactionParams {
+pub:
+	id ?Snowflake
+	name string @[required]
+}
+
+pub fn (params ReactionParams) build() string {
+	if id := params.id {
+		return '${urllib.path_escape(params.name)}:${urllib.path_escape(id.build())}'
+	} else {
+		return urllib.path_escape(params.name)
+	}
+}
+
+// Create a reaction for the message. This endpoint requires the `.read_message_history` permission to be present on the current user. Additionally, if nobody else has reacted to the message using this emoji, this endpoint requires the `.add_reactions` permission to be present on the current user. Fires a Message Reaction Add Gateway event.
+pub fn (c Client) create_reaction(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
+	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions/${params.build()}/@me')!
+}
+
+// Delete a reaction the current user has made for the message. Fires a Message Reaction Remove Gateway event.
+pub fn (c Client) delete_own_reaction(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions/${params.build()}/@me')!
+}
+
+// Deletes another user's reaction. This endpoint requires the `.manage_messages` permission to be present on the current user. Fires a Message Reaction Remove Gateway event.
+pub fn (c Client) delete_user_reaction(channel_id Snowflake, message_id Snowflake, user_id Snowflake, params ReactionParams) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions/${params.build()}/${urllib.path_escape(user_id.build())}')!
+}
+
+@[params]
+pub struct FetchReactionsParams {
+	ReactionParams
+pub:
+	after ?Snowflake
+	limit ?int
+}
+
+pub fn (params FetchReactionsParams) build_query_values() urllib.Values {
+	mut query_params := urllib.new_values()
+	if after := params.after {
+		query_params.set('after', after.build())
+	}
+	if limit := params.limit {
+		query_params.set('limit', limit.str())
+	}
+	return query_params
+}
+
+// Get a list of users that reacted with this emoji. Returns an array of [user](#User) objects on success.
+pub fn (c Client) fetch_reactions(channel_id Snowflake, message_id Snowflake, params FetchReactionsParams) ![]User {
+	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions/${params.build()}${encode_query(params.build_query_values())}')!.body)! as []json2.Any).map(User.parse(it)!)
+}
+
+// Deletes all reactions on a message. This endpoint requires the `.manage_messages` permission to be present on the current user. Fires a Message Reaction Remove All Gateway event.
+pub fn (c Client) delete_all_reactions(channel_id Snowflake, message_id Snowflake) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions')!
+}
+
+// Deletes all the reactions for a given emoji on a message. This endpoint requires the `.manage_messages` permission to be present on the current user. Fires a Message Reaction Remove Emoji Gateway event.
+pub fn (c Client) delete_all_reactions_for_emoji(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions/${params.build()}')!
+}
+
+// Delete a message. If operating on a guild channel and trying to delete a message that was not sent by the current user, this endpoint requires the `.manage_messages` permission. Fires a Message Delete Gateway event.
 pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, config ReasonParam) ! {
 	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}',
 		reason: config.reason
+	)!
+}
+
+// Delete multiple messages in a single request. This endpoint can only be used on guild channels and requires the `.manage_messages` permission. Fires a Message Delete Bulk Gateway event.
+// Any message IDs given that do not exist or are invalid will count towards the minimum and maximum message count (currently 2 and 100 respectively).
+// > ! This endpoint will not delete messages older than 2 weeks, and will fail with a 400 BAD REQUEST if any message provided is older than that or if any duplicate message IDs are provided.
+pub fn (c Client) delete_messages(channel_id Snowflake, message_ids []Snowflake, config ReasonParam) ! {
+	c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages/bulk-delete',
+		reason: config.reason
+		json: message_ids.map(|s| json2.Any(s.build()))
 	)!
 }

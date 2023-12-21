@@ -17,7 +17,7 @@ pub struct GatewayClient {
 pub:
 	settings    GatewayClientSettings
 	intents     int
-	properties  ?Properties
+	properties  Properties
 	gateway_url string = 'wss://gateway.discord.gg'
 mut:
 	ws                 &websocket.Client = unsafe { nil }
@@ -139,11 +139,7 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 				})!
 				client.logger.info('Sent RESUME')
 			} else {
-				props := if o := client.properties {
-					o
-				} else {
-					Properties{}
-				}
+				props := client.properties
 				client.logger.info('Sending IDENTIFY')
 				mut data := {
 					'token':      json2.Any(client.token)
@@ -315,7 +311,23 @@ pub fn (mut c GatewayClient) run() ! {
 }
 
 pub fn (mut c GatewayClient) launch() ! {
-	c.logger.debug('\nRunning with user-agent: ${c.user_agent}')
+	c.logger.debug(
+		'\n'+
+		'+----- Running discord.v -----+\n'+
+		'|                             |\n'+
+		'| HTTP:                       |-\n'+
+		'| - User agent:               | ${c.user_agent}\n'+
+		'|                             |\n'+
+		'| Gateway:                    |-\n'+
+		'| - Properties:               |--\n'+
+		'| -- Operating system:        | ${c.properties.os}\n'+
+		'| -- Browser:                 | ${c.properties.browser}\n'+
+		'| -- Device:                  | ${c.properties.device}\n'+
+		'|                             |--\n'+
+		'|                             |-\n'+
+		'|                             |\n'+
+		'+-----------------------------+\n'
+	)
 	c.init()!
 	c.run()!
 }

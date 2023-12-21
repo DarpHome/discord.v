@@ -23,7 +23,12 @@ pub const sentinel_bool = unsafe { bool(126) }
 
 pub struct None {}
 
-pub type Option[T] = None | T
+pub type UndefinedOr[T] = None | T
+
+// we are not going to support JavaScript
+pub fn undefined[T]() UndefinedOr[T] {
+	return discord.None{}
+}
 
 // is_sentinel reports whether `target` is sentinel
 pub fn is_sentinel[T](target T) bool {
@@ -47,7 +52,7 @@ pub fn is_sentinel[T](target T) bool {
 		return math.is_nan(f64(target))
 	} $else $if T is None {
 		return true
-	} $else $if T is Option {
+	} $else $if T is UndefinedOr {
 		return target == None{}
 	} $else $if T is time.Duration {
 		return target == discord.sentinel_duration

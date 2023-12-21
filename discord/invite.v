@@ -38,6 +38,7 @@ pub:
 
 // Extra information about an invite, will extend the invite object.
 pub struct InviteMetadata {
+	Invite
 pub:
 	// number of times this invite has been used
 	uses int
@@ -55,6 +56,7 @@ pub fn InviteMetadata.parse(j json2.Any) !InviteMetadata {
 	match j {
 		map[string]json2.Any {
 			return InviteMetadata{
+				Invite: Invite.parse(j)!
 				uses: j['uses']!.int()
 				max_uses: j['max_uses']!.int()
 				max_age: j['max_age']!.int() * time.second

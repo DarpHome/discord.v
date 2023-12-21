@@ -90,25 +90,25 @@ pub:
 pub fn (params ListEntitlementParams) build_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if user_id := params.user_id {
-		query_params.add('user_id', user_id.build())
+		query_params.set('user_id', user_id.build())
 	}
 	if sku_ids := params.sku_ids {
-		query_params.add('sku_ids', sku_ids.map(it.build()).join(','))
+		query_params.set('sku_ids', sku_ids.map(it.build()).join(','))
 	}
 	if before := params.before {
-		query_params.add('before', before.build())
+		query_params.set('before', before.build())
 	}
 	if after := params.after {
-		query_params.add('after', after.build())
+		query_params.set('after', after.build())
 	}
 	if limit := params.limit {
-		query_params.add('limit', limit.str())
+		query_params.set('limit', limit.str())
 	}
 	if guild_id := params.guild_id {
-		query_params.add('guild_id', guild_id.build())
+		query_params.set('guild_id', guild_id.build())
 	}
 	if exclude_ended := params.exclude_ended {
-		query_params.add('exclude_ended', exclude_ended.str())
+		query_params.set('exclude_ended', exclude_ended.str())
 	}
 	return query_params
 }

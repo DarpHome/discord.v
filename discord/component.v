@@ -166,9 +166,9 @@ pub fn Button.parse(j json2.Any) !Button {
 pub struct SelectOption {
 pub:
 	// User-facing name of the option; max 100 characters
-	label string
+	label string @[required]
 	// Dev-defined value of the option; max 100 characters
-	value string
+	value string @[required]
 	// Additional description of the option; max 100 characters
 	description ?string
 	// `id`, `name`, and `animated`
@@ -226,9 +226,9 @@ pub fn SelectOption.parse(j json2.Any) !SelectOption {
 pub struct StringSelect {
 pub:
 	// ID for the select menu; max 100 characters
-	custom_id string
+	custom_id string @[required]
 	// Specified choices in a select menu (only required and available for string selects (type 3); max 25
-	options []SelectOption
+	options []SelectOption @[required]
 	// Placeholder text if nothing is selected; max 150 characters
 	placeholder ?string
 	// Minimum number of items that must be chosen (defaults to 1); min 0, max 25
@@ -352,7 +352,7 @@ pub fn DefaultValue.parse(j json2.Any) !DefaultValue {
 pub struct UserSelect {
 pub:
 	// ID for the select menu; max 100 characters
-	custom_id string
+	custom_id string @[required]
 	// Placeholder text if nothing is selected; max 150 characters
 	placeholder ?string
 	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
@@ -434,7 +434,7 @@ pub fn UserSelect.parse(j json2.Any) !UserSelect {
 pub struct RoleSelect {
 pub:
 	// ID for the select menu; max 100 characters
-	custom_id string
+	custom_id string @[required]
 	// Placeholder text if nothing is selected; max 150 characters
 	placeholder ?string
 	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
@@ -443,7 +443,7 @@ pub:
 	min_values ?int
 	// Maximum number of items that can be chosen (defaults to 1); max 25
 	max_values ?int
-	// Whether select menu is disabled (defaults to false)
+	// Whether select menu is disabled (defaults to `false`)
 	disabled ?bool
 }
 
@@ -516,7 +516,7 @@ pub fn RoleSelect.parse(j json2.Any) !RoleSelect {
 pub struct MentionableSelect {
 pub:
 	// ID for the select menu; max 100 characters
-	custom_id string
+	custom_id string @[required]
 	// Placeholder text if nothing is selected; max 150 characters
 	placeholder ?string
 	// List of default values for auto-populated select menu components; number of default values must be in the range defined by `min_values` and `max_values`
@@ -595,7 +595,7 @@ pub fn MentionableSelect.parse(j json2.Any) !MentionableSelect {
 pub struct ChannelSelect {
 pub:
 	// ID for the select menu; max 100 characters
-	custom_id string
+	custom_id string @[required]
 	// List of channel types to include in the channel select component
 	channel_types ?[]ChannelType
 	// Placeholder text if nothing is selected; max 150 characters
@@ -606,7 +606,7 @@ pub:
 	min_values ?int
 	// Maximum number of items that can be chosen (defaults to 1); max 25
 	max_values ?int
-	// Whether select menu is disabled (defaults to false)
+	// Whether select menu is disabled (defaults to `false`)
 	disabled ?bool
 }
 

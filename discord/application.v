@@ -431,7 +431,7 @@ pub:
 	// Description of the app
 	description ?string
 	// Role connection verification URL for the app
-	role_connections_verification_url ?string
+	role_connections_verification_url ?string = sentinel_string
 	// Settings for the app's default in-app authorization link, if enabled
 	install_params ?InstallParams
 	// App's public flags
@@ -441,7 +441,7 @@ pub:
 	// Default rich presence invite cover image for the app
 	cover_image ?Image = sentinel_image
 	// Interactions endpoint URL for the app
-	interactions_endpoint_url ?string
+	interactions_endpoint_url ?string = sentinel_string
 	// List of tags describing the content and functionality of the app (max of 20 characters per tag). Max of 5 tags.
 	tags ?[]string
 }
@@ -455,7 +455,11 @@ pub fn (params EditApplicationParams) build() json2.Any {
 		r['description'] = description
 	}
 	if role_connections_verification_url := params.role_connections_verification_url {
-		r['role_connections_verification_url'] = role_connections_verification_url
+		if !is_sentinel(role_connections_verification_url) {
+			r['role_connections_verification_url'] = role_connections_verification_url
+		}
+	} else {
+		r['role_connections_verification_url'] = json2.null
 	}
 	if install_params := params.install_params {
 		r['install_params'] = install_params.build()
@@ -478,7 +482,11 @@ pub fn (params EditApplicationParams) build() json2.Any {
 		r['cover_image'] = json2.Null{}
 	}
 	if interactions_endpoint_url := params.interactions_endpoint_url {
-		r['interactions_endpoint_url'] = interactions_endpoint_url
+		if !is_sentinel(interactions_endpoint_url) {
+			r['interactions_endpoint_url'] = interactions_endpoint_url
+		}
+	} else {
+		r['interactions_endpoint_url'] = json2.null
 	}
 	if tags := params.tags {
 		r['tags'] = json2.Any(tags.map(json2.Any(it)))

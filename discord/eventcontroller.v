@@ -132,6 +132,7 @@ pub fn (mut a Awaitable[T]) do() ?T {
 }
 
 // `wait` returns Awaitable that can be used to get event
+// > ! Do not use that directly in events, please take a reference using `controller := &events.creator.events.on_x`
 pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] {
 	id := ec.generate_id()
 	ec.wait_fors[id] = EventWaiter[T]{

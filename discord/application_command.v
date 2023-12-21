@@ -469,7 +469,7 @@ pub:
 pub fn (c Client) fetch_global_application_commands(application_id Snowflake, params FetchGlobalApplicationCommandsParams) ![]ApplicationCommand {
 	mut query_params := urllib.new_values()
 	if with_localizations := params.with_localizations {
-		query_params.add('with_localizations', with_localizations.str())
+		query_params.set('with_localizations', with_localizations.str())
 	}
 	return (json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/commands${encode_query(query_params)}')!.body)! as []json2.Any).map(ApplicationCommand.parse(it)!)
 }

@@ -15,7 +15,7 @@ pub fn (pe PartialEmoji) build() json2.Any {
 		'id':   if id := pe.id {
 			json2.Any(id.build())
 		} else {
-			json2.Any(json2.null)
+			json2.null
 		}
 		'name': pe.name
 	}
@@ -28,10 +28,13 @@ pub fn (pe PartialEmoji) build() json2.Any {
 pub fn PartialEmoji.parse(j json2.Any) !PartialEmoji {
 	match j {
 		map[string]json2.Any {
-			id := j['id']!
 			return PartialEmoji{
-				id: if id !is json2.Null {
-					?Snowflake(Snowflake.parse(id)!)
+				id: if s := j['id'] {
+					if s !is json2.Null {
+						?Snowflake(Snowflake.parse(s)!)
+					} else {
+						none
+					}
 				} else {
 					none
 				}
