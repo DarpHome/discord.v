@@ -62,26 +62,24 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 		return
 	}
 	if ec.listeners.len == 1 {
-		/*t := spawn fn [options] [T](f EventListener[T], e T) {
+		spawn fn [T](f EventListener[T], e T, options EmitOptions) {
 			f(e) or {
 				if g := options.error_handler {
 					g(0, err)
 				}
 			}
-		}(ec.listeners.values()[0], e)
-		t.wait()*/
-		f := (ec.listeners.values()[0])
+		}(ec.listeners.values()[0], e, options)
+		
+		/* f := (ec.listeners.values()[0])
 		f(e) or {
 			if g := options.error_handler {
 				g(0, err)
 			}
-		}
+		} */
 		return
 	}
 	mut ts := []thread{}
 	for i, l in ec.listeners {
-
-		eprintln('spawning...')
 		ts << spawn fn [options] [T](f EventListener[T], j int, e T) {
 			f(e) or {
 				if g := options.error_handler {
@@ -89,11 +87,8 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 				}
 			}
 		}(l, i, e)
-		eprintln('spawned')
 	}
-	eprintln('kek...')
 	ts.wait()
-	eprintln('blocked?')
 }
 
 @[params]

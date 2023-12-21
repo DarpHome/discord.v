@@ -433,8 +433,7 @@ pub:
 pub fn Guild.parse(j json2.Any) !Guild {
 	match j {
 		map[string]json2.Any {
-			icon := j['icon']!
-			icon_hash := j['icon_hash']!
+			icon := j['icon'] or { return error('expected guild.icon to be present') }
 			splash := j['splash']!
 			discovery_splash := j['discovery_splash']!
 			afk_channel_id := j['afk_channel_id']!
@@ -454,8 +453,12 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				} else {
 					none
 				}
-				icon_hash: if icon_hash is string {
-					?string(icon_hash)
+				icon_hash: if s := j['icon_hash'] {
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
 				} else {
 					none
 				}

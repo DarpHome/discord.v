@@ -73,12 +73,12 @@ fn (mut c GatewayClient) raw_dispatch(name string, data json2.Any) ! {
 		c.events.on_raw_event.emit(event, error_handler: c.error_logger())
 		return
 	}
-	if !(c.process_dispatch(event)!) {
-		/* if c.settings.has(.ignore_unknown_events) {
+	if !c.process_dispatch(event)! {
+		if c.settings.has(.ignore_unknown_events) {
 			return
 		}
 		c.logger.debug('Unknown event ${name}, emitting raw instead')
-		c.events.on_raw_event.emit(event, error_handler: c.error_logger()) */
+		c.events.on_raw_event.emit(event, error_handler: c.error_logger())
 	}
 	return
 }
@@ -187,14 +187,15 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 				if seq := message.seq {
 					client.sequence = seq
 				}
-				fn (creatorp voidptr, msg WSMessage) {
+				/* fn (creatorp voidptr, msg WSMessage) {
 					mut creator := unsafe { &GatewayClient(creatorp) }
 					creator.raw_dispatch(msg.event, msg.data) or {
 						creator.logger.error('Dispatching ${msg.event} failed: ${err}')
 					}
-					println('blocked??')
-				}(voidptr(client), message)
-				println('no?')
+				}(voidptr(client), message) */
+				client.raw_dispatch(message.event, message.data) or {
+					client.logger.error('Dispatching ${message.event} failed: ${err}')
+				}
 				return
 			}
 			.reconnect {

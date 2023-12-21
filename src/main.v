@@ -3,7 +3,6 @@ module main
 import discord
 import os
 import strconv
-import x.json2
 
 fn main() {
 	token := os.read_lines('token.txt')![0]
@@ -73,67 +72,42 @@ fn main() {
 			match args[0] or { '' } {
 				'square' {
 					if args.len != 2 {
-						event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
-							json: {
-								'content': json2.Any('Specify argument, e.g. !square 7')
-							}
-						)!
+						event.creator.create_message(event.message.channel_id, content: 'Specify argument, e.g. !square 7')!
 						return
 					}
 					i := strconv.atoi(args[1]) or {
-						event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
-							json: {
-								'content': json2.Any('Invalid integer')
-							}
-						)!
+						event.creator.create_message(event.message.channel_id, content: 'Invalid integer')!
 						return
 					}
-					event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
-						json: {
-							'content':           json2.Any((i * i).str())
-							'message_reference': {
-								'message_id': json2.Any(event.message.id)
-							}
-						}
-					)!
+					event.creator.create_message(event.message.channel_id, content: (i * i).str(), message_reference: discord.MessageReference{
+						message_id: event.message.id
+					})!
 				}
 				'ping' {
-					event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
-						json: {
-							'content':           json2.Any('Pong!')
-							'message_reference': {
-								'message_id': json2.Any(event.message.id)
-							}
-						}
-					)!
+					event.creator.create_message(event.message.channel_id, content: 'Pong', message_reference: discord.MessageReference{
+						message_id: event.message.id
+					})!
 				}
 				'guild' {
 					guild_id := event.message.guild_id
 					dump(event.creator.fetch_guild(guild_id or {
-						event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
-							json: {
-								'content':           json2.Any('Not an guild')
-								'message_reference': {
-									'message_id': json2.Any(event.message.id)
-								}
-							}
-						)!
-						return
-					})!)
-					event.creator.request(.post, '/channels/${event.message.channel_id}/messages',
-						json: {
-							'content':           json2.Any('Dumped!')
-							'message_reference': {
-								'message_id': json2.Any(event.message.id)
-							}
+						event.creator.create_message(event.message.channel_id, content: 'Not an guild', message_reference: discord.MessageReference{
+							message_id: event.message.id
+						}) or {
+							eprintln('message ${err}')
+							return err
 						}
-					)!
+						return
+					}) or {
+						eprintln('guild ${err}')
+						return
+					})
+					event.creator.create_message(event.message.channel_id, content: 'Dumped!', message_reference: discord.MessageReference{
+						message_id: event.message.id
+					})!
 				}
 				else {}
 			}
 	})
-	/*c.events.on_raw_event.listen(fn (event discord.DispatchEvent) ! {
-		dump(event.name)
-	})*/
 	c.launch()!
 }

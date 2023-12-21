@@ -1,6 +1,8 @@
 module discord
 
+import arrays
 import encoding.base64
+import net.http
 import net.urllib
 import time
 import x.json2
@@ -1054,6 +1056,164 @@ pub fn (c Client) fetch_messages(channel_id Snowflake, params GetChannelMessages
 
 pub fn (c Client) fetch_message(channel_id Snowflake, message_id Snowflake) !Message {
 	return Message.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}')!.body)!)!
+}
+
+pub enum AllowedMentionType {
+	// Controls role mentions
+	roles
+	// Controls user mentions
+	users
+	// Controls @everyone and @here mentions
+	everyone
+}
+
+pub fn (amt AllowedMentionType) build() string {
+	return match amt {
+		.roles { 'roles' }
+		.users { 'users' }
+		.everyone { 'everyone' }
+	}
+}
+
+pub struct AllowedMentions {
+pub:
+	// An array of allowed mention types to parse from the content.
+	parse ?[]AllowedMentionType
+	// Array of role_ids to mention (Max size of 100)
+	roles ?[]Snowflake
+	// Array of user_ids to mention (Max size of 100)
+	users ?[]Snowflake
+	// For replies, whether to mention the author of the message being replied to (default false)
+	replied_user ?bool
+}
+
+pub fn (am AllowedMentions) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if parse := am.parse {
+		r['parse'] = parse.map(|p| json2.Any(p.build()))
+	}
+	if roles := am.roles {
+		r['roles'] = roles.map(|s| json2.Any(s.build()))
+	}
+	if users := am.users {
+		r['users'] = users.map(|s| json2.Any(s.build()))
+	}
+	if replied_user := am.replied_user {
+		r['replied_user'] = replied_user
+	}
+	return r
+}
+
+pub struct File {
+pub:
+	filename string @[required]
+	content_type string = 'application/octet-stream'
+	data []u8 @[required]
+	description ?string
+}
+
+pub fn (f File) build(i int) json2.Any {
+	mut r := {
+		'id': json2.Any(i)
+		'filename': f.filename
+	}
+	if description := f.description {
+		r['description'] = description
+	}
+	return r
+}
+
+@[params]
+pub struct CreateMessageParams {
+pub:
+	// Message contents (up to 2000 characters)
+	content ?string
+	// Can be used to verify a message was sent (up to 25 characters). Value will appear in the Message Create event.
+	nonce ?Nonce
+	// `true` if this is a TTS message
+	tts ?bool
+	// Up to 10 embeds (up to 6000 characters)
+	embeds ?[]Embed
+	// Allowed mentions for the message
+	allowed_mentions ?AllowedMentions
+	// Include to make your message a reply
+	message_reference ?MessageReference
+	// Components to include with the message
+	components ?[]Component
+	// IDs of up to 3 stickers in the server to send in the message
+	sticker_ids ?[]Snowflake
+	// Contents of the file being sent. See Uploading Files
+	files ?[]File
+	// Message flags combined as a bitfield (only SUPPRESS_EMBEDS and SUPPRESS_NOTIFICATIONS can be set)
+	flags ?MessageFlags
+}
+
+pub fn (params CreateMessageParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if content := params.content {
+		r['content'] = content
+	}
+	if nonce := params.nonce {
+		r['nonce'] = match nonce {
+			int { json2.Any(nonce) }
+			string { nonce }
+		}
+	}
+	if tts := params.tts {
+		r['tts'] = tts
+	}
+	if embeds := params.embeds {
+		r['embeds'] = embeds.map(|e| e.build())
+	}
+	if allowed_mentions := params.allowed_mentions {
+		r['allowed_mentions'] = allowed_mentions.build()
+	}
+	if message_reference := params.message_reference {
+		r['message_reference'] = message_reference.build()
+	}
+	if components := params.components {
+		r['components'] = components.map(|c| c.build())
+	}
+	if sticker_ids := params.sticker_ids {
+		r['sticker_ids'] = sticker_ids.map(|s| json2.Any(s.build()))
+	}
+	if files := params.files {
+		r['attachments'] = arrays.map_indexed(files, fn (i int, f File) json2.Any {
+			return f.build(i)
+		})
+	}
+	if flags := params.flags {
+		r['flags'] = int(flags)
+	}
+	return r
+}
+
+pub fn (c Client) create_message(channel_id Snowflake, params CreateMessageParams) !Message {
+	if files := params.files {
+		println('ok')
+		mut mp := {
+			'payload_json': [
+				http.FileData{
+					content_type: 'application/json'
+					data: params.build().json_str()
+				},
+			],
+		}
+		for i, file in files {
+			mp['files[$i]'] = [http.FileData{
+				filename: file.filename
+				content_type: file.content_type
+				data: file.data.bytestr()
+			}]
+		}
+		body, boundary := multipart_form_body(mp)
+		println('sending')
+		return Message.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages', body: body, common_headers: {
+			.content_type: 'multipart/form-data; boundary="${boundary}"'
+		})!.body)!)!
+	} else {
+		return Message.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages', json: params.build())!.body)!)!
+	}
 }
 
 pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, config ReasonParam) ! {
