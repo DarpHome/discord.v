@@ -44,8 +44,8 @@ fn run_pingpong(token string) ! {
 }
 ```
 
+> Don't forget toggle `Message Content` intent in Developer Portal! Otherwise, your bot will shutdown with error:
 <blockquote>
-Don't forget toggle `Message Content` intent in Developer Portal! Otherwise, your bot will shutdown with error:
 ```
 ...
 2023-12-21 18:46:20.237000 [ERROR] Websocket closed with 4014 Disallowed intent(s).
