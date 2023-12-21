@@ -7,7 +7,10 @@ fn main() {
 		eprintln('No token specified')
 		exit(1)
 	}
-	match os.args[0] {
+	match os.args[1] or {
+		eprintln('No example specified')
+		exit(1)
+	} {
 		'pingpong' {
 			run_pingpong(token)!
 		}
