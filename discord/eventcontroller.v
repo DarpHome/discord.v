@@ -69,7 +69,7 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 				}
 			}
 		}(ec.listeners.values()[0], e, options)
-		
+
 		/* f := (ec.listeners.values()[0])
 		f(e) or {
 			if g := options.error_handler {

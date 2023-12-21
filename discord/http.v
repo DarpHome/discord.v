@@ -123,19 +123,9 @@ fn encode_query(vs urllib.Values) string {
 	return '?${r}'
 }
 
-pub fn multipart_form_body(/* form map[string]string, */files map[string][]http.FileData) (string, string) {
-	rboundary := hex.encode(rand.bytes(32) or {
-		rand.ascii(32).bytes()
-	})
+pub fn multipart_form_body(files map[string][]http.FileData) (string, string) {
+	rboundary := hex.encode(rand.bytes(32) or { rand.ascii(32).bytes() })
 	mut sb := strings.new_builder(1024)
-	/* for name, value in form {
-		sb.write_string('\r\n--')
-		sb.write_string(rboundary)
-		sb.write_string('\r\nContent-Disposition: form-data; name="')
-		sb.write_string(name)
-		sb.write_string('"\r\n\r\n')
-		sb.write_string(value)
-	} */
 	for name, fs in files {
 		for f in fs {
 			sb.write_string('\r\n--')
@@ -148,6 +138,7 @@ pub fn multipart_form_body(/* form map[string]string, */files map[string][]http.
 				sb.write_string(f.filename)
 				sb.write_string('"')
 			}
+
 			sb.write_string('\r\nContent-Type: ')
 			sb.write_string(f.content_type)
 			sb.write_string('\r\n\r\n')

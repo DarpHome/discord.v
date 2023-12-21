@@ -26,7 +26,5 @@ pub fn extract_id_from_token(token string) !Snowflake {
 	if id == '' {
 		return error('invalid base64')
 	}
-	return Snowflake(strconv.parse_uint(id, 10, 64) or {
-		return error('not a id: ${err}')
-	})
+	return Snowflake(strconv.parse_uint(id, 10, 64) or { return error('not a id: ${err}') })
 }

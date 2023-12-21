@@ -46,10 +46,10 @@ fn (config ClientConfig) get_level() log.Level {
 pub struct BotConfig {
 	ClientConfig
 pub:
-	presence   ?Presence
-	properties Properties
-	intents    Intents
-	settings   GatewayClientSettings
+	presence      ?Presence
+	properties    Properties
+	intents       Intents
+	settings      GatewayClientSettings
 	read_timeout  ?time.Duration
 	write_timeout ?time.Duration
 }

@@ -64,50 +64,66 @@ fn main() {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})
 	c.events.on_message_create.listen(fn (event discord.MessageCreateEvent) ! {
-			prefix := 'dv!'
-			if !event.message.content.starts_with(prefix) {
-				return
+		prefix := 'dv!'
+		if !event.message.content.starts_with(prefix) {
+			return
+		}
+		args := event.message.content[prefix.len..].split(' ')
+		match args[0] or { '' } {
+			'square' {
+				if args.len != 2 {
+					event.creator.create_message(event.message.channel_id,
+						content: 'Specify argument, e.g. !square 7'
+					)!
+					return
+				}
+				i := strconv.atoi(args[1]) or {
+					event.creator.create_message(event.message.channel_id,
+						content: 'Invalid integer'
+					)!
+					return
+				}
+				event.creator.create_message(event.message.channel_id,
+					content: (i * i).str()
+					message_reference: discord.MessageReference{
+						message_id: event.message.id
+					}
+				)!
 			}
-			args := event.message.content[prefix.len..].split(' ')
-			match args[0] or { '' } {
-				'square' {
-					if args.len != 2 {
-						event.creator.create_message(event.message.channel_id, content: 'Specify argument, e.g. !square 7')!
-						return
-					}
-					i := strconv.atoi(args[1]) or {
-						event.creator.create_message(event.message.channel_id, content: 'Invalid integer')!
-						return
-					}
-					event.creator.create_message(event.message.channel_id, content: (i * i).str(), message_reference: discord.MessageReference{
+			'ping' {
+				event.creator.create_message(event.message.channel_id,
+					content: 'Pong'
+					message_reference: discord.MessageReference{
 						message_id: event.message.id
-					})!
-				}
-				'ping' {
-					event.creator.create_message(event.message.channel_id, content: 'Pong', message_reference: discord.MessageReference{
-						message_id: event.message.id
-					})!
-				}
-				'guild' {
-					guild_id := event.message.guild_id
-					dump(event.creator.fetch_guild(guild_id or {
-						event.creator.create_message(event.message.channel_id, content: 'Not an guild', message_reference: discord.MessageReference{
+					}
+				)!
+			}
+			'guild' {
+				guild_id := event.message.guild_id
+				dump(event.creator.fetch_guild(guild_id or {
+					event.creator.create_message(event.message.channel_id,
+						content: 'Not an guild'
+						message_reference: discord.MessageReference{
 							message_id: event.message.id
-						}) or {
-							eprintln('message ${err}')
-							return err
 						}
-						return
-					}) or {
-						eprintln('guild ${err}')
-						return
-					})
-					event.creator.create_message(event.message.channel_id, content: 'Dumped!', message_reference: discord.MessageReference{
+					) or {
+						eprintln('message ${err}')
+						return err
+					}
+					return
+				}) or {
+					eprintln('guild ${err}')
+					return
+				})
+				event.creator.create_message(event.message.channel_id,
+					content: 'Dumped!'
+					message_reference: discord.MessageReference{
 						message_id: event.message.id
-					})!
-				}
-				else {}
+					}
+				)!
 			}
+			else {}
+		}
 	})
 	c.launch()!
 }

@@ -114,13 +114,13 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 }
 
 fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
-	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, mut client &GatewayClient) ! {
+	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, mut client GatewayClient) ! {
 		if reason != 'closed by client' {
 			client.close_code = code
 			client.logger.error('Websocket closed with ${code} ${reason}')
 		}
 	}, &mut c)
-	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, mut client &GatewayClient) ! {
+	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, mut client GatewayClient) ! {
 		message := decode_websocket_message(m)!
 		if !client.ready {
 			if message.opcode != .hello {
@@ -278,7 +278,8 @@ fn (c GatewayClient) websocket_opts() websocket.ClientOpt {
 }
 
 pub fn (mut c GatewayClient) init() ! {
-	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') + '?v=10&encoding=json', c.websocket_opts())!
+	mut ws := websocket.new_client(c.gateway_url.trim_right('/?') + '?v=10&encoding=json',
+		c.websocket_opts())!
 	c.ws = ws
 	c.ready = false
 	c.init_ws(mut ws)
