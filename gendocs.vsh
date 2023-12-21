@@ -1,7 +1,7 @@
 import os
 
 println('Generating docs...')
-if os.system('v doc -f html -o docs/ -color -readme discord/') != 0 {
+if os.system('v doc -color -f html -o docs/ -readme discord/') != 0 {
 	eprintln('HTML docs generation failed')
 	exit(1)
 } else {

@@ -106,7 +106,7 @@ fn run_testbot(token string) ! {
 						}
 					) or {
 						eprintln('message ${err}')
-						return err
+						return
 					}
 					return
 				}) or {
