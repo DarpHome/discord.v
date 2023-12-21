@@ -62,20 +62,20 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 		return
 	}
 	if ec.listeners.len == 1 {
-		t := spawn fn [options] [T](f EventListener[T], e T) {
+		/*t := spawn fn [options] [T](f EventListener[T], e T) {
 			f(e) or {
 				if g := options.error_handler {
 					g(0, err)
 				}
 			}
 		}(ec.listeners.values()[0], e)
-		t.wait()
-		/*f := (ec.listeners.values()[0])
+		t.wait()*/
+		f := (ec.listeners.values()[0])
 		f(e) or {
 			if g := options.error_handler {
 				g(0, err)
 			}
-		}*/
+		}
 		return
 	}
 	mut ts := []thread{}

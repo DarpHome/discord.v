@@ -8,7 +8,7 @@ import x.json2
 fn main() {
 	token := os.read_lines('token.txt')![0]
 	mut c := discord.bot(token,
-		intents: .message_content | .guild_messages | .guild_message_typing | .direct_message_typing | .guild_message_reactions | .direct_message_reactions
+		intents: .message_content | .guild_messages | .guild_message_reactions | .direct_message_reactions
 		presence: discord.Presence{
 			activities: [
 				discord.Activity{
