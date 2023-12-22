@@ -1325,7 +1325,7 @@ pub:
 	limit ?int
 }
 
-pub fn (params ListArchivedThreadsParams) build_query_values() urllib.Values {
+pub fn (params ListJoinedPrivateArchivedThreadsParams) build_query_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if before := params.before {
 		query_params.set('before', before.build())
@@ -1337,6 +1337,6 @@ pub fn (params ListArchivedThreadsParams) build_query_values() urllib.Values {
 }
 
 // Returns archived threads in the channel that are of type `.private_threads`, and the user has joined. Threads are ordered by their `id`, in descending order. Requires the `.read_message_history` permission.
-pub fn (c Client) list_private_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
+pub fn (c Client) list_joined_private_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
 	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/users/@me/threads/archived/private${encode_query(params.build_query_values())}')!.body)!)!
 }
