@@ -12,15 +12,22 @@ fn run_concurrency(token string) ! {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})
 	c.events.on_message_create.listen(fn (event discord.MessageCreateEvent) ! {
-		match event.message.content {
-			'!mystery' {
+		content := event.message.content
+		if !content.starts_with('!') {
+			return
+		}
+		tmp := content[1..].split(' ')
+		command := tmp[0]
+		// args := tmp[1..]
+		match command {
+			'mystery' {
 				message := event.creator.create_message(event.message.channel_id,
 					content: 'I will delete that messsge after 5 seconds...'
 				)!
 				time.sleep(5 * time.second)
 				event.creator.delete_message(message.channel_id, message.id)!
 			}
-			'!sum' {
+			'sum' {
 				event.creator.create_message(event.message.channel_id,
 					content: "OK, Let's sum two numbers.\nType your first number, you have 10 seconds..."
 				)!
@@ -65,6 +72,22 @@ fn run_concurrency(token string) ! {
 				}
 				event.creator.create_message(event.message.channel_id,
 					content: 'The sum of ${x} and ${y} is ${x + y}.'
+				)!
+			}
+			'turn-off-embeds' {
+				message := event.creator.create_message(event.message.channel_id,
+					content: 'I will turn off embeds in your message after 10 seconds...'
+				)!
+				time.sleep(10 * time.second)
+				event.creator.edit_message(event.message.channel_id, message.id,
+					content: '5 seconds...'
+				)!
+				time.sleep(5 * time.second)
+				event.creator.edit_message(event.message.channel_id, event.message.id,
+					flags: .suppress_embeds
+				)!
+				event.creator.edit_message(event.message.channel_id, message.id,
+					content: 'Turned off!'
 				)!
 			}
 			else {}

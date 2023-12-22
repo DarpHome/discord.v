@@ -718,7 +718,7 @@ pub fn (mr MessageReference) build() json2.Any {
 	return r
 }
 
-@[flags]
+@[flag]
 pub enum MessageFlags {
 	crossposted
 	is_crosspost
@@ -1290,6 +1290,88 @@ pub fn (c Client) delete_all_reactions(channel_id Snowflake, message_id Snowflak
 pub fn (c Client) delete_all_reactions_for_emoji(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
 	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions/${params.build()}')!
 }
+
+@[params]
+pub struct EditMessageParams {
+pub:
+	// Message contents (up to 2000 characters)
+	content ?string = sentinel_string
+	// Up to 10 embeds (up to 6000 characters)
+	embeds ?[]Embed
+	// Edit the flags of a message (only SUPPRESS_EMBEDS can currently be set/unset)
+	flags ?MessageFlags
+	// Allowed mentions for the message
+	allowed_mentions ?AllowedMentions
+	// Components to include with the message
+	components ?[]Component
+	// Contents of the file being sent/edited. See Uploading Files
+	files ?[]File
+}
+
+pub fn (params EditMessageParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if content := params.content {
+		if !is_sentinel(content) {
+			r['content'] = content
+		}
+	} else {
+		r['content'] = json2.null
+	}
+	if embeds := params.embeds {
+		r['embeds'] = embeds.map(|e| e.build())
+	}
+	if flags := params.flags {
+		r['flags'] = int(flags)
+	}
+	if allowed_mentions := params.allowed_mentions {
+		r['allowed_mentions'] = allowed_mentions.build()
+	}
+	if components := params.components {
+		r['components'] = components.map(|c| c.build())
+	}
+	if files := params.files {
+		r['attachments'] = arrays.map_indexed(files, fn (i int, f File) json2.Any {
+			return f.build(i)
+		})
+	}
+	return r
+}
+
+// Edit a previously sent message. The fields `content`, `embeds`, and `flags` can be edited by the original message author. Other users can only edit `flags` and only if they have the `.manage_messages` permission in the corresponding channel. When specifying flags, ensure to include all previously set flags/bits in addition to ones that you are modifying. Only `flags` documented in the table below may be modified by users (unsupported flag changes are currently ignored without error).
+// When the `content` field is edited, the `mentions` array in the message object will be reconstructed from scratch based on the new content. The `allowed_mentions` field of the edit request controls how this happens. If there is no explicit `allowed_mentions` in the edit request, the content will be parsed with default allowances, that is, without regard to whether or not an `allowed_mentions` was present in the request that originally created the message.
+// Returns a [message](#Message) object. Fires a Message Update Gateway event.
+pub fn (c Client) edit_message(channel_id Snowflake, message_id Snowflake, params EditMessageParams) !Message {
+	if fs := params.files {
+		mut mp := {
+			'payload_json': [
+				http.FileData{
+					content_type: 'application/json'
+					data: params.build().json_str()
+				},
+			]
+		}
+		for i, file in fs {
+			mp['files[${i}]'] = [
+				http.FileData{
+					filename: file.filename
+					content_type: file.content_type
+					data: file.data.bytestr()
+				},
+			]
+		}
+		body, boundary := multipart_form_body(mp)
+		return Message.parse(json2.raw_decode(c.request(.patch, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}',
+			body: body
+			common_headers: {
+				.content_type: 'multipart/form-data; boundary="${boundary}"'
+			}
+		)!.body)!)!
+	}
+	return Message.parse(json2.raw_decode(c.request(.patch, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}',
+		json: params.build()
+	)!.body)!)!
+}
+
 
 // Delete a message. If operating on a guild channel and trying to delete a message that was not sent by the current user, this endpoint requires the `.manage_messages` permission. Fires a Message Delete Gateway event.
 pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, config ReasonParam) ! {

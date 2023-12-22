@@ -312,7 +312,7 @@ pub fn (mut c GatewayClient) run() ! {
 
 pub fn (mut c GatewayClient) launch() ! {
 	// vfmt off
-	c.logger.debug('\n' +
+	c.logger.info('\n' +
 		'+----- Running discord.v -----+\n' +
 		'|                             |\n' +
 		'| HTTP:                       |-\n' +
@@ -326,7 +326,7 @@ pub fn (mut c GatewayClient) launch() ! {
 		'|                             |--\n' +
 		'|                             |-\n' +
 		'|                             |\n' +
-		'+-----------------------------+\n')
+		'+-----------------------------+')
 	// vfmt on
 	c.init()!
 	c.run()!
