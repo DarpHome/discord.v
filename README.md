@@ -27,8 +27,12 @@ module main
 
 import discord
 
-fn run_pingpong(token string) ! {
-	mut c := discord.bot(token,
+fn main() {
+	mut c := discord.bot(
+		os.getenv_opt('DISCORD_BOT_TOKEN') or {
+			eprintln('No token specified')
+			exit(1)
+		}
 		intents: .message_content | .guild_messages | .direct_messages
 	)
 	c.events.on_ready.listen(fn (event discord.ReadyEvent) ! {

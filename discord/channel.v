@@ -947,3 +947,396 @@ pub fn (c Client) delete_channel(channel_id Snowflake, params ReasonParam) !Chan
 		reason: params.reason
 	)!.body)!)!
 }
+
+@[params]
+pub struct EditChannelPermissionsParams {
+pub:
+	// the bitwise value of all allowed permissions (default `0`)
+	allow ?Permissions = sentinel_permissions
+	// the bitwise value of all disallowed permissions (default `0`)
+	deny ?Permissions = sentinel_permissions
+	// 0 for a role or 1 for a member
+	typ PermissionOverwriteType @[required]
+	reason ?string
+}
+
+pub fn (params EditChannelPermissionsParams) build() json2.Any {
+	mut r := {
+		'type': json2.Any(int(params.typ))
+	}
+	if allow := params.allow {
+		if !is_sentinel(allow) {
+			r['allow'] = u64(allow).str()
+		}
+	} else {
+		r['allow'] = json2.null
+	}
+	if deny := params.deny {
+		if !is_sentinel(deny) {
+			r['deny'] = u64(deny).str()
+		}
+	} else {
+		r['deny'] = json2.null
+	}
+	return r
+}
+
+// Edit the channel permission overwrites for a user or role in a channel. Only usable for guild channels. Requires the `.manage_roles` permission. Only permissions your bot has in the guild or parent channel (if applicable) can be allowed/denied (unless your bot has a `.manage_roles` overwrite in the channel). Fires a Channel Update Gateway event. For more information about permissions, see [Permissions](#Permissions).
+pub fn (c Client) edit_channel_permissions(channel_id Snowflake, overwrite_id Snowflake, params EditChannelPermissionsParams) ! {
+	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/overwrites/${urllib.path_escape(overwrite_id.build())}', json: params.build(), reason: params.reason)!
+}
+
+// Returns a list of invite objects (with invite metadata) for the channel. Only usable for guild channels. Requires the `.manage_channels` permission.
+pub fn (c Client) fetch_invites(channel_id Snowflake) ![]InviteMetadata {
+	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/invites')!.body)! as []json2.Any).map(InviteMetadata.parse(it)!)
+}
+
+@[params]
+pub struct CreateInviteParams {
+pub:
+	// duration of invite in seconds before expiry, or 0 for never. between 0 and 604800 (7 days)
+	max_age ?time.Duration
+	// max number of uses or 0 for unlimited. between 0 and 100
+	max_uses ?int
+	// whether this invite only grants temporary membership
+	temporary ?bool
+	// if true, don't try to reuse a similar invite (useful for creating many unique one time use invites)
+	unique ?bool
+	// the type of target for this voice channel invite
+	target_type ?InviteTargetType
+	// the id of the user whose stream to display for this invite, required if target_type is 1, the user must be streaming in the channel
+	target_user_id ?Snowflake
+	// the id of the embedded application to open for this invite, required if target_type is 2, the application must have the EMBEDDED flag
+	target_application_id ?Snowflake
+}
+
+pub fn (params CreateInviteParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if max_age := params.max_age {
+		r['max_age'] = max_age / time.second
+	}
+	if max_uses := params.max_uses {
+		r['max_uses'] = max_uses
+	}
+	if temporary := params.temporary {
+		r['temporary'] = temporary
+	}
+	if unique := params.unique {
+		r['unique'] = unique
+	}
+	if target_type := params.target_type {
+		r['target_type'] = int(target_type)
+	}
+	if target_user_id := params.target_user_id {
+		r['target_user_id'] = target_user_id.build()
+	}
+	if target_application_id := params.target_application_id {
+		r['target_application_id'] = target_application_id.build()
+	}
+	return r
+}
+
+// Create a new invite object for the channel. Only usable for guild channels. Requires the `.create_instant_invite` permission. All JSON parameters for this route are optional. Returns an invite object. Fires an Invite Create Gateway event.
+pub fn (c Client) create_invite(channel_id Snowflake, params CreateInviteParams) !Invite {
+	return Invite.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/invites', json: params.build())!.body)!)!
+}
+
+// Delete a channel permission overwrite for a user or role in a channel. Only usable for guild channels. Requires the `.manage_roles` permission. Fires a Channel Update Gateway event. For more information about permissions, see [Permissions](#Permissions).
+pub fn (c Client) delete_channel_permission(channel_id Snowflake, overwrite_id Snowflake, params ReasonParam) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/overwrites/${urllib.path_escape(overwrite_id.build())}', reason: params.reason)!
+}
+
+pub struct FollowedChannel {
+pub:
+	// source channel id
+	channel_id Snowflake
+	// created target webhook id
+	webhook_id Snowflake
+}
+
+pub fn FollowedChannel.parse(j json2.Any) !FollowedChannel {
+	match j {
+		map[string]json2.Any {
+			return FollowedChannel{
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				webhook_id: Snowflake.parse(j['webhook_id']!)!
+			}
+		}
+		else {
+			return error('expected follow channel to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// Follow an Announcement Channel to send messages to a target channel. Requires the `.manage_webhooks` permission in the target channel. Fires a Webhooks Update Gateway event for the target channel.
+pub fn (c Client) follow_announcement_channel(channel_id Snowflake, webhook_channel_id Snowflake) !FollowedChannel {
+	return FollowedChannel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/followers', json: {
+		'webhook_channel_id': json2.Any(webhook_channel_id.build())
+	})!.body)!)!
+}
+
+// Post a typing indicator for the specified channel, which expires after 10 seconds. Fires a Typing Start Gateway event.
+// Generally bots should not use this route. However, if a bot is responding to a command and expects the computation to take a few seconds, this endpoint may be called to let the user know that the bot is processing their message.
+pub fn (c Client) trigger_typing(channel_id Snowflake) ! {
+	c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/typing')!
+}
+
+@[params]
+pub struct GroupDMAddRecipientParams {
+pub:
+	// access token of a user that has granted your app the gdm.join scope
+	access_token string @[required]
+	// nickname of the user being added
+	nickname ?string
+}
+
+pub fn (params GroupDMAddRecipientParams) build() json2.Any {
+	mut r := {
+		'access_token': json2.Any(params.access_token)
+	}
+	if nickname := params.nickname {
+		r['nickname'] = nickname
+	}
+	return r
+}
+
+// Adds a recipient to a Group DM using their access token.
+pub fn (c Client) group_dm_add_recipient(channel_id Snowflake, user_id Snowflake, params GroupDMAddRecipientParams) ! {
+	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/recipients/${urllib.path_escape(user_id.build())}', json: params.build())!
+}
+
+// Removes a recipient from a Group DM.
+pub fn (c Client) group_dm_remove_recipient(channel_id Snowflake, user_id Snowflake) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/recipients/${urllib.path_escape(user_id.build())}')!
+}
+
+@[params]
+pub struct StartThreadFromMessageParams {
+pub:
+	// 1-100 character channel name
+	name string @[required]
+	// the thread will stop showing in the channel list after auto_archive_duration minutes of inactivity, can be set to: 60, 1440, 4320, 10080
+	auto_archive_duration ?time.Duration
+	// amount of seconds a user has to wait before sending another message (0-21600)
+	rate_limit_per_user ?time.Duration = sentinel_duration
+	reason ?string
+}
+
+pub fn (params StartThreadFromMessageParams) build() json2.Any {
+	mut r := {
+		'name': json2.Any(params.name)
+	}
+	if auto_archive_duration := params.auto_archive_duration {
+		r['auto_archive_duration'] = auto_archive_duration / time.minute
+	}
+	if rate_limit_per_user := params.rate_limit_per_user {
+		if !is_sentinel(rate_limit_per_user) {
+			r['rate_limit_per_user'] = rate_limit_per_user / time.second
+		}
+	} else {
+		r['rate_limit_per_user'] = json2.null
+	}
+	return r
+}
+
+// Creates a new thread from an existing message. Fires a Thread Create and a Message Update Gateway event.
+// When called on a `.guild_text` channel, creates a `.public_thread`. When called on a `.guild_announcement` channel, creates a `.announcement_thread`. Does not work on a `.guild_forum` or a `.guild_media` channel. The id of the created thread will be the same as the id of the source message, and as such a message can only have a single thread created from it.
+pub fn (c Client) start_thread_from_message(channel_id Snowflake, message_id Snowflake, params StartThreadFromMessageParams) !Channel {
+	return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/threads', json: params.build(), reason: params.reason)!.body)!)!
+}
+
+@[params]
+pub struct StartThreadWithoutMessageParams {
+pub:
+	// 1-100 character channel name
+	name string @[required]
+	// the thread will stop showing in the channel list after auto_archive_duration minutes of inactivity, can be set to: 60, 1440, 4320, 10080
+	auto_archive_duration ?time.Duration
+	// the type of thread to create
+	typ ChannelType @[required]
+	// whether non-moderators can add other non-moderators to a thread; only available when creating a private thread
+	invitable ?bool
+	// amount of seconds a user has to wait before sending another message (0-21600)
+	rate_limit_per_user ?time.Duration = sentinel_duration
+	reason ?string
+}
+
+pub fn (params StartThreadWithoutMessageParams) build() json2.Any {
+	mut r := {
+		'name': json2.Any(params.name)
+		'type': int(params.typ)
+	}
+	if auto_archive_duration := params.auto_archive_duration {
+		r['auto_archive_duration'] = auto_archive_duration / time.minute
+	}
+	if invitable := params.invitable {
+		r['invitable'] = invitable
+	}
+	if rate_limit_per_user := params.rate_limit_per_user {
+		if !is_sentinel(rate_limit_per_user) {
+			r['rate_limit_per_user'] = rate_limit_per_user / time.second
+		}
+	} else {
+		r['rate_limit_per_user'] = json2.null
+	}
+	return r
+}
+
+
+// Creates a new thread that is not connected to an existing message. Fires a Thread Create Gateway event.
+pub fn (c Client) start_thread_without_message(channel_id Snowflake, params StartThreadWithoutMessageParams) !Channel {
+	return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/threads', json: params.build(), reason: params.reason)!.body)!)!
+}
+
+// Adds the current user to a thread. Also requires the thread is not archived. Fires a Thread Members Update and a Thread Create Gateway event.
+pub fn (c Client) join_thread(channel_id Snowflake) ! {
+	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/thread-members/@me')!
+}
+
+// Adds another member to a thread. Requires the ability to send messages in the thread. Also requires the thread is not archived. Returns nothing if the member is successfully added or was already a member of the thread. Fires a Thread Members Update Gateway event.
+pub fn (c Client) add_thread_member(channel_id Snowflake, user_id Snowflake) ! {
+	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/thread-members/${urllib.path_escape(user_id.build())}')!
+}
+
+// Removes the current user from a thread. Also requires the thread is not archived. Returns nothing on success. Fires a Thread Members Update Gateway event.
+pub fn (c Client) leave_thread(channel_id Snowflake) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/thread-members/@me')!
+}
+
+// Removes another member from a thread. Requires the `.manage_threads` permission, or the creator of the thread if it is a `.private_thread`. Also requires the thread is not archived. Returns nothing on success. Fires a Thread Members Update Gateway event.
+pub fn (c Client) remove_thread_member(channel_id Snowflake, user_id Snowflake) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/thread-members/${urllib.path_escape(user_id.build())}')!
+}
+
+@[params]
+pub struct FetchThreadMemberParams {
+pub:
+	// Whether to include a guild member object for the thread member
+	with_member ?bool
+}
+
+pub fn (params FetchThreadMemberParams) build_query_values() urllib.Values {
+	mut query_params := urllib.new_values()
+	if with_member := params.with_member {
+		query_params.set('with_member', with_member.str())
+	}
+	return query_params
+}
+
+// Returns a thread member object for the specified user if they are a member of the thread, returns a 404 response otherwise.
+// When with_member is set to `true`, the thread member object will include a `member` field containing a guild member object.
+pub fn (c Client) fetch_thread_member(channel_id Snowflake, user_id Snowflake, params FetchThreadMemberParams) !ThreadMember {
+	return ThreadMember.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members/${urllib.path_escape(user_id.build())}${encode_query(params.build_query_values())}')!.body)!)!
+}
+
+@[params]
+pub struct ListThreadMembersParams {
+pub:
+	// Whether to include a guild member object for each thread member
+	with_member ?bool
+	// Get thread members after this user ID
+	after ?Snowflake
+	// Max number of thread members to return (1-100). Defaults to 100.
+	limit ?int
+}
+
+pub fn (params ListThreadMembersParams) build_query_values() urllib.Values {
+	mut query_params := urllib.new_values()
+	if with_member := params.with_member {
+		query_params.set('with_member', with_member.str())
+	}
+	if after := params.after {
+		query_params.set('after', after.build())
+	}
+	if limit := params.limit {
+		query_params.set('limit', limit.str())
+	}
+	return query_params
+}
+
+
+// Returns array of thread members objects that are members of the thread.
+// When with_member is set to `true`, the results will be paginated and each thread member object will include a `member` field containing a guild member object.
+pub fn (c Client) list_thread_members(channel_id Snowflake, params FetchThreadMemberParams) ![]ThreadMember {
+	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members${encode_query(params.build_query_values())}')!.body)! as []json2.Any).map(ThreadMember.parse(it)!)
+}
+
+@[params]
+pub struct ListArchivedThreadsParams {
+pub:
+	// returns threads archived before this timestamp
+	before ?time.Time
+	// optional maximum number of threads to return
+	limit ?int
+}
+
+pub fn (params ListArchivedThreadsParams) build_query_values() urllib.Values {
+	mut query_params := urllib.new_values()
+	if before := params.before {
+		query_params.set('before', format_iso8601(before))
+	}
+	if limit := params.limit {
+		query_params.set('limit', limit.str())
+	}
+	return query_params
+}
+
+pub struct ListThreadsResponse {
+pub:
+	// the threads
+	threads []Channel
+	// a thread member object for each returned thread the current user has joined
+	members []ThreadMember
+	// whether there are potentially additional threads that could be returned on a subsequent call
+	has_more bool
+}
+
+pub fn ListThreadsResponse.parse(j json2.Any) !ListThreadsResponse {
+	match j {
+		map[string]json2.Any {
+			return ListThreadsResponse{
+				threads: (j['threads']! as []json2.Any).map(Channel.parse(it)!)
+				members: (j['members']! as []json2.Any).map(ThreadMember.parse(it)!)
+				has_more: j['has_more']! as bool
+			}
+		}
+		else {
+			return error('expected list threads response to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// Returns archived threads in the channel that are public. When called on a `.guild_text` channel, returns threads of type `.public_thread`. When called on a `.guild_announcement` channel returns threads of type `.announcement_thread`. Threads are ordered by `archive_timestamp`, in descending order. Requires the `.read_message_history` permission.
+pub fn (c Client) list_public_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
+	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/threads/archived/public${encode_query(params.build_query_values())}')!.body)!)!
+}
+
+// Returns archived threads in the channel that are of type `.private_thread`. Threads are ordered by `archive_timestamp`, in descending order. Requires both the `.read_message_history` and `.manage_threads` permissions.
+pub fn (c Client) list_private_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
+	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/threads/archived/private${encode_query(params.build_query_values())}')!.body)!)!
+}
+
+@[params]
+pub struct ListJoinedPrivateArchivedThreadsParams {
+pub:
+	// returns threads before this id
+	before ?Snowflake
+	// optional maximum number of threads to return
+	limit ?int
+}
+
+pub fn (params ListArchivedThreadsParams) build_query_values() urllib.Values {
+	mut query_params := urllib.new_values()
+	if before := params.before {
+		query_params.set('before', before.build())
+	}
+	if limit := params.limit {
+		query_params.set('limit', limit.str())
+	}
+	return query_params
+}
+
+// Returns archived threads in the channel that are of type `.private_threads`, and the user has joined. Threads are ordered by their `id`, in descending order. Requires the `.read_message_history` permission.
+pub fn (c Client) list_private_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
+	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/users/@me/threads/archived/private${encode_query(params.build_query_values())}')!.body)!)!
+}

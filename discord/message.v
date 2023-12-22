@@ -1374,18 +1374,160 @@ pub fn (c Client) edit_message(channel_id Snowflake, message_id Snowflake, param
 
 
 // Delete a message. If operating on a guild channel and trying to delete a message that was not sent by the current user, this endpoint requires the `.manage_messages` permission. Fires a Message Delete Gateway event.
-pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, config ReasonParam) ! {
+pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
 	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}',
-		reason: config.reason
+		reason: params.reason
 	)!
 }
 
 // Delete multiple messages in a single request. This endpoint can only be used on guild channels and requires the `.manage_messages` permission. Fires a Message Delete Bulk Gateway event.
 // Any message IDs given that do not exist or are invalid will count towards the minimum and maximum message count (currently 2 and 100 respectively).
 // > ! This endpoint will not delete messages older than 2 weeks, and will fail with a 400 BAD REQUEST if any message provided is older than that or if any duplicate message IDs are provided.
-pub fn (c Client) delete_messages(channel_id Snowflake, message_ids []Snowflake, config ReasonParam) ! {
+pub fn (c Client) delete_messages(channel_id Snowflake, message_ids []Snowflake, params ReasonParam) ! {
 	c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages/bulk-delete',
-		reason: config.reason
+		reason: params.reason
 		json: message_ids.map(|s| json2.Any(s.build()))
 	)!
+}
+
+// Returns all pinned messages in the channel as an array of message objects.
+pub fn (c Client) fetch_pinned_messagse(channel_id Snowflake) ![]Message {
+	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/pins')!.body)! as []json2.Any).map(Message.parse(it)!)
+}
+
+// Pin a message in a channel. Requires the `.manage_messages` permission. Fires a Channel Pins Update Gateway event.
+pub fn (c Client) pin_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
+	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/pins/${urllib.path_escape(message_id.build())}',
+		reason: params.reason
+	)!
+}
+
+// Unpin a message in a channel. Requires the `.manage_messages` permission. Fires a Channel Pins Update Gateway event.
+pub fn (c Client) unpin_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/pins/${urllib.path_escape(message_id.build())}',
+		reason: params.reason
+	)!
+}
+
+
+pub struct ForumThreadMessageParams {
+pub:
+	// Message contents (up to 2000 characters)
+	content ?string
+	// Up to 10 rich embeds (up to 6000 characters)
+	embeds ?[]Embed
+	// Allowed mentions for the message
+	allowed_mentions ?AllowedMentions
+	// Components to include with the message
+	components ?[]Component
+	// IDs of up to 3 stickers in the server to send in the message
+	sticker_ids ?[]Snowflake
+	// Contents of the file being sent. See Uploading Files
+	files ?[]File
+	// Message flags combined as a bitfield (only `.suppress_embeds` and `.suppress_notifications` can be set)
+	flags ?MessageFlags
+}
+
+pub fn (params ForumThreadMessageParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if content := params.content {
+		r['content'] = content
+	}
+	if embeds := params.embeds {
+		r['embeds'] = embeds.map(|e| e.build())
+	}
+	if allowed_mentions := params.allowed_mentions {
+		r['allowed_mentions'] = allowed_mentions.build()
+	}
+	if components := params.components {
+		r['components'] = components.map(|c| c.build())
+	}
+	if files := params.files {
+		r['attachments'] = arrays.map_indexed(files, fn (i int, f File) json2.Any {
+			return f.build(i)
+		})
+	}
+	if flags := params.flags {
+		r['flags'] = int(flags)
+	}
+	return r
+}
+
+@[params]
+pub struct StartThreadInForumChannelParams {
+pub:
+	// 1-100 character channel name
+	name string @[required]
+	// duration in minutes to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
+	auto_archive_duration ?time.Duration
+	// amount of seconds a user has to wait before sending another message (0-21600)
+	rate_limit_per_user ?time.Duration = sentinel_duration
+	// contents of the first message in the forum/media thread
+	message ForumThreadMessageParams @[required]
+	// the IDs of the set of tags that have been applied to a thread in a `.guild_forum` or a `.guild_media` channel
+	applied_tags ?[]Snowflake
+	reason ?string
+}
+
+pub fn (params StartThreadInForumChannelParams) build() json2.Any {
+	mut r := {
+		'name': json2.Any(params.name)
+		'message': params.message.build()
+	}
+	if auto_archive_duration := params.auto_archive_duration {
+		r['auto_archive_duration'] = auto_archive_duration / time.minute
+	}
+	if rate_limit_per_user := params.rate_limit_per_user {
+		if !is_sentinel(rate_limit_per_user) {
+			r['rate_limit_per_user'] = rate_limit_per_user / time.second
+		}
+	} else {
+		r['rate_limit_per_user'] = json2.null
+	}
+	if applied_tags := params.applied_tags {
+		r['applied_tags'] = applied_tags.map(|s| json2.Any(s.build()))
+	}
+	return r
+}
+
+// Creates a new thread in a forum or a media channel, and sends a message within the created thread. Fires a Thread Create and Message Create Gateway event.
+// - The type of the created thread is `.public_thread`.
+// - See message formatting for more information on how to properly format messages.
+// - The current user must have the `.send_messages` permission (`.create_public_threads` is ignored).
+// - The maximum request size when sending a message is 25 MiB.
+// - Note that when sending a message, you must provide a value for at least one of `content`, `embeds`, `sticker_ids`, `components, or `files[n]`.
+// > ! Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using `allowed_mentions` to prevent unexpected mentions.
+pub fn (c Client) start_thread_in_forum_channel(channel_id Snowflake, params StartThreadInForumChannelParams) !Channel {
+	if files := params.message.files {
+		mut mp := {
+			'payload_json': [
+				http.FileData{
+					content_type: 'application/json'
+					data: params.build().json_str()
+				},
+			]
+		}
+		for i, file in files {
+			mp['files[${i}]'] = [
+				http.FileData{
+					filename: file.filename
+					content_type: file.content_type
+					data: file.data.bytestr()
+				},
+			]
+		}
+		body, boundary := multipart_form_body(mp)
+		return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/threads',
+			body: body
+			common_headers: {
+				.content_type: 'multipart/form-data; boundary="${boundary}"'
+			}
+			reason: params.reason
+		)!.body)!)!
+	} else {
+		return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/threads',
+			json: params.build()
+			reason: params.reason
+		)!.body)!)!
+	}
 }
