@@ -47,7 +47,6 @@ pub fn (u UndefinedOr[T]) value[T]() T {
 			panic('UndefinedOr[${typeof[T]()}].value() called on none')
 		}
 	}
-
 }
 
 // is_sentinel reports whether `target` is sentinel

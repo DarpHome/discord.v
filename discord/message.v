@@ -1318,7 +1318,6 @@ pub fn (c Client) edit_message(channel_id Snowflake, message_id Snowflake, param
 	)!.body)!)!
 }
 
-
 // Delete a message. If operating on a guild channel and trying to delete a message that was not sent by the current user, this endpoint requires the `.manage_messages` permission. Fires a Message Delete Gateway event.
 pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
 	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}',
@@ -1354,7 +1353,6 @@ pub fn (c Client) unpin_message(channel_id Snowflake, message_id Snowflake, para
 		reason: params.reason
 	)!
 }
-
 
 pub struct ForumThreadMessageParams {
 pub:
@@ -1412,12 +1410,12 @@ pub:
 	message ForumThreadMessageParams @[required]
 	// the IDs of the set of tags that have been applied to a thread in a `.guild_forum` or a `.guild_media` channel
 	applied_tags ?[]Snowflake
-	reason ?string
+	reason       ?string
 }
 
 pub fn (params StartThreadInForumChannelParams) build() json2.Any {
 	mut r := {
-		'name': json2.Any(params.name)
+		'name':    json2.Any(params.name)
 		'message': params.message.build()
 	}
 	if auto_archive_duration := params.auto_archive_duration {

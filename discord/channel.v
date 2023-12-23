@@ -956,7 +956,7 @@ pub:
 	// the bitwise value of all disallowed permissions (default `0`)
 	deny ?Permissions = sentinel_permissions
 	// 0 for a role or 1 for a member
-	typ PermissionOverwriteType @[required]
+	typ    PermissionOverwriteType @[required]
 	reason ?string
 }
 
@@ -983,7 +983,10 @@ pub fn (params EditChannelPermissionsParams) build() json2.Any {
 
 // Edit the channel permission overwrites for a user or role in a channel. Only usable for guild channels. Requires the `.manage_roles` permission. Only permissions your bot has in the guild or parent channel (if applicable) can be allowed/denied (unless your bot has a `.manage_roles` overwrite in the channel). Fires a Channel Update Gateway event. For more information about permissions, see [Permissions](#Permissions).
 pub fn (c Client) edit_channel_permissions(channel_id Snowflake, overwrite_id Snowflake, params EditChannelPermissionsParams) ! {
-	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/overwrites/${urllib.path_escape(overwrite_id.build())}', json: params.build(), reason: params.reason)!
+	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/overwrites/${urllib.path_escape(overwrite_id.build())}',
+		json: params.build()
+		reason: params.reason
+	)!
 }
 
 // Returns a list of invite objects (with invite metadata) for the channel. Only usable for guild channels. Requires the `.manage_channels` permission.
@@ -1038,12 +1041,16 @@ pub fn (params CreateInviteParams) build() json2.Any {
 
 // Create a new invite object for the channel. Only usable for guild channels. Requires the `.create_instant_invite` permission. All JSON parameters for this route are optional. Returns an invite object. Fires an Invite Create Gateway event.
 pub fn (c Client) create_invite(channel_id Snowflake, params CreateInviteParams) !Invite {
-	return Invite.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/invites', json: params.build())!.body)!)!
+	return Invite.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/invites',
+		json: params.build()
+	)!.body)!)!
 }
 
 // Delete a channel permission overwrite for a user or role in a channel. Only usable for guild channels. Requires the `.manage_roles` permission. Fires a Channel Update Gateway event. For more information about permissions, see [Permissions](#Permissions).
 pub fn (c Client) delete_channel_permission(channel_id Snowflake, overwrite_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/overwrites/${urllib.path_escape(overwrite_id.build())}', reason: params.reason)!
+	c.request(.delete, '/channels/${urllib.path_escape(channel_id.build())}/overwrites/${urllib.path_escape(overwrite_id.build())}',
+		reason: params.reason
+	)!
 }
 
 pub struct FollowedChannel {
@@ -1070,9 +1077,11 @@ pub fn FollowedChannel.parse(j json2.Any) !FollowedChannel {
 
 // Follow an Announcement Channel to send messages to a target channel. Requires the `.manage_webhooks` permission in the target channel. Fires a Webhooks Update Gateway event for the target channel.
 pub fn (c Client) follow_announcement_channel(channel_id Snowflake, webhook_channel_id Snowflake) !FollowedChannel {
-	return FollowedChannel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/followers', json: {
-		'webhook_channel_id': json2.Any(webhook_channel_id.build())
-	})!.body)!)!
+	return FollowedChannel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/followers',
+		json: {
+			'webhook_channel_id': json2.Any(webhook_channel_id.build())
+		}
+	)!.body)!)!
 }
 
 // Post a typing indicator for the specified channel, which expires after 10 seconds. Fires a Typing Start Gateway event.
@@ -1102,7 +1111,9 @@ pub fn (params GroupDMAddRecipientParams) build() json2.Any {
 
 // Adds a recipient to a Group DM using their access token.
 pub fn (c Client) group_dm_add_recipient(channel_id Snowflake, user_id Snowflake, params GroupDMAddRecipientParams) ! {
-	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/recipients/${urllib.path_escape(user_id.build())}', json: params.build())!
+	c.request(.put, '/channels/${urllib.path_escape(channel_id.build())}/recipients/${urllib.path_escape(user_id.build())}',
+		json: params.build()
+	)!
 }
 
 // Removes a recipient from a Group DM.
@@ -1119,7 +1130,7 @@ pub:
 	auto_archive_duration ?time.Duration
 	// amount of seconds a user has to wait before sending another message (0-21600)
 	rate_limit_per_user ?time.Duration = sentinel_duration
-	reason ?string
+	reason              ?string
 }
 
 pub fn (params StartThreadFromMessageParams) build() json2.Any {
@@ -1142,7 +1153,10 @@ pub fn (params StartThreadFromMessageParams) build() json2.Any {
 // Creates a new thread from an existing message. Fires a Thread Create and a Message Update Gateway event.
 // When called on a `.guild_text` channel, creates a `.public_thread`. When called on a `.guild_announcement` channel, creates a `.announcement_thread`. Does not work on a `.guild_forum` or a `.guild_media` channel. The id of the created thread will be the same as the id of the source message, and as such a message can only have a single thread created from it.
 pub fn (c Client) start_thread_from_message(channel_id Snowflake, message_id Snowflake, params StartThreadFromMessageParams) !Channel {
-	return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/threads', json: params.build(), reason: params.reason)!.body)!)!
+	return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/threads',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 @[params]
@@ -1158,7 +1172,7 @@ pub:
 	invitable ?bool
 	// amount of seconds a user has to wait before sending another message (0-21600)
 	rate_limit_per_user ?time.Duration = sentinel_duration
-	reason ?string
+	reason              ?string
 }
 
 pub fn (params StartThreadWithoutMessageParams) build() json2.Any {
@@ -1182,10 +1196,12 @@ pub fn (params StartThreadWithoutMessageParams) build() json2.Any {
 	return r
 }
 
-
 // Creates a new thread that is not connected to an existing message. Fires a Thread Create Gateway event.
 pub fn (c Client) start_thread_without_message(channel_id Snowflake, params StartThreadWithoutMessageParams) !Channel {
-	return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/threads', json: params.build(), reason: params.reason)!.body)!)!
+	return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/threads',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 // Adds the current user to a thread. Also requires the thread is not archived. Fires a Thread Members Update and a Thread Create Gateway event.
@@ -1253,7 +1269,6 @@ pub fn (params ListThreadMembersParams) build_query_values() urllib.Values {
 	}
 	return query_params
 }
-
 
 // Returns array of thread members objects that are members of the thread.
 // When with_member is set to `true`, the results will be paginated and each thread member object will include a `member` field containing a guild member object.

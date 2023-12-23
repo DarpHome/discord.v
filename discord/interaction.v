@@ -170,7 +170,6 @@ pub fn (mrd MessageResponseData) build() json2.Any {
 	return r
 }
 
-
 pub struct AutocompleteResponseData {
 pub:
 	// autocomplete choices (max of 25 choices)
@@ -188,7 +187,6 @@ pub fn (ard AutocompleteResponseData) build() json2.Any {
 		'choices': json2.Any(ard.choices.map(|choice| choice.build()))
 	}
 }
-
 
 pub struct ModalResponseData {
 pub:
@@ -236,7 +234,6 @@ pub fn (ir InteractionResponse) get_files() ?[]File {
 	}
 	return none
 }
-
 
 pub fn (ir InteractionResponse) build() json2.Any {
 	mut r := {
