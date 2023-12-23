@@ -1,5 +1,6 @@
 module discord
 
+import arrays
 import x.json2
 import net.urllib
 
@@ -113,8 +114,62 @@ pub enum InteractionResponseType {
 
 pub interface InteractionResponseData {
 	is_interaction_response_data()
+	get_files() ?[]File
 	build() json2.Any
 }
+
+pub struct MessageResponseData {
+pub:
+	// is the response TTS
+	tts ?bool
+	// message content
+	content ?string
+	// supports up to 10 embeds
+	embeds ?[]Embed
+	// allowed mentions object
+	allowed_mentions ?AllowedMentions
+	// message flags combined as a bitfield (only SUPPRESS_EMBEDS and EPHEMERAL can be set)
+	flags ?MessageFlags
+	// message components
+	components ?[]Component
+	// uploaded files
+	files ?[]File
+}
+
+pub fn (_ MessageResponseData) is_interaction_response_data() {}
+
+pub fn (mrd MessageResponseData) get_files() ?[]File {
+	return mrd.files
+}
+
+pub fn (mrd MessageResponseData) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if tts := mrd.tts {
+		r['tts'] = tts
+	}
+	if content := mrd.content {
+		r['content'] = content
+	}
+	if embeds := mrd.embeds {
+		r['embeds'] = embeds.map(|e| e.build())
+	}
+	if allowed_mentions := mrd.allowed_mentions {
+		r['allowed_mentions'] = allowed_mentions.build()
+	}
+	if flags := mrd.flags {
+		r['flags'] = int(flags)
+	}
+	if components := mrd.components {
+		r['components'] = components.map(|c| c.build())
+	}
+	if files := mrd.files {
+		r['attachments'] = arrays.map_indexed(files, fn (i int, f File) json2.Any {
+			return f.build(i)
+		})
+	}
+	return r
+}
+
 
 pub struct AutocompleteResponseData {
 pub:
@@ -124,11 +179,16 @@ pub:
 
 pub fn (_ AutocompleteResponseData) is_interaction_response_data() {}
 
+pub fn (_ AutocompleteResponseData) get_files() ?[]File {
+	return none
+}
+
 pub fn (ard AutocompleteResponseData) build() json2.Any {
 	return {
 		'choices': json2.Any(ard.choices.map(|choice| choice.build()))
 	}
 }
+
 
 pub struct ModalResponseData {
 pub:
@@ -142,6 +202,10 @@ pub:
 
 pub fn (_ ModalResponseData) is_interaction_response_data() {}
 
+pub fn (_ ModalResponseData) get_files() ?[]File {
+	return none
+}
+
 pub fn (mrd ModalResponseData) build() json2.Any {
 	return {
 		'custom_id':  json2.Any(mrd.custom_id)
@@ -152,6 +216,7 @@ pub fn (mrd ModalResponseData) build() json2.Any {
 
 pub interface IInteractionResponse {
 	is_interaction_response()
+	get_files() ?[]File
 	build() json2.Any
 }
 
@@ -165,6 +230,14 @@ pub:
 
 fn (_ InteractionResponse) is_interaction_response() {}
 
+pub fn (ir InteractionResponse) get_files() ?[]File {
+	if d := ir.data {
+		return d.get_files()
+	}
+	return none
+}
+
+
 pub fn (ir InteractionResponse) build() json2.Any {
 	mut r := {
 		'type': json2.Any(int(ir.typ))
@@ -175,6 +248,40 @@ pub fn (ir InteractionResponse) build() json2.Any {
 	return r
 }
 
+pub struct MessageInteractionResponse {
+	MessageResponseData
+}
+
+fn (_ MessageInteractionResponse) is_interaction_response() {}
+
+pub fn (_ MessageInteractionResponse) get_files() ?[]File {
+	return none
+}
+
+pub fn (mir MessageInteractionResponse) build() json2.Any {
+	return {
+		'type': json2.Any(int(InteractionResponseType.channel_message_with_source))
+		'data': mir.MessageResponseData.build()
+	}
+}
+
+pub struct UpdateMessageInteractionResponse {
+	MessageResponseData
+}
+
+fn (_ UpdateMessageInteractionResponse) is_interaction_response() {}
+
+pub fn (_ UpdateMessageInteractionResponse) get_files() ?[]File {
+	return none
+}
+
+pub fn (umir UpdateMessageInteractionResponse) build() json2.Any {
+	return {
+		'type': json2.Any(int(InteractionResponseType.update_message))
+		'data': umir.MessageResponseData.build()
+	}
+}
+
 pub struct AutocompleteInteractionResponse {
 pub:
 	// autocomplete choices (max of 25 choices)
@@ -182,6 +289,10 @@ pub:
 }
 
 fn (_ AutocompleteInteractionResponse) is_interaction_response() {}
+
+pub fn (_ AutocompleteInteractionResponse) get_files() ?[]File {
+	return none
+}
 
 pub fn (air AutocompleteInteractionResponse) build() json2.Any {
 	return {
@@ -204,6 +315,10 @@ pub:
 
 fn (_ ModalInteractionResponse) is_interaction_response() {}
 
+pub fn (_ ModalInteractionResponse) get_files() ?[]File {
+	return none
+}
+
 pub fn (mir ModalInteractionResponse) build() json2.Any {
 	return {
 		'type': json2.Any(int(InteractionResponseType.modal))
@@ -216,7 +331,17 @@ pub fn (mir ModalInteractionResponse) build() json2.Any {
 }
 
 pub fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response IInteractionResponse) ! {
-	c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
-		json: response.build()
-	)!
+	if files := response.get_files() {
+		body, boundary := build_multipart_with_files(files, response.build())
+		c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
+			body: body
+			common_headers: {
+				.content_type: 'multipart/form-data; boundary="${boundary}"'
+			}
+		)!
+	} else {
+		c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
+			json: response.build()
+		)!
+	}
 }

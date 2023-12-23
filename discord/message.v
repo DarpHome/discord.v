@@ -2,7 +2,6 @@ module discord
 
 import arrays
 import encoding.base64
-import net.http
 import net.urllib
 import time
 import x.json2
@@ -1104,25 +1103,6 @@ pub fn (am AllowedMentions) build() json2.Any {
 	return r
 }
 
-pub struct File {
-pub:
-	filename     string  @[required]
-	content_type string = 'application/octet-stream'
-	data         []u8    @[required]
-	description  ?string
-}
-
-pub fn (f File) build(i int) json2.Any {
-	mut r := {
-		'id':       json2.Any(i)
-		'filename': f.filename
-	}
-	if description := f.description {
-		r['description'] = description
-	}
-	return r
-}
-
 @[params]
 pub struct CreateMessageParams {
 pub:
@@ -1190,24 +1170,7 @@ pub fn (params CreateMessageParams) build() json2.Any {
 
 pub fn (c Client) create_message(channel_id Snowflake, params CreateMessageParams) !Message {
 	if files := params.files {
-		mut mp := {
-			'payload_json': [
-				http.FileData{
-					content_type: 'application/json'
-					data: params.build().json_str()
-				},
-			]
-		}
-		for i, file in files {
-			mp['files[${i}]'] = [
-				http.FileData{
-					filename: file.filename
-					content_type: file.content_type
-					data: file.data.bytestr()
-				},
-			]
-		}
-		body, boundary := multipart_form_body(mp)
+		body, boundary := build_multipart_with_files(files, params.build())
 		return Message.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages',
 			body: body
 			common_headers: {
@@ -1342,24 +1305,7 @@ pub fn (params EditMessageParams) build() json2.Any {
 // Returns a [message](#Message) object. Fires a Message Update Gateway event.
 pub fn (c Client) edit_message(channel_id Snowflake, message_id Snowflake, params EditMessageParams) !Message {
 	if fs := params.files {
-		mut mp := {
-			'payload_json': [
-				http.FileData{
-					content_type: 'application/json'
-					data: params.build().json_str()
-				},
-			]
-		}
-		for i, file in fs {
-			mp['files[${i}]'] = [
-				http.FileData{
-					filename: file.filename
-					content_type: file.content_type
-					data: file.data.bytestr()
-				},
-			]
-		}
-		body, boundary := multipart_form_body(mp)
+		body, boundary := build_multipart_with_files(fs, params.build())
 		return Message.parse(json2.raw_decode(c.request(.patch, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}',
 			body: body
 			common_headers: {
@@ -1499,24 +1445,7 @@ pub fn (params StartThreadInForumChannelParams) build() json2.Any {
 // > ! Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using `allowed_mentions` to prevent unexpected mentions.
 pub fn (c Client) start_thread_in_forum_channel(channel_id Snowflake, params StartThreadInForumChannelParams) !Channel {
 	if files := params.message.files {
-		mut mp := {
-			'payload_json': [
-				http.FileData{
-					content_type: 'application/json'
-					data: params.build().json_str()
-				},
-			]
-		}
-		for i, file in files {
-			mp['files[${i}]'] = [
-				http.FileData{
-					filename: file.filename
-					content_type: file.content_type
-					data: file.data.bytestr()
-				},
-			]
-		}
-		body, boundary := multipart_form_body(mp)
+		body, boundary := build_multipart_with_files(files, params.build())
 		return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/threads',
 			body: body
 			common_headers: {
