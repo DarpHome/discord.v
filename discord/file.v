@@ -1,7 +1,9 @@
 module discord
 
+import encoding.base64
 import net.http
 import x.json2
+import time
 
 pub struct File {
 pub:
@@ -41,4 +43,108 @@ pub fn build_multipart_with_files(files []File, j json2.Any) (string, string) {
 		]
 	}
 	return multipart_form_body(mp)
+}
+
+
+@[flag]
+pub enum AttachmentFlags {
+	reserved_0
+	reserved_1
+	// this attachment has been edited using the remix feature on mobile
+	is_remix
+}
+
+pub struct Attachment {
+pub:
+	// attachment id
+	id Snowflake
+	// name of file attached
+	filename string
+	// description for the file (max 1024 characters)
+	description ?string
+	// the attachment's media type
+	content_type ?string
+	// size of file in bytes
+	size int
+	// source url of file
+	url string
+	// a proxied url of file
+	proxy_url string
+	// height of file (if image)
+	height ?int
+	// width of file (if image)
+	width ?int
+	// whether this attachment is ephemeral
+	ephemeral ?bool
+	// the duration of the audio file (currently for voice messages)
+	duration_secs ?time.Duration
+	// base64 encoded bytearray representing a sampled waveform (currently for voice messages)
+	waveform ?[]u8
+	// attachment flags combined as a bitfield
+	flags ?AttachmentFlags
+}
+
+pub fn Attachment.parse(j json2.Any) !Attachment {
+	match j {
+		map[string]json2.Any {
+			return Attachment{
+				id: Snowflake.parse(j['id']!)!
+				filename: j['filename']! as string
+				description: if s := j['description'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				content_type: if s := j['content_type'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				size: j['size']!.int()
+				url: j['url']! as string
+				proxy_url: j['proxy_url']! as string
+				height: if i := j['height'] {
+					if i !is json2.Null {
+						?int(i.int())
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				width: if i := j['width'] {
+					if i !is json2.Null {
+						?int(i.int())
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				ephemeral: if b := j['ephemeral'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				duration_secs: if f := j['duration_secs'] {
+					?time.Duration(i64(f.f64() * f64(time.second)))
+				} else {
+					none
+				}
+				waveform: if s := j['waveform'] {
+					?[]u8(base64.decode(s as string))
+				} else {
+					none
+				}
+				flags: if i := j['flags'] {
+					?AttachmentFlags(unsafe { AttachmentFlags(i.int()) })
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected attachment to be object, got ${j.type_name()}')
+		}
+	}
 }

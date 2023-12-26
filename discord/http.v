@@ -51,6 +51,9 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 	if f := options.prepare {
 		f(mut &req)!
 	}
+	$if debug ? {
+		eprintln('[HTTP] ${method.str()} ${route}; with payload: ${req.data}')
+	}
 	res := req.do()!
 	if res.status_code >= 400 {
 		status := res.status()

@@ -749,8 +749,7 @@ pub fn TextInput.parse(j json2.Any) !TextInput {
 		map[string]json2.Any {
 			return TextInput{
 				custom_id: j['custom_id']! as string
-				style: unsafe { TextInputStyle(j['style']! as i64) }
-				label: j['label']! as string
+				label: ''
 				min_length: if i := j['min_length'] {
 					?int(i.int())
 				} else {

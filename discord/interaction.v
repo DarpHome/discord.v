@@ -93,6 +93,285 @@ pub fn Interaction.parse(j json2.Any) !Interaction {
 	}
 }
 
+pub fn (i Interaction) get_user() User {
+	if u := i.user {
+		return u
+	}
+	return i.member or { GuildMember{} }.user or {
+		panic("corrupted interaction")
+	}
+}
+
+pub type ApplicationCommandInteractionDataOptionValue = string | int | f64 | bool
+
+pub fn ApplicationCommandInteractionDataOptionValue.parse(j json2.Any) !ApplicationCommandInteractionDataOptionValue {
+	match j {
+		string { return j }
+		i8, i16, int, i64, u8, u16, u32, u64 { return int(j) }
+		f32, f64 { return f64(j) }
+		bool { return j }
+		else {
+			return error('expected application command interaction data option value to be string/int/f64/bool, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (v ApplicationCommandInteractionDataOptionValue) as_string() string {
+	match v {
+		string {
+			return v
+		}
+		else {
+			return ''
+		}
+	}
+}
+
+pub fn (v ApplicationCommandInteractionDataOptionValue) as_int() int {
+	match v {
+		int {
+			return v
+		}
+		else {
+			return 0
+		}
+	}
+}
+
+pub fn (v ApplicationCommandInteractionDataOptionValue) as_f64() f64 {
+	match v {
+		int {
+			return v
+		}
+		else {
+			return 0.0
+		}
+	}
+}
+
+pub fn (v ApplicationCommandInteractionDataOptionValue) as_bool() bool {
+	match v {
+		bool {
+			return v
+		}
+		else {
+			return false
+		}
+	}
+}
+
+pub struct ApplicationCommandInteractionDataOption {
+pub:
+	// Name of the parameter
+	name string
+	// Value of application command option type
+	typ ApplicationCommandOptionType
+	// Value of the option resulting from user input
+	value ?ApplicationCommandInteractionDataOptionValue
+	// Present if this option is a group or subcommand
+	options ?[]ApplicationCommandInteractionDataOption
+	// true if this option is the currently focused option for autocomplete
+	focused ?bool
+}
+
+pub fn ApplicationCommandInteractionDataOption.parse(j json2.Any) !ApplicationCommandInteractionDataOption {
+	match j {
+		map[string]json2.Any {
+			return ApplicationCommandInteractionDataOption{
+				name: j['name']! as string
+				typ: unsafe { ApplicationCommandOptionType(j['type']!.int()) }
+				value: if v := j['value'] {
+					?ApplicationCommandInteractionDataOptionValue(ApplicationCommandInteractionDataOptionValue.parse(v)!)
+				} else {
+					none
+				}
+				options: if a := j['options'] {
+					?[]ApplicationCommandInteractionDataOption(maybe_map[json2.Any, ApplicationCommandInteractionDataOption](a as []json2.Any, fn (o json2.Any) !ApplicationCommandInteractionDataOption {
+						return ApplicationCommandInteractionDataOption.parse(o)!
+					})!)
+				} else {
+					none
+				}
+				focused: if b := j['focused'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected application command interaction data option to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct ApplicationCommandData {
+pub:
+	// the ID of the invoked command
+	id Snowflake
+	// the name of the invoked command
+	name string
+	// the type of the invoked command
+	typ ApplicationCommandType
+	// converted users + roles + channels + attachments
+	resolved ?Resolved
+	// the params + values from the user
+	options ?[]ApplicationCommandInteractionDataOption
+	// the id of the guild the command is registered to
+	guild_id ?Snowflake
+	// id of the user or message targeted by a user or message command
+	target_id ?Snowflake
+}
+
+pub fn ApplicationCommandData.parse(j json2.Any) !ApplicationCommandData {
+	match j {
+		map[string]json2.Any {
+			return ApplicationCommandData{
+				id: Snowflake.parse(j['id']!)!
+				name: j['name']! as string
+				typ: unsafe { ApplicationCommandType(j['type']!.int()) }
+				resolved: if o := j['resolved'] {
+					?Resolved(Resolved.parse(o)!)
+				} else {
+					none
+				}
+				options: if a := j['options'] {
+					?[]ApplicationCommandInteractionDataOption(maybe_map[json2.Any, ApplicationCommandInteractionDataOption](a as []json2.Any, fn (o json2.Any) !ApplicationCommandInteractionDataOption {
+						return ApplicationCommandInteractionDataOption.parse(o)!
+					})!)
+				} else {
+					none
+				}
+				guild_id: if s := j['guild_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+				target_id: if s := j['target_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected application command data to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (acd ApplicationCommandData) get(option string) ?ApplicationCommandInteractionDataOptionValue {
+	if opts := acd.options {
+		for opt in opts {
+			if opt.name == option {
+				return opt.value
+			}
+		}
+	}
+	return none
+}
+
+pub fn (i Interaction) get_application_command_data() !ApplicationCommandData {
+	return ApplicationCommandData.parse(i.data or {
+		return error('no data')
+	})!
+}
+
+pub struct MessageComponentData {
+pub:
+	// the custom_id of the component
+	custom_id string
+	// the type of the component
+	component_type ComponentType
+	// values the user selected in a select menu component
+	values ?[]string
+	// resolved entities from selected options
+	resolved ?Resolved
+}
+
+pub fn MessageComponentData.parse(j json2.Any) !MessageComponentData {
+	match j {
+		map[string]json2.Any {
+			return MessageComponentData{
+				custom_id: j['custom_id']! as string
+				component_type: unsafe { ComponentType(j['component_type']!.int()) }
+				values: if a := j['values'] {
+					?[]string((a as []json2.Any).map(|s| s as string))
+				} else {
+					none
+				}
+				resolved: if o := j['resolved'] {
+					?Resolved(Resolved.parse(o)!)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message component data to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (i Interaction) get_message_component_data() !MessageComponentData {
+	return MessageComponentData.parse(i.data or {
+		return error('no data')
+	})!
+}
+
+pub struct ModalSubmitData {
+pub:
+	// the custom_id of the modal
+	custom_id string
+	// the values submitted by the user
+	components []Component
+}
+
+pub fn ModalSubmitData.parse(j json2.Any) !ModalSubmitData {
+	match j {
+		map[string]json2.Any {
+			return ModalSubmitData{
+				custom_id: j['custom_id']! as string
+				components: maybe_map[json2.Any, Component](j['components']! as []json2.Any, fn (o json2.Any) !Component {
+					return Component.parse(o)!
+				})!
+			}
+		}
+		else {
+			return error('expected modal submit data to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (msd ModalSubmitData) get(custom_id string) ?string {
+	println('what')
+	for c in msd.components {
+		println('a')
+		if c is ActionRow {
+			println('b')
+			dump(voidptr(c))
+			dump(voidptr(c.components.data))
+			for d in c.components {
+				println('c')
+				if d is TextInput {
+					println('d')
+					if d.custom_id == custom_id {
+						println('e')
+						return d.value
+					}
+				}
+			}
+		}
+	}
+	return none
+}
+
+pub fn (i Interaction) get_modal_submit_data() !ModalSubmitData {
+	return ModalSubmitData.parse(i.data or {
+		return error('no data')
+	})!
+}
+
 pub enum InteractionResponseType {
 	// ACK a `Ping`
 	pong                                    = 1
@@ -251,8 +530,8 @@ pub struct MessageInteractionResponse {
 
 fn (_ MessageInteractionResponse) is_interaction_response() {}
 
-pub fn (_ MessageInteractionResponse) get_files() ?[]File {
-	return none
+pub fn (r MessageInteractionResponse) get_files() ?[]File {
+	return r.files
 }
 
 pub fn (mir MessageInteractionResponse) build() json2.Any {
@@ -268,8 +547,8 @@ pub struct UpdateMessageInteractionResponse {
 
 fn (_ UpdateMessageInteractionResponse) is_interaction_response() {}
 
-pub fn (_ UpdateMessageInteractionResponse) get_files() ?[]File {
-	return none
+pub fn (r UpdateMessageInteractionResponse) get_files() ?[]File {
+	return r.files
 }
 
 pub fn (umir UpdateMessageInteractionResponse) build() json2.Any {
@@ -335,10 +614,12 @@ pub fn (c Client) create_interaction_response(interaction_id Snowflake, interact
 			common_headers: {
 				.content_type: 'multipart/form-data; boundary="${boundary}"'
 			}
+			authenticate: false
 		)!
 	} else {
 		c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
 			json: response.build()
+			authenticate: false
 		)!
 	}
 }

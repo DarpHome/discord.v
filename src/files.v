@@ -6,7 +6,10 @@ fn run_files(token string) ! {
 	mut c := discord.bot(token,
 		intents: .message_content | .guild_messages | .direct_messages
 	)
-	spam := [u8(`A`)].repeat(15483) // after 15484, it crashes
+	// old: 15484
+	// after 15528, it errors
+	// after 15555, it crashes
+	spam := [u8(`A`)].repeat(15528)
 	c.events.on_ready.listen(fn (event discord.ReadyEvent) ! {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})

@@ -3,33 +3,43 @@ module main
 import os
 
 fn main() {
-	token := os.getenv_opt('DISCORD_BOT_TOKEN') or {
-		eprintln('No token specified')
+	op := os.args[1] or {
+		eprintln('No operation specified (must be bot or rpc)')
 		exit(1)
 	}
-	arg := os.args[1] or {
-		eprintln('No example specified')
-		exit(1)
-	}
-	println('Running ${arg}...')
-	match arg {
-		'pingpong' {
-			run_pingpong(token)!
+	match op {
+		'bot' {
+			table := {
+				'pingpong': run_pingpong,
+				'files': run_files,
+				'test': run_testbot,
+				'interactions': run_interactions,
+				'concurrency': run_concurrency,
+				'slash_pingpong': run_slash_pingpong,
+			}
+			arg1 := os.args[2] or {
+				eprintln('No example specified (may be ${table.keys().join(', ')})')
+				exit(1)
+			}
+			f := table[arg1] or {
+				eprintln('That example not exists (may be ${table.keys().join(', ')})')
+				exit(1)
+			}
+			println('Running ${arg1}...')
+			token := os.getenv_opt('DISCORD_BOT_TOKEN') or {
+				eprintln('No token specified')
+				exit(1)
+			}
+			f(token) or {
+				panic(err)
+			}
 		}
-		'files' {
-			run_files(token)!
-		}
-		'test' {
-			run_testbot(token)!
-		}
-		'interactions' {
-			run_interactions(token)!
-		}
-		'concurrency' {
-			run_concurrency(token)!
+		'rpc' {
+			run_rpc()!
 		}
 		else {
-			eprintln('Not found')
+			eprintln("I don't know such operation")
+			exit(1)
 		}
 	}
 }

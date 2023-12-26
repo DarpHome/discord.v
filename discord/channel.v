@@ -39,6 +39,109 @@ pub enum ChannelType {
 	guild_media         = 16
 }
 
+// See [permissions](#Permissions) for more information about the allow and deny fields.
+pub struct PermissionOverwrite {
+pub:
+	// role or user id
+	id Snowflake
+	// either 0 (role) or 1 (member)
+	typ PermissionOverwriteType
+	// permission bit set
+	allow Permissions = sentinel_permissions
+	// permission bit set
+	deny Permissions = sentinel_permissions
+}
+
+pub fn PermissionOverwrite.parse(j json2.Any) !PermissionOverwrite {
+	match j {
+		map[string]json2.Any {
+			return PermissionOverwrite{
+				id: Snowflake.parse(j['id']!)!
+				typ: unsafe { PermissionOverwriteType(j['type']!.int()) }
+				allow: Permissions.parse(j['allow']!)!
+				deny: Permissions.parse(j['deny']!)!
+			}
+		}
+		else {
+			return error('expected permission overwrite to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (po PermissionOverwrite) build() json2.Any {
+	mut r := {
+		'id':   json2.Any(po.id.build())
+		'type': int(po.typ)
+	}
+	if !is_sentinel(po.allow) {
+		r['allow'] = u64(po.allow).str()
+	}
+	if !is_sentinel(po.deny) {
+		r['deny'] = u64(po.deny).str()
+	}
+	return r
+}
+
+pub const sentinel_permission_overwrites = []PermissionOverwrite{}
+
+pub struct ForumTag {
+pub:
+	// the id of the tag
+	id Snowflake
+	// the name of the tag (0-20 characters)
+	name string
+	// whether this tag can only be added to or removed from threads by a member with the MANAGE_THREADS permission
+	moderated bool
+	// the id of a guild's custom emoji
+	emoji_id ?Snowflake
+	// the unicode character of the emoji
+	emoji_name ?string
+}
+
+pub fn (ft ForumTag) build() json2.Any {
+	return {
+		'name': json2.Any(ft.name)
+		'moderated': ft.moderated
+		'emoji_id': if s := ft.emoji_id {
+			s.build()
+		} else {
+			json2.null
+		}
+		'emoji_name': if s := ft.emoji_name {
+			s
+		} else {
+			json2.null
+		}
+	}
+}
+
+pub fn ForumTag.parse(j json2.Any) !ForumTag {
+	match j {
+		map[string]json2.Any {
+			emoji_id := j['emoji_id']!
+			emoji_name := j['emoji_name']!
+			return ForumTag{
+				id: Snowflake.parse(j['id']!)!
+				name: j['name']! as string
+				moderated: j['moderated']! as bool
+				emoji_id: if emoji_id !is json2.Null {
+					?Snowflake(Snowflake.parse(emoji_id)!)
+				} else {
+					none
+				}
+				emoji_name: if emoji_name !is json2.Null {
+					?string(emoji_name as string)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected forum tag to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub interface IChannel {
 	id Snowflake
 	is_channel()
@@ -46,12 +149,62 @@ pub interface IChannel {
 
 pub struct PartialChannel {
 pub:
-	id   Snowflake
-	typ  ChannelType
-	name string
+	id                    Snowflake
+	typ                   ChannelType
+	position              ?int
+	permission_overwrites ?[]PermissionOverwrite
+	name                  ?string
+	topic                 ?string = sentinel_string
+	nsfw                  ?bool
+	bitrate               ?int
+	user_limit            ?int
+	parent_id             ?Snowflake
+	default_auto_archive_duration ?time.Duration
+	flags                 ?ChannelFlags
+	available_tags        ?[]ForumTag
 }
 
 fn (_ PartialChannel) is_channel() {}
+
+pub fn (pc PartialChannel) build() json2.Any {
+	mut r := {
+		'id': json2.Any(int(pc.id))
+	}
+	if position := pc.position {
+		r['position'] = position
+	}
+	if permission_overwrites := pc.permission_overwrites {
+		r['permission_overwrites'] = permission_overwrites.map(|po| po.build())
+	}
+	if name := pc.name {
+		r['name'] = name
+	}
+	if topic := pc.topic {
+		r['topic'] = topic
+	}
+	if nsfw := pc.nsfw {
+		r['nsfw'] = nsfw
+	}
+	if bitrate := pc.bitrate {
+		r['bitrate'] = bitrate
+	}
+	if user_limit := pc.user_limit {
+		r['user_limit'] = user_limit
+	}
+	if parent_id := pc.parent_id {
+		r['parent_id'] = int(parent_id)
+	}
+	if default_auto_archive_duration := pc.default_auto_archive_duration {
+		r['default_auto_archive_duration'] = default_auto_archive_duration / time.minute
+	}
+	if flags := pc.flags {
+		r['flags'] = int(flags)
+	}
+	if available_tags := pc.available_tags {
+		r['available_tags'] = available_tags.map(|t| t.build())
+	}
+	return r
+}
 
 pub fn PartialChannel.parse(j json2.Any) !PartialChannel {
 	match j {
@@ -119,51 +272,6 @@ pub enum PermissionOverwriteType {
 	role
 	member
 }
-
-// See [permissions](#Permissions) for more information about the allow and deny fields.
-pub struct PermissionOverwrite {
-pub:
-	// role or user id
-	id Snowflake
-	// either 0 (role) or 1 (member)
-	typ PermissionOverwriteType
-	// permission bit set
-	allow Permissions = sentinel_permissions
-	// permission bit set
-	deny Permissions = sentinel_permissions
-}
-
-pub fn PermissionOverwrite.parse(j json2.Any) !PermissionOverwrite {
-	match j {
-		map[string]json2.Any {
-			return PermissionOverwrite{
-				id: Snowflake.parse(j['id']!)!
-				typ: unsafe { PermissionOverwriteType(j['type']!.int()) }
-				allow: Permissions.parse(j['allow']!)!
-				deny: Permissions.parse(j['deny']!)!
-			}
-		}
-		else {
-			return error('expected permission overwrite to be object, got ${j.type_name()}')
-		}
-	}
-}
-
-pub fn (po PermissionOverwrite) build() json2.Any {
-	mut r := {
-		'id':   json2.Any(po.id.build())
-		'type': int(po.typ)
-	}
-	if !is_sentinel(po.allow) {
-		r['allow'] = u64(po.allow).str()
-	}
-	if !is_sentinel(po.deny) {
-		r['deny'] = u64(po.deny).str()
-	}
-	return r
-}
-
-pub const sentinel_permission_overwrites = []PermissionOverwrite{}
 
 pub struct ThreadMetadata {
 pub:
@@ -250,47 +358,6 @@ pub fn ThreadMember.parse(j json2.Any) !ThreadMember {
 		}
 		else {
 			return error('expected thread member to be object, got ${j.type_name()}')
-		}
-	}
-}
-
-pub struct ForumTag {
-pub:
-	// the id of the tag
-	id Snowflake
-	// the name of the tag (0-20 characters)
-	name string
-	// whether this tag can only be added to or removed from threads by a member with the MANAGE_THREADS permission
-	moderated bool
-	// the id of a guild's custom emoji
-	emoji_id ?Snowflake
-	// the unicode character of the emoji
-	emoji_name ?string
-}
-
-pub fn ForumTag.parse(j json2.Any) !ForumTag {
-	match j {
-		map[string]json2.Any {
-			emoji_id := j['emoji_id']!
-			emoji_name := j['emoji_name']!
-			return ForumTag{
-				id: Snowflake.parse(j['id']!)!
-				name: j['name']! as string
-				moderated: j['moderated']! as bool
-				emoji_id: if emoji_id !is json2.Null {
-					?Snowflake(Snowflake.parse(emoji_id)!)
-				} else {
-					none
-				}
-				emoji_name: if emoji_name !is json2.Null {
-					?string(emoji_name as string)
-				} else {
-					none
-				}
-			}
-		}
-		else {
-			return error('expected forum tag to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1354,4 +1421,182 @@ pub fn (params ListJoinedPrivateArchivedThreadsParams) build_query_values() urll
 // Returns archived threads in the channel that are of type `.private_threads`, and the user has joined. Threads are ordered by their `id`, in descending order. Requires the `.read_message_history` permission.
 pub fn (c Client) list_joined_private_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
 	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/users/@me/threads/archived/private${encode_query(params.build_query_values())}')!.body)!)!
+}
+
+pub const sentinel_forum_tags = []ForumTag{}
+
+@[params]
+pub struct CreateGuildChannelParams {
+pub:
+	name string @[required]
+	// the type of channel
+	typ ?ChannelType = unsafe { ChannelType(sentinel_int) }
+	// channel topic (0-1024 characters)
+	topic ?string = sentinel_string
+	// the bitrate (in bits) of the voice or stage channel; min 8000
+	bitrate ?int = sentinel_int
+	// the user limit of the voice channel
+	user_limit ?int = sentinel_int
+	// amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission `.manage_messages` or `.manage_channel`, are unaffected
+	rate_limit_per_user ?time.Duration = sentinel_duration
+	// sorting position of the channel
+	position ?int = sentinel_int
+	// the channel's permission overwrites
+	permission_overwrites ?[]PermissionOverwrite = sentinel_permission_overwrites
+	// id of the parent category for a channel
+	parent_id ?Snowflake = sentinel_snowflake
+	// whether the channel is nsfw
+	nsfw ?bool = sentinel_bool
+	// channel voice region id of the voice or stage channel, automatic when set to null
+	rtc_region ?string = sentinel_string
+	// the camera video quality mode of the voice channel
+	video_quality_mode ?VideoQualityMode = unsafe { VideoQualityMode(sentinel_int) }
+	// the default duration that the clients use (not the API) for newly created threads in the channel, in minutes, to automatically archive the thread after recent activity
+	default_auto_archive_duration ?time.Duration = sentinel_duration
+	// emoji to show in the add reaction button on a thread in a `.guild_forum` or a `.guild_media` channel
+	default_reaction_emoji ?DefaultReaction = sentinel_default_reaction
+	// set of tags that can be used in a `.guild_forum` or a `.guild_media` channel
+	available_tags ?[]ForumTag = sentinel_forum_tags
+	// the default sort order type used to order posts in `.guild_forum` and `.guild_media`  channels
+	default_sort_order ?SortOrderType = unsafe { SortOrderType(sentinel_int) }
+	// the default forum layout view used to display posts in `.guild_forum` channels
+	default_forum_layout ?ForumLayoutType = unsafe { ForumLayoutType(sentinel_int) }
+	// the initial `rate_limit_per_user` to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update.
+	default_thread_rate_limit_per_user ?time.Duration = sentinel_duration
+	reason ?string
+}
+
+pub fn (params CreateGuildChannelParams) build() json2.Any {
+	mut r := {
+		'name': json2.Any(params.name)
+	}
+	if typ := params.typ {
+		i := int(typ)
+		if !is_sentinel(i) {
+			r['type'] = i
+		}
+	} else {
+		r['type'] = json2.null
+	}
+	if topic := params.topic {
+		if !is_sentinel(topic) {
+			r['topic'] = topic
+		}
+	} else {
+		r['topic'] = json2.null
+	}
+	if bitrate := params.bitrate {
+		if !is_sentinel(bitrate) {
+			r['bitrate'] = bitrate
+		}
+	} else {
+		r['bitrate'] = json2.null
+	}
+	if user_limit := params.user_limit {
+		if !is_sentinel(user_limit) {
+			r['user_limit'] = user_limit
+		}
+	} else {
+		r['user_limit'] = json2.null
+	}
+	if rate_limit_per_user := params.rate_limit_per_user {
+		if !is_sentinel(rate_limit_per_user) {
+			r['rate_limit_per_user'] = rate_limit_per_user / time.second
+		}
+	} else {
+		r['rate_limit_per_user'] = json2.null
+	}
+	if position := params.position {
+		if !is_sentinel(position) {
+			r['position'] = position
+		}
+	} else {
+		r['position'] = json2.null
+	}
+	if permission_overwrites := params.permission_overwrites {
+		if permission_overwrites.data != sentinel_permission_overwrites.data {
+			r['permission_overwrites'] = permission_overwrites.map(|po| po.build())
+		}
+	} else {
+		r['permission_overwrites'] = json2.null
+	}
+	if parent_id := params.parent_id {
+		if !is_sentinel(parent_id) {
+			r['parent_id'] = parent_id.build()
+		}
+	} else {
+		r['parent_id'] = json2.null
+	}
+	if nsfw := params.nsfw {
+		if !is_sentinel(nsfw) {
+			r['nsfw'] = nsfw
+		}
+	} else {
+		r['nsfw'] = json2.null
+	}
+	if rtc_region := params.rtc_region {
+		if !is_sentinel(rtc_region) {
+			r['rtc_region'] = rtc_region
+		}
+	} else {
+		r['rtc_region'] = json2.null
+	}
+	if video_quality_mode := params.video_quality_mode {
+		i := int(video_quality_mode)
+		if !is_sentinel(i) {
+			r['video_quality_mode'] = i
+		}
+	} else {
+		r['video_quality_mode'] = json2.null
+	}
+	if default_auto_archive_duration := params.default_auto_archive_duration {
+		if !is_sentinel(default_auto_archive_duration) {
+			r['default_auto_archive_duration'] = default_auto_archive_duration / time.minute
+		}
+	} else {
+		r['default_auto_archive_duration'] = json2.null
+	}
+	if default_reaction_emoji := params.default_reaction_emoji {
+		if !default_reaction_emoji.is_sentinel() {
+			r['default_reaction_emoji'] = default_reaction_emoji.build()
+		}
+	} else {
+		r['default_reaction_emoji'] = json2.null
+	}
+	if available_tags := params.available_tags {
+		if available_tags.data != sentinel_forum_tags.data {
+			r['available_tags'] = available_tags.map(|ft| ft.build())
+		}
+	} else {
+		r['available_tags'] = json2.null
+	}
+	if default_sort_order := params.default_sort_order {
+		i := int(default_sort_order)
+		if !is_sentinel(i) {
+			r['default_sort_order'] = i
+		}
+	} else {
+		r['default_sort_order'] = json2.null
+	}
+	if default_forum_layout := params.default_forum_layout {
+		i := int(default_forum_layout)
+		if !is_sentinel(i) {
+			r['default_forum_layout'] = i
+		}
+	} else {
+		r['default_forum_layout'] = json2.null
+	}
+	if default_thread_rate_limit_per_user := params.default_thread_rate_limit_per_user {
+		if !is_sentinel(default_thread_rate_limit_per_user) {
+			r['default_thread_rate_limit_per_user'] = default_thread_rate_limit_per_user / time.second
+		}
+	} else {
+		r['default_thread_rate_limit_per_user'] = json2.null
+	}
+	return r
+}
+
+// Create a new channel object for the guild. Requires the `.manage_channels` permission. If setting permission overwrites, only permissions your bot has in the guild can be allowed/denied. Setting `.manage_roles` permission in channels is only possible for guild administrators. Returns the new [channel](#Channel) object on success. Fires a Channel Create Gateway event.
+pub fn (c Client) create_guild_channel(guild_id Snowflake, params CreateGuildChannelParams) !Channel {
+	return Channel.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/channels', json: params.build(), reason: params.reason)!.body)!)!
 }

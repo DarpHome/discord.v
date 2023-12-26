@@ -203,6 +203,17 @@ pub:
 	flags RoleFlags
 }
 
+pub fn (role Role) build() json2.Any {
+	return {
+		'id': json2.Any(int(role.id))
+		'name': role.name
+		'color': role.color
+		'hoist': role.hoist
+		'permissions': u64(role.permissions).str()
+		'mentionable': role.mentionable
+	}
+}
+
 pub fn Role.parse(j json2.Any) !Role {
 	match j {
 		map[string]json2.Any {
@@ -601,10 +612,6 @@ pub fn Guild.parse(j json2.Any) !Guild {
 	}
 }
 
-pub fn (c Client) fetch_guild(guild_id Snowflake) !Guild {
-	return Guild.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}')!.body)!)!
-}
-
 @[flag]
 pub enum GuildMemberFlags {
 	// Member has left and rejoined the guild
@@ -815,4 +822,325 @@ pub fn PartialGuildMember.parse(j json2.Any) !PartialGuildMember {
 			return error('expected partial guild member to be object, got ${j.type_name()}')
 		}
 	}
+}
+
+@[params]
+pub struct CreateGuildParams {
+pub:
+	name                          string                      @[required]
+	icon                          ?Image
+	verification_level            ?VerificationLevel
+	default_message_notifications ?MessageNotificationsLevel
+	explicit_content_filter       ?ExplicitContentFilterLevel
+	roles                         ?[]Role
+	channels                      ?[]PartialChannel
+	afk_channel_id                ?int
+	afk_timeout                   ?time.Duration
+	system_channel_id             ?int
+	system_channel_flags          ?SystemChannelFlags
+}
+
+pub fn (params CreateGuildParams) build() json2.Any {
+	mut r := {
+		'name': json2.Any(params.name)
+	}
+	if icon := params.icon {
+		r['icon'] = icon.build()
+	}
+	if verification_level := params.verification_level {
+		r['verification_level'] = int(verification_level)
+	}
+	if default_message_notifications := params.default_message_notifications {
+		r['default_message_notifications'] = int(default_message_notifications)
+	}
+	if explicit_content_filter := params.explicit_content_filter {
+		r['explicit_content_filter'] = int(explicit_content_filter)
+	}
+	if roles := params.roles {
+		r['roles'] = roles.map(|role| role.build())
+	}
+	if channels := params.channels {
+		r['channels'] = channels.map(|c| c.build())
+	}
+	if afk_channel_id := params.afk_channel_id {
+		r['afk_channel_id'] = afk_channel_id
+	}
+	if afk_timeout := params.afk_timeout {
+		r['afk_timeout'] = afk_timeout / time.second
+	}
+	if system_channel_id := params.system_channel_id {
+		r['system_channel_id'] = system_channel_id
+	}
+	if system_channel_flags := params.system_channel_flags {
+		r['system_channel_flags'] = int(system_channel_flags)
+	}
+	return r
+}
+
+pub fn (c Client) create_guild(params CreateGuildParams) !Guild {
+	return Guild.parse(json2.raw_decode(c.request(.post, '/guilds', json: params.build())!.body)!)!
+}
+
+pub fn (c Client) fetch_guild(guild_id Snowflake) !Guild {
+	return Guild.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}')!.body)!)!
+}
+
+pub struct GuildPreview {
+pub:
+	// guild id
+	id Snowflake
+	// guild name (2-100 characters)
+	name string
+	// icon hash
+	icon ?string
+	// splash hash
+	splash ?string
+	// discovery splash hash
+	discovery_splash ?string
+	// custom guild emojis
+	emojis []Emoji
+	// enabled guild features
+	features []GuildFeature
+	// approximate number of members in this guild
+	approximate_member_count int
+	// approximate number of online members in this guild
+	approximate_presence_count int
+	// the description for the guild
+	description ?string
+	// custom guild stickers
+	stickers []Sticker
+}
+
+pub fn GuildPreview.parse(j json2.Any) !GuildPreview {
+	match j {
+		map[string]json2.Any {
+			icon := j['icon']!
+			splash := j['splash']!
+			discovery_splash := j['discovery_splash']!
+			description := j['description']!
+			return GuildPreview{
+				id: Snowflake.parse(j['id']!)!
+				name: j['name']! as string
+				icon: if icon !is json2.Null {
+					?string(icon as string)
+				} else {
+					none
+				}
+				splash: if splash !is json2.Null {
+					?string(splash as string)
+				} else {
+					none
+				}
+				discovery_splash: if discovery_splash !is json2.Null {
+					?string(discovery_splash as string)
+				} else {
+					none
+				}
+				emojis: (j['emojis']! as []json2.Any).map(Emoji.parse(it)!)
+				features: (j['features']! as []json2.Any).map(|f| GuildFeature(f as string))
+				approximate_member_count: j['approximate_member_count']!.int()
+				approximate_presence_count: j['approximate_presence_count']!.int()
+				description: if description !is json2.Null {
+					?string(icon as string)
+				} else {
+					none
+				}
+				stickers: (j['stickers']! as []json2.Any).map(Sticker.parse(it)!)
+			}
+		}
+		else {
+			return error('expected guild preview to be object, got ${j.type_name()}')
+		}
+
+	}
+}
+
+pub fn (c Client) fetch_guild_preview(guild_id Snowflake) !GuildPreview {
+	return GuildPreview.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/preview')!.body)!)!
+}
+
+@[params]
+pub struct EditGuildParams {
+pub:
+	// guild name
+	name ?string
+	// verification level
+	verification_level ?VerificationLevel = unsafe { VerificationLevel(sentinel_int) }
+	// default message notification level
+	default_message_notifications ?MessageNotificationsLevel = unsafe { MessageNotificationsLevel(sentinel_int) }
+	// explicit content filter level
+	explicit_content_filter ?ExplicitContentFilterLevel = unsafe { ExplicitContentFilterLevel(sentinel_int) }
+	// id for afk channel
+	afk_channel_id ?Snowflake = sentinel_snowflake
+	// afk timeout in seconds, can be set to: 60, 300, 900, 1800, 3600
+	afk_timeout ?time.Duration
+	// base64 1024x1024 png/jpeg/gif image for the guild icon (can be animated gif when the server has the ANIMATED_ICON feature)
+	icon ?Image = sentinel_image
+	// user id to transfer guild ownership to (must be owner)
+	owner_id ?Snowflake
+	// base64 16:9 png/jpeg image for the guild splash (when the server has the INVITE_SPLASH feature)
+	splash ?Image = sentinel_image
+	// base64 16:9 png/jpeg image for the guild discovery splash (when the server has the DISCOVERABLE feature)
+	discovery_splash ?Image = sentinel_image
+	// base64 16:9 png/jpeg image for the guild banner (when the server has the BANNER feature; can be animated gif when the server has the ANIMATED_BANNER feature)
+	banner ?Image = sentinel_image
+	// the id of the channel where guild notices such as welcome messages and boost events are posted
+	system_channel_id ?Snowflake = sentinel_snowflake
+	// system channel flags
+	system_channel_flags ?SystemChannelFlags
+	// the id of the channel where Community guilds display rules and/or guidelines
+	rules_channel_id ?Snowflake = sentinel_snowflake
+	// the id of the channel where admins and moderators of Community guilds receive notices from Discord
+	public_updates_channel_id ?Snowflake = sentinel_snowflake
+	// the preferred locale of a Community guild used in server discovery and notices from Discord; defaults to "en-US"
+	preferred_locale ?string = sentinel_string
+	// enabled guild features
+	features ?[]GuildFeature
+	// the description for the guild
+	description ?string = sentinel_string
+	// whether the guild's boost progress bar should be enabled
+	premium_progress_bar_enabled ?bool
+	// the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
+	safety_alerts_channel_id ?Snowflake = sentinel_snowflake
+	reason ?string
+}
+
+pub fn (params EditGuildParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if name := params.name {
+		r['name'] = name
+	}
+	if verification_level := params.verification_level {
+		i := int(verification_level)
+		if !is_sentinel(i) {
+			r['verification_level'] = i
+		}
+	} else {
+		r['verification_level'] = json2.null
+	}
+	if default_message_notifications := params.default_message_notifications {
+		i := int(default_message_notifications)
+		if !is_sentinel(i) {
+			r['default_message_notifications'] = i
+		}
+	} else {
+		r['default_message_notifications'] = json2.null
+	}
+	if explicit_content_filter := params.explicit_content_filter {
+		i := int(explicit_content_filter)
+		if !is_sentinel(i) {
+			r['explicit_content_filter'] = i
+		}
+	} else {
+		r['explicit_content_filter'] = json2.null
+	}
+	if afk_channel_id := params.afk_channel_id {
+		if !is_sentinel(afk_channel_id) {
+			r['afk_channel_id'] = afk_channel_id.build()
+		}
+	} else {
+		r['afk_channel_id'] = json2.null
+	}
+	if afk_timeout := params.afk_timeout {
+		r['afk_timeout'] = afk_timeout
+	}
+	if icon := params.icon {
+		if !is_sentinel(icon) {
+			r['icon'] = icon.build()
+		}
+	} else {
+		r['icon'] = json2.null
+	}
+	if owner_id := params.owner_id {
+		r['owner_id'] = owner_id.build()
+	}
+	if splash := params.splash {
+		if !is_sentinel(splash) {
+			r['splash'] = splash.build()
+		}
+	} else {
+		r['splash'] = json2.null
+	}
+	if discovery_splash := params.discovery_splash {
+		if !is_sentinel(discovery_splash) {
+			r['discovery_splash'] = discovery_splash.build()
+		}
+	} else {
+		r['discovery_splash'] = json2.null
+	}
+	if banner := params.banner {
+		if !is_sentinel(banner) {
+			r['banner'] = banner.build()
+		}
+	} else {
+		r['banner'] = json2.null
+	}
+	if system_channel_id := params.system_channel_id {
+		if !is_sentinel(system_channel_id) {
+			r['system_channel_id'] = system_channel_id.build()
+		}
+	} else {
+		r['system_channel_id'] = json2.null
+	}
+	if system_channel_flags := params.system_channel_flags {
+		r['system_channel_flags'] = int(system_channel_flags)
+	}
+	if rules_channel_id := params.rules_channel_id {
+		if !is_sentinel(rules_channel_id) {
+			r['rules_channel_id'] = rules_channel_id.build()
+		}
+	} else {
+		r['rules_channel_id'] = json2.null
+	}
+	if public_updates_channel_id := params.public_updates_channel_id {
+		if !is_sentinel(public_updates_channel_id) {
+			r['public_updates_channel_id'] = public_updates_channel_id.build()
+		}
+	} else {
+		r['public_updates_channel_id'] = json2.null
+	}
+	if preferred_locale := params.preferred_locale {
+		if !is_sentinel(preferred_locale) {
+			r['preferred_locale'] = preferred_locale
+		}
+	} else {
+		r['preferred_locale'] = json2.null
+	}
+	if features := params.features {
+		r['features'] = features.map(|f| json2.Any(f))
+	}
+	if description := params.description {
+		if !is_sentinel(description) {
+			r['description'] = description
+		}
+	} else {
+		r['description'] = json2.null
+	}
+	if premium_progress_bar_enabled := params.premium_progress_bar_enabled {
+		r['premium_progress_bar_enabled'] = premium_progress_bar_enabled
+	}
+	if safety_alerts_channel_id := params.safety_alerts_channel_id {
+		if !is_sentinel(safety_alerts_channel_id) {
+			r['safety_alerts_channel_id'] = safety_alerts_channel_id.build()
+		}
+	} else {
+		r['safety_alerts_channel_id'] = json2.null
+	}
+	return r
+}
+
+// Modify a guild's settings. Requires the `.manage_guild` permission. Returns the updated [guild](#Guild) object on success. Fires a Guild Update Gateway event.
+// > ! Attempting to add or remove the COMMUNITY guild feature requires the ADMINISTRATOR permission.
+pub fn (c Client) edit_guild(guild_id Snowflake, params EditGuildParams) !Guild {
+	return Guild.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}', json: params.build(), reason: params.reason)!.body)!)!
+}
+
+// Delete a guild permanently. User must be owner. Fires a Guild Delete Gateway event.
+pub fn (c Client) delete_guild(guild_id Snowflake) ! {
+	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}')!
+}
+
+// Returns a list of guild channel objects. Does not include threads.
+pub fn (c Client) fetch_guild_channels(guild_id Snowflake) ![]Channel {
+	return (json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/channels')!.body)! as []json2.Any).map(Channel.parse(it)!)
 }
