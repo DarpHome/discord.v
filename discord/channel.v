@@ -100,9 +100,9 @@ pub:
 
 pub fn (ft ForumTag) build() json2.Any {
 	return {
-		'name': json2.Any(ft.name)
-		'moderated': ft.moderated
-		'emoji_id': if s := ft.emoji_id {
+		'name':       json2.Any(ft.name)
+		'moderated':  ft.moderated
+		'emoji_id':   if s := ft.emoji_id {
 			s.build()
 		} else {
 			json2.null
@@ -149,19 +149,19 @@ pub interface IChannel {
 
 pub struct PartialChannel {
 pub:
-	id                    Snowflake
-	typ                   ChannelType
-	position              ?int
-	permission_overwrites ?[]PermissionOverwrite
-	name                  ?string
-	topic                 ?string = sentinel_string
-	nsfw                  ?bool
-	bitrate               ?int
-	user_limit            ?int
-	parent_id             ?Snowflake
+	id                            Snowflake
+	typ                           ChannelType
+	position                      ?int
+	permission_overwrites         ?[]PermissionOverwrite
+	name                          ?string
+	topic                         ?string = sentinel_string
+	nsfw                          ?bool
+	bitrate                       ?int
+	user_limit                    ?int
+	parent_id                     ?Snowflake
 	default_auto_archive_duration ?time.Duration
-	flags                 ?ChannelFlags
-	available_tags        ?[]ForumTag
+	flags                         ?ChannelFlags
+	available_tags                ?[]ForumTag
 }
 
 fn (_ PartialChannel) is_channel() {}
@@ -1442,7 +1442,7 @@ pub:
 	// sorting position of the channel
 	position ?int = sentinel_int
 	// the channel's permission overwrites
-	permission_overwrites ?[]PermissionOverwrite = sentinel_permission_overwrites
+	permission_overwrites ?[]PermissionOverwrite = discord.sentinel_permission_overwrites
 	// id of the parent category for a channel
 	parent_id ?Snowflake = sentinel_snowflake
 	// whether the channel is nsfw
@@ -1454,16 +1454,16 @@ pub:
 	// the default duration that the clients use (not the API) for newly created threads in the channel, in minutes, to automatically archive the thread after recent activity
 	default_auto_archive_duration ?time.Duration = sentinel_duration
 	// emoji to show in the add reaction button on a thread in a `.guild_forum` or a `.guild_media` channel
-	default_reaction_emoji ?DefaultReaction = sentinel_default_reaction
+	default_reaction_emoji ?DefaultReaction = discord.sentinel_default_reaction
 	// set of tags that can be used in a `.guild_forum` or a `.guild_media` channel
-	available_tags ?[]ForumTag = sentinel_forum_tags
+	available_tags ?[]ForumTag = discord.sentinel_forum_tags
 	// the default sort order type used to order posts in `.guild_forum` and `.guild_media`  channels
 	default_sort_order ?SortOrderType = unsafe { SortOrderType(sentinel_int) }
 	// the default forum layout view used to display posts in `.guild_forum` channels
 	default_forum_layout ?ForumLayoutType = unsafe { ForumLayoutType(sentinel_int) }
 	// the initial `rate_limit_per_user` to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update.
 	default_thread_rate_limit_per_user ?time.Duration = sentinel_duration
-	reason ?string
+	reason                             ?string
 }
 
 pub fn (params CreateGuildChannelParams) build() json2.Any {
@@ -1514,7 +1514,7 @@ pub fn (params CreateGuildChannelParams) build() json2.Any {
 		r['position'] = json2.null
 	}
 	if permission_overwrites := params.permission_overwrites {
-		if permission_overwrites.data != sentinel_permission_overwrites.data {
+		if permission_overwrites.data != discord.sentinel_permission_overwrites.data {
 			r['permission_overwrites'] = permission_overwrites.map(|po| po.build())
 		}
 	} else {
@@ -1564,7 +1564,7 @@ pub fn (params CreateGuildChannelParams) build() json2.Any {
 		r['default_reaction_emoji'] = json2.null
 	}
 	if available_tags := params.available_tags {
-		if available_tags.data != sentinel_forum_tags.data {
+		if available_tags.data != discord.sentinel_forum_tags.data {
 			r['available_tags'] = available_tags.map(|ft| ft.build())
 		}
 	} else {
@@ -1598,5 +1598,8 @@ pub fn (params CreateGuildChannelParams) build() json2.Any {
 
 // Create a new channel object for the guild. Requires the `.manage_channels` permission. If setting permission overwrites, only permissions your bot has in the guild can be allowed/denied. Setting `.manage_roles` permission in channels is only possible for guild administrators. Returns the new [channel](#Channel) object on success. Fires a Channel Create Gateway event.
 pub fn (c Client) create_guild_channel(guild_id Snowflake, params CreateGuildChannelParams) !Channel {
-	return Channel.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/channels', json: params.build(), reason: params.reason)!.body)!)!
+	return Channel.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/channels',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }

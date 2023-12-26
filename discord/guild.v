@@ -205,10 +205,10 @@ pub:
 
 pub fn (role Role) build() json2.Any {
 	return {
-		'id': json2.Any(int(role.id))
-		'name': role.name
-		'color': role.color
-		'hoist': role.hoist
+		'id':          json2.Any(int(role.id))
+		'name':        role.name
+		'color':       role.color
+		'hoist':       role.hoist
 		'permissions': u64(role.permissions).str()
 		'mentionable': role.mentionable
 	}
@@ -951,7 +951,6 @@ pub fn GuildPreview.parse(j json2.Any) !GuildPreview {
 		else {
 			return error('expected guild preview to be object, got ${j.type_name()}')
 		}
-
 	}
 }
 
@@ -1002,7 +1001,7 @@ pub:
 	premium_progress_bar_enabled ?bool
 	// the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
 	safety_alerts_channel_id ?Snowflake = sentinel_snowflake
-	reason ?string
+	reason                   ?string
 }
 
 pub fn (params EditGuildParams) build() json2.Any {
@@ -1132,7 +1131,10 @@ pub fn (params EditGuildParams) build() json2.Any {
 // Modify a guild's settings. Requires the `.manage_guild` permission. Returns the updated [guild](#Guild) object on success. Fires a Guild Update Gateway event.
 // > ! Attempting to add or remove the COMMUNITY guild feature requires the ADMINISTRATOR permission.
 pub fn (c Client) edit_guild(guild_id Snowflake, params EditGuildParams) !Guild {
-	return Guild.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}', json: params.build(), reason: params.reason)!.body)!)!
+	return Guild.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 // Delete a guild permanently. User must be owner. Fires a Guild Delete Gateway event.

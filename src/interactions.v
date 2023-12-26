@@ -9,7 +9,8 @@ fn run_interactions(token string) ! {
 	c.events.on_ready.listen(fn (event discord.ReadyEvent) ! {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})
-	c.bulk_overwrite_global_application_commands(discord.extract_id_from_token(token)!, [
+	c.bulk_overwrite_global_application_commands(discord.extract_id_from_token(token)!,
+		[
 		discord.CreateApplicationCommandParams{
 			name: 'greet'
 			description: 'Greet someone'
@@ -19,9 +20,9 @@ fn run_interactions(token string) ! {
 					name: 'user'
 					description: 'The user to greet'
 					required: true
-				}
+				},
 			]
-		}
+		},
 	])!
 	c.events.on_message_create.listen(fn (event discord.MessageCreateEvent) ! {
 		content := event.message.content
@@ -173,7 +174,6 @@ fn run_interactions(token string) ! {
 								},
 							]
 						},
-
 					]
 				)!
 			}
@@ -224,9 +224,9 @@ fn run_interactions(token string) ! {
 										discord.TextInput{
 											custom_id: 'name'
 											label: 'Name'
-										}
+										},
 									]
-								}
+								},
 							]
 						})!
 					}

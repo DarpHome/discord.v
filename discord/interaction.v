@@ -97,19 +97,25 @@ pub fn (i Interaction) get_user() User {
 	if u := i.user {
 		return u
 	}
-	return i.member or { GuildMember{} }.user or {
-		panic("corrupted interaction")
-	}
+	return i.member or { GuildMember{} }.user or { panic('corrupted interaction') }
 }
 
-pub type ApplicationCommandInteractionDataOptionValue = string | int | f64 | bool
+pub type ApplicationCommandInteractionDataOptionValue = bool | f64 | int | string
 
 pub fn ApplicationCommandInteractionDataOptionValue.parse(j json2.Any) !ApplicationCommandInteractionDataOptionValue {
 	match j {
-		string { return j }
-		i8, i16, int, i64, u8, u16, u32, u64 { return int(j) }
-		f32, f64 { return f64(j) }
-		bool { return j }
+		string {
+			return j
+		}
+		i8, i16, int, i64, u8, u16, u32, u64 {
+			return int(j)
+		}
+		f32, f64 {
+			return f64(j)
+		}
+		bool {
+			return j
+		}
 		else {
 			return error('expected application command interaction data option value to be string/int/f64/bool, got ${j.type_name()}')
 		}
@@ -186,7 +192,8 @@ pub fn ApplicationCommandInteractionDataOption.parse(j json2.Any) !ApplicationCo
 					none
 				}
 				options: if a := j['options'] {
-					?[]ApplicationCommandInteractionDataOption(maybe_map[json2.Any, ApplicationCommandInteractionDataOption](a as []json2.Any, fn (o json2.Any) !ApplicationCommandInteractionDataOption {
+					?[]ApplicationCommandInteractionDataOption(maybe_map[json2.Any, ApplicationCommandInteractionDataOption](a as []json2.Any,
+						fn (o json2.Any) !ApplicationCommandInteractionDataOption {
 						return ApplicationCommandInteractionDataOption.parse(o)!
 					})!)
 				} else {
@@ -236,7 +243,8 @@ pub fn ApplicationCommandData.parse(j json2.Any) !ApplicationCommandData {
 					none
 				}
 				options: if a := j['options'] {
-					?[]ApplicationCommandInteractionDataOption(maybe_map[json2.Any, ApplicationCommandInteractionDataOption](a as []json2.Any, fn (o json2.Any) !ApplicationCommandInteractionDataOption {
+					?[]ApplicationCommandInteractionDataOption(maybe_map[json2.Any, ApplicationCommandInteractionDataOption](a as []json2.Any,
+						fn (o json2.Any) !ApplicationCommandInteractionDataOption {
 						return ApplicationCommandInteractionDataOption.parse(o)!
 					})!)
 				} else {
@@ -272,9 +280,7 @@ pub fn (acd ApplicationCommandData) get(option string) ?ApplicationCommandIntera
 }
 
 pub fn (i Interaction) get_application_command_data() !ApplicationCommandData {
-	return ApplicationCommandData.parse(i.data or {
-		return error('no data')
-	})!
+	return ApplicationCommandData.parse(i.data or { return error('no data') })!
 }
 
 pub struct MessageComponentData {
@@ -314,9 +320,7 @@ pub fn MessageComponentData.parse(j json2.Any) !MessageComponentData {
 }
 
 pub fn (i Interaction) get_message_component_data() !MessageComponentData {
-	return MessageComponentData.parse(i.data or {
-		return error('no data')
-	})!
+	return MessageComponentData.parse(i.data or { return error('no data') })!
 }
 
 pub struct ModalSubmitData {
@@ -332,7 +336,8 @@ pub fn ModalSubmitData.parse(j json2.Any) !ModalSubmitData {
 		map[string]json2.Any {
 			return ModalSubmitData{
 				custom_id: j['custom_id']! as string
-				components: maybe_map[json2.Any, Component](j['components']! as []json2.Any, fn (o json2.Any) !Component {
+				components: maybe_map[json2.Any, Component](j['components']! as []json2.Any,
+					fn (o json2.Any) !Component {
 					return Component.parse(o)!
 				})!
 			}
@@ -367,9 +372,7 @@ pub fn (msd ModalSubmitData) get(custom_id string) ?string {
 }
 
 pub fn (i Interaction) get_modal_submit_data() !ModalSubmitData {
-	return ModalSubmitData.parse(i.data or {
-		return error('no data')
-	})!
+	return ModalSubmitData.parse(i.data or { return error('no data') })!
 }
 
 pub enum InteractionResponseType {

@@ -6,12 +6,12 @@ import x.json2
 
 pub struct RPC {
 mut:
-	conn io.ReaderWriter 
+	conn io.ReaderWriter
 }
 
 pub struct RPCPacket {
 pub:
-	op int
+	op   int
 	data []u8
 }
 
@@ -47,10 +47,9 @@ pub fn (mut rpc RPC) send_json(op int, j json2.Any) ! {
 
 pub struct RPCJSONPacket {
 pub:
-	op int
+	op   int
 	data json2.Any
 }
-
 
 pub fn (mut rpc RPC) recv_json() !RPCJSONPacket {
 	packet := rpc.recv()!
@@ -68,7 +67,7 @@ pub fn new_rpc(file io.ReaderWriter) !RPC {
 
 pub fn (mut rpc RPC) handshake(client_id Snowflake) ! {
 	rpc.send_json(0, {
-		'v': json2.Any(1)
+		'v':         json2.Any(1)
 		'client_id': client_id.build()
 	})!
 	packet := rpc.recv_json()!

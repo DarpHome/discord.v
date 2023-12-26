@@ -10,12 +10,12 @@ fn main() {
 	match op {
 		'bot' {
 			table := {
-				'pingpong': run_pingpong,
-				'files': run_files,
-				'test': run_testbot,
-				'interactions': run_interactions,
-				'concurrency': run_concurrency,
-				'slash_pingpong': run_slash_pingpong,
+				'pingpong':       run_pingpong
+				'files':          run_files
+				'test':           run_testbot
+				'interactions':   run_interactions
+				'concurrency':    run_concurrency
+				'slash_pingpong': run_slash_pingpong
 			}
 			arg1 := os.args[2] or {
 				eprintln('No example specified (may be ${table.keys().join(', ')})')
@@ -30,9 +30,7 @@ fn main() {
 				eprintln('No token specified')
 				exit(1)
 			}
-			f(token) or {
-				panic(err)
-			}
+			f(token) or { panic(err) }
 		}
 		'rpc' {
 			run_rpc()!

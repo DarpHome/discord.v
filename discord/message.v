@@ -922,7 +922,6 @@ pub fn Message2.parse(j json2.Any) !Message2 {
 	}
 }
 
-
 pub struct PartialMessage {
 pub:
 	// id of the message

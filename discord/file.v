@@ -45,7 +45,6 @@ pub fn build_multipart_with_files(files []File, j json2.Any) (string, string) {
 	return multipart_form_body(mp)
 }
 
-
 @[flag]
 pub enum AttachmentFlags {
 	reserved_0
