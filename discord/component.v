@@ -55,6 +55,29 @@ pub fn ActionRow.parse(j map[string]json2.Any) !ActionRow {
 	}
 }
 
+pub fn (r []Component) flatten() []Component {
+	mut t := []Component{}
+	for u in r {
+		if u is ActionRow {
+			t << u.components.flatten()
+		} else {
+			t << u
+		}
+	}
+	return t
+}
+
+pub fn (cs []Component) find[T](f fn (T) bool) ?T {
+	for c in cs.flatten() {
+		if c is T {
+			if f(c) {
+				return *c
+			}
+		}
+	}
+	return none
+}
+
 pub enum ButtonStyle {
 	// blurple
 	primary   = 1

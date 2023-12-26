@@ -349,26 +349,9 @@ pub fn ModalSubmitData.parse(j json2.Any) !ModalSubmitData {
 }
 
 pub fn (msd ModalSubmitData) get(custom_id string) ?string {
-	println('what')
-	for c in msd.components {
-		println('a')
-		if c is ActionRow {
-			println('b')
-			dump(voidptr(c))
-			dump(voidptr(c.components.data))
-			for d in c.components {
-				println('c')
-				if d is TextInput {
-					println('d')
-					if d.custom_id == custom_id {
-						println('e')
-						return d.value
-					}
-				}
-			}
-		}
-	}
-	return none
+	return msd.components.find[TextInput](fn [custom_id] (c TextInput) bool {
+		return c.custom_id == custom_id
+	}) or { return none }.value
 }
 
 pub fn (i Interaction) get_modal_submit_data() !ModalSubmitData {
