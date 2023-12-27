@@ -16,6 +16,7 @@ pub const sentinel_string = 'darp'
 pub const sentinel_number = math.nan()
 
 pub const sentinel_snowflake = Snowflake(0)
+pub const sentinel_snowflakes = []Snowflake{}
 pub const sentinel_permissions = unsafe { Permissions(max_u64) }
 pub const sentinel_image = Image(NoneImage{})
 pub const sentinel_duration = time.infinite
@@ -53,6 +54,8 @@ pub fn (u UndefinedOr[T]) value[T]() T {
 pub fn is_sentinel[T](target T) bool {
 	$if T is Snowflake {
 		return target == discord.sentinel_snowflake
+	} $else $if T is []Snowflake {
+		return target.data == sentinel_snowflakes.data
 	} $else $if T is Permissions {
 		return target == discord.sentinel_permissions
 	} $else $if T is Image {

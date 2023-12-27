@@ -1603,3 +1603,8 @@ pub fn (c Client) create_guild_channel(guild_id Snowflake, params CreateGuildCha
 		reason: params.reason
 	)!.body)!)!
 }
+
+// Returns all active threads in the guild, including public and private threads. Threads are ordered by their [`id`](#Snowflake), in descending order.
+pub fn (c Client) list_active_guild_threads(guild_id Snowflake) !ListThreadsResponse {
+	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/threads/active')!.body)!)!
+}

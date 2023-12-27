@@ -34,3 +34,35 @@ pub fn (mut gc GatewayClient) update_voice_state(params VoiceStateUpdate) ! {
 		data: params.build()
 	})!
 }
+
+pub struct VoiceRegion {
+pub:
+	// unique ID for the region
+	id string
+	// name of the region
+	name string
+	// true for a single server that is closest to the current user's client
+	optimal bool
+	// whether this is a deprecated voice region (avoid switching to these)
+	deprecated bool
+	// whether this is a custom voice region (used for events/etc)
+	custom bool
+}
+
+pub fn VoiceRegion.parse(j json2.Any) !VoiceRegion {
+	match j {
+		map[string]json2.Any {
+			return VoiceRegion{}
+		}
+		else {
+			return error('expected voice region to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// Returns an array of voice region objects that can be used when setting a voice or stage channel's `rtc_region`.
+pub fn (c Client) list_voice_regions() ![]VoiceRegion {
+	return maybe_map(json2.raw_decode(c.request(.get, '/voice/regions')!.body)! as []json2.Any, fn (j json2.Any) !VoiceRegion {
+		return VoiceRegion.parse(j)!
+	})!
+}
