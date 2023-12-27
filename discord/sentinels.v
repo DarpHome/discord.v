@@ -55,7 +55,7 @@ pub fn is_sentinel[T](target T) bool {
 	$if T is Snowflake {
 		return target == discord.sentinel_snowflake
 	} $else $if T is []Snowflake {
-		return target.data == sentinel_snowflakes.data
+		return target.data == discord.sentinel_snowflakes.data
 	} $else $if T is Permissions {
 		return target == discord.sentinel_permissions
 	} $else $if T is Image {
