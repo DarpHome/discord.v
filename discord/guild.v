@@ -332,19 +332,18 @@ pub fn WelcomeChannel.parse(j json2.Any) !WelcomeChannel {
 
 pub fn (wc WelcomeChannel) build() json2.Any {
 	return {
-		'channel_id': json2.Any(wc.channel_id.build())
+		'channel_id':  json2.Any(wc.channel_id.build())
 		'description': wc.description
-		'emoji_id': if emoji_id := wc.emoji_id {
+		'emoji_id':    if emoji_id := wc.emoji_id {
 			emoji_id.build()
 		} else {
 			json2.null
 		}
-		'emoji_name': if emoji_name := wc.emoji_name {
+		'emoji_name':  if emoji_name := wc.emoji_name {
 			emoji_name
 		} else {
 			json2.null
 		}
-
 	}
 }
 
@@ -2144,7 +2143,6 @@ pub fn (c Client) fetch_guild_welcome_screen(guild_id Snowflake) !WelcomeScreen 
 pub struct EditGuildWelcomeScreenParams {
 pub:
 	reason ?string
-
 	// whether the welcome screen is enabled
 	enabled ?bool
 	// channels linked in the welcome screen and their display options
@@ -2237,8 +2235,8 @@ pub fn PromptOption.parse(j json2.Any) !PromptOption {
 pub fn (po PromptOption) build() json2.Any {
 	mut r := {
 		'channel_ids': json2.Any(po.channel_ids.map(|s| json2.Any(s.build())))
-		'role_ids': json2.Any(po.role_ids.map(|s| json2.Any(s.build())))
-		'title': po.title
+		'role_ids':    json2.Any(po.role_ids.map(|s| json2.Any(s.build())))
+		'title':       po.title
 		'description': po.description
 	}
 	if emoji_id := po.emoji_id {
@@ -2299,11 +2297,11 @@ pub fn OnboardingPrompt.parse(j json2.Any) !OnboardingPrompt {
 
 pub fn (op OnboardingPrompt) build() json2.Any {
 	return {
-		'type': json2.Any(int(op.typ))
-		'options': op.options.map(|o| o.build())
-		'title': op.title
+		'type':          json2.Any(int(op.typ))
+		'options':       op.options.map(|o| o.build())
+		'title':         op.title
 		'single_select': op.single_select
-		'required': op.required
+		'required':      op.required
 		'in_onboarding': op.in_onboarding
 	}
 }
@@ -2338,7 +2336,8 @@ pub fn GuildOnboarding.parse(j json2.Any) !GuildOnboarding {
 				prompts: maybe_map(j['prompts']! as []json2.Any, fn (k json2.Any) !OnboardingPrompt {
 					return OnboardingPrompt.parse(k)!
 				})!
-				default_channel_ids: maybe_map(j['default_channel_ids']! as []json2.Any, fn (k json2.Any) !Snowflake {
+				default_channel_ids: maybe_map(j['default_channel_ids']! as []json2.Any,
+					fn (k json2.Any) !Snowflake {
 					return Snowflake.parse(k)!
 				})!
 				enabled: j['enabled']! as bool
@@ -2360,7 +2359,6 @@ pub fn (c Client) fetch_guild_onboarding(guild_id Snowflake) !GuildOnboarding {
 pub struct EditGuildOnboardingParams {
 pub:
 	reason ?string
-
 	// Prompts shown during onboarding and in customize community
 	prompts ?[]OnboardingPrompt
 	// Channel IDs that members get opted into automatically
@@ -2391,7 +2389,10 @@ pub fn (params EditGuildOnboardingParams) build() json2.Any {
 // Modifies the onboarding configuration of the guild. Returns a 200 with the Onboarding object for the guild. Requires the `.manage_guild` and `.manage_roles` permissions.
 // > i Onboarding enforces constraints when enabled. These constraints are that there must be at least 7 Default Channels and at least 5 of them must allow sending messages to the @everyone role. The mode field modifies what is considered when enforcing these constraints.
 pub fn (c Client) edit_guild_onboarding(guild_id Snowflake, params EditGuildOnboardingParams) !GuildOnboarding {
-	return GuildOnboarding.parse(json2.raw_decode(c.request(.put, '/guilds/${urllib.path_escape(guild_id.build())}/onboarding', json: params.build(), reason: params.reason)!.body)!)!
+	return GuildOnboarding.parse(json2.raw_decode(c.request(.put, '/guilds/${urllib.path_escape(guild_id.build())}/onboarding',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 @[params]
@@ -2432,9 +2433,10 @@ pub fn (params EditCurrentUserVoiceStateParams) build() json2.Any {
 // - You must have the `.request_to_speak` permission to request to speak. You can always clear your own request to speak.
 // - You are able to set `request_to_speak_timestamp` to any present or future time.
 pub fn (c Client) edit_current_user_voice_state(guild_id Snowflake, params EditCurrentUserVoiceStateParams) ! {
-	c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/voice-states/@me', json: params.build())!
+	c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/voice-states/@me',
+		json: params.build()
+	)!
 }
-
 
 @[params]
 pub struct EditUserVoiceStateParams {
@@ -2465,5 +2467,7 @@ pub fn (params EditUserVoiceStateParams) build() json2.Any {
 // - When unsuppressed, non-bot users will have their `request_to_speak_timestamp` set to the current time. Bot users will not.
 // - When suppressed, the user will have their `request_to_speak_timestamp` removed.
 pub fn (c Client) edit_user_voice_state(guild_id Snowflake, user_id Snowflake, params EditUserVoiceStateParams) ! {
-	c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/voice-states/${urllib.path_escape(user_id.build())}', json: params.build())!
+	c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/voice-states/${urllib.path_escape(user_id.build())}',
+		json: params.build()
+	)!
 }

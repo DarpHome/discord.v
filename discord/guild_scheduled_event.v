@@ -47,9 +47,7 @@ pub fn GuildScheduledEventEntityMetadata.parse(j json2.Any) !GuildScheduledEvent
 
 pub fn (md GuildScheduledEventEntityMetadata) build() json2.Any {
 	return {
-		'location': json2.Any(md.location or {
-			panic('location cannot be null')
-		})
+		'location': json2.Any(md.location or { panic('location cannot be null') })
 	}
 }
 
@@ -178,7 +176,8 @@ pub fn (params FetchScheduledEventsParams) build_values() urllib.Values {
 
 // Returns a list of [guild scheduled event](#GuildScheduledEvent) objects for the given guild.
 pub fn (c Client) list_scheduled_events_for_guild(guild_id Snowflake, params FetchScheduledEventsParams) ![]GuildScheduledEvent {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events${encode_query(params.build_values())}')!.body)! as []json2.Any, fn (k json2.Any) !GuildScheduledEvent {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events${encode_query(params.build_values())}')!.body)! as []json2.Any,
+		fn (k json2.Any) !GuildScheduledEvent {
 		return GuildScheduledEvent.parse(k)!
 	})!
 }
@@ -187,7 +186,6 @@ pub fn (c Client) list_scheduled_events_for_guild(guild_id Snowflake, params Fet
 pub struct CreateGuildScheduledEventParams {
 pub:
 	reason ?string
-
 	// the channel id of the scheduled event.
 	channel_id ?Snowflake
 	// the entity metadata of the scheduled event
@@ -210,10 +208,10 @@ pub:
 
 pub fn (params CreateGuildScheduledEventParams) build() json2.Any {
 	mut r := {
-		'name': json2.Any(params.name)
-		'privacy_level': int(params.privacy_level)
+		'name':                 json2.Any(params.name)
+		'privacy_level':        int(params.privacy_level)
 		'scheduled_start_time': format_iso8601(params.scheduled_start_time)
-		'entity_type': int(params.entity_type)
+		'entity_type':          int(params.entity_type)
 	}
 	if channel_id := params.channel_id {
 		r['channel_id'] = channel_id.build()
@@ -236,7 +234,10 @@ pub fn (params CreateGuildScheduledEventParams) build() json2.Any {
 // Create a guild scheduled event in the guild. Returns a [guild scheduled event](#GuildScheduledEvent) object on success. Fires a Guild Scheduled Event Create Gateway event.
 // > i A guild can have a maximum of 100 events with `.scheduled` or `.active` status at any time.
 pub fn (c Client) create_guild_scheduled_event(guild_id Snowflake, params CreateGuildScheduledEventParams) !GuildScheduledEvent {
-	return GuildScheduledEvent.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events', json: params.build(), reason: params.reason)!.body)!)!
+	return GuildScheduledEvent.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 // Get a guild scheduled event. Returns a guild scheduled event object on success.
@@ -244,16 +245,17 @@ pub fn (c Client) fetch_guild_scheduled_event(guild_id Snowflake, guild_schedule
 	return GuildScheduledEvent.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/${urllib.path_escape(guild_scheduled_event_id.build())}${encode_query(params.build_values())}')!.body)!)!
 }
 
-
 @[params]
 pub struct EditGuildScheduledEventParams {
 pub:
 	reason ?string
-
 	// the channel id of the scheduled event, set to `none` if changing entity type to `.external`
 	channel_id ?Snowflake = sentinel_snowflake
 	// the entity metadata of the scheduled event
-	entity_metadata ?GuildScheduledEventEntityMetadata = GuildScheduledEventEntityMetadata{location: none} // sentinel
+	entity_metadata ?GuildScheduledEventEntityMetadata = GuildScheduledEventEntityMetadata{
+		location: none
+	}
+	// sentinel
 	// the name of the scheduled event
 	name ?string
 	// the privacy level of the scheduled event
@@ -327,12 +329,17 @@ pub fn (params EditGuildScheduledEventParams) build() json2.Any {
 // > i To start or end an event, use this function to modify the event's status field.
 // > i This endpoint silently discards `entity_metadata` for non-`.external` events.
 pub fn (c Client) edit_guild_scheduled_event(guild_id Snowflake, guild_scheduled_event_id Snowflake, params EditGuildScheduledEventParams) !GuildScheduledEvent {
-	return GuildScheduledEvent.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/${urllib.path_escape(guild_scheduled_event_id.build())}', json: params.build(), reason: params.reason)!.body)!)!
+	return GuildScheduledEvent.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/${urllib.path_escape(guild_scheduled_event_id.build())}',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 // Delete a guild scheduled event. Returns a 204 on success. Fires a Guild Scheduled Event Delete Gateway event.
 pub fn (c Client) delete_guild_scheduled_event(guild_id Snowflake, guild_scheduled_event_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/${urllib.path_escape(guild_scheduled_event_id.build())}', reason: params.reason)!
+	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/${urllib.path_escape(guild_scheduled_event_id.build())}',
+		reason: params.reason
+	)!
 }
 
 pub struct GuildScheduledEventUser {
@@ -396,7 +403,8 @@ pub fn (params FetchGuildScheduledEventUsersParams) build_values() urllib.Values
 
 // Get a list of guild scheduled event users subscribed to a guild scheduled event. Returns a list of [guild scheduled event user](#GuildScheduledEventUser) objects on success. Guild member data, if it exists, is included if the `with_member` parameter is set.
 pub fn (c Client) fetch_guild_scheduled_event_users(guild_id Snowflake, guild_scheduled_event_id Snowflake, params FetchGuildScheduledEventUsersParams) ![]GuildScheduledEventUser {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/users${encode_query(params.build_values())}')!.body)! as []json2.Any, fn (k json2.Any) !GuildScheduledEventUser {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/users${encode_query(params.build_values())}')!.body)! as []json2.Any,
+		fn (k json2.Any) !GuildScheduledEventUser {
 		return GuildScheduledEventUser.parse(k)!
 	})!
 }

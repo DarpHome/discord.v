@@ -138,7 +138,8 @@ pub fn Invite.parse(j json2.Any) !Invite {
 		else {
 			return error('expected invite to be object, got ${j.type_name()}')
 		}
-	}}
+	}
+}
 
 @[params]
 pub struct FetchInviteParams {
