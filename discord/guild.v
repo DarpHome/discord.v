@@ -295,9 +295,9 @@ pub enum NSFWLevel {
 pub struct WelcomeChannel {
 pub:
 	// the channel's id
-	channel_id ?Snowflake
+	channel_id Snowflake @[required]
 	// the description shown for the channel
-	description string
+	description string @[required]
 	// the emoji id, if the emoji is custom
 	emoji_id ?Snowflake
 	// the emoji name if custom, the unicode character if standard, or `none` if no emoji is set
@@ -327,6 +327,24 @@ pub fn WelcomeChannel.parse(j json2.Any) !WelcomeChannel {
 		else {
 			return error('expected welcome channel to be object, got ${j.type_name()}')
 		}
+	}
+}
+
+pub fn (wc WelcomeChannel) build() json2.Any {
+	return {
+		'channel_id': json2.Any(wc.channel_id.build())
+		'description': wc.description
+		'emoji_id': if emoji_id := wc.emoji_id {
+			emoji_id.build()
+		} else {
+			json2.null
+		}
+		'emoji_name': if emoji_name := wc.emoji_name {
+			emoji_name
+		} else {
+			json2.null
+		}
+
 	}
 }
 
@@ -2080,4 +2098,372 @@ pub fn GuildWidget.parse(j json2.Any) !GuildWidget {
 			return error('expected guild widget to be object, got ${j.type_name()}')
 		}
 	}
+}
+
+// Returns the widget for the guild. Fires an Invite Create Gateway event when an invite channel is defined and a new Invite is generated.
+pub fn (c Client) fetch_guild_widget(guild_id Snowflake) !GuildWidget {
+	return GuildWidget.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/widget.json')!.body)!)!
+}
+
+pub struct GuildVanityUrl {
+pub:
+	code ?string
+	uses int
+}
+
+pub fn GuildVanityUrl.parse(j json2.Any) !GuildVanityUrl {
+	match j {
+		map[string]json2.Any {
+			code := j['code']!
+			return GuildVanityUrl{
+				code: if code !is json2.Null {
+					?string(code as string)
+				} else {
+					none
+				}
+				uses: j['uses']!.int()
+			}
+		}
+		else {
+			return error('expected guild vanity url to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// Returns a partial invite object for guilds with that feature enabled. Requires the `.manage_guild` permission. `code` will be none if a vanity url for the guild is not set.
+pub fn (c Client) fetch_guild_vanity_url(guild_id Snowflake) !GuildVanityUrl {
+	return GuildVanityUrl.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/vanity-url')!.body)!)!
+}
+
+// Returns the Welcome Screen object for the guild. If the welcome screen is not enabled, the `.manage_guild` permission is required.
+pub fn (c Client) fetch_guild_welcome_screen(guild_id Snowflake) !WelcomeScreen {
+	return WelcomeScreen.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/welcome-screen')!.body)!)!
+}
+
+@[params]
+pub struct EditGuildWelcomeScreenParams {
+pub:
+	reason ?string
+
+	// whether the welcome screen is enabled
+	enabled ?bool
+	// channels linked in the welcome screen and their display options
+	welcome_channels ?[]WelcomeChannel
+	// the server description to show in the welcome screen
+	description ?string = sentinel_string
+}
+
+pub fn (params EditGuildWelcomeScreenParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if enabled := params.enabled {
+		r['enabled'] = enabled
+	}
+	if welcome_channels := params.welcome_channels {
+		r['welcome_channels'] = welcome_channels.map(|wc| wc.build())
+	}
+	if description := params.description {
+		if !is_sentinel(description) {
+			r['description'] = description
+		}
+	} else {
+		r['description'] = json2.null
+	}
+	return r
+}
+
+pub struct PromptOption {
+pub:
+	// ID of the prompt option
+	id Snowflake
+	// IDs for channels a member is added to when the option is selected
+	channel_ids []Snowflake
+	// IDs for roles assigned to a member when the option is selected
+	role_ids []Snowflake
+	// Emoji of the option (see below)
+	emoji ?Emoji
+	// Emoji ID of the option (see below)
+	emoji_id ?Snowflake
+	// Emoji name of the option (see below)
+	emoji_name ?string
+	// Whether the emoji is animated (see below)
+	emoji_animated ?bool
+	// Title of the option
+	title string
+	// Description of the option
+	description string
+}
+
+pub fn PromptOption.parse(j json2.Any) !PromptOption {
+	match j {
+		map[string]json2.Any {
+			return PromptOption{
+				id: Snowflake.parse(j['id']!)!
+				channel_ids: maybe_map(j['channel_ids']! as []json2.Any, fn (k json2.Any) !Snowflake {
+					return Snowflake.parse(k)!
+				})!
+				role_ids: maybe_map(j['role_ids']! as []json2.Any, fn (k json2.Any) !Snowflake {
+					return Snowflake.parse(k)!
+				})!
+				emoji: if o := j['emoji'] {
+					?Emoji(Emoji.parse(o)!)
+				} else {
+					none
+				}
+				emoji_id: if s := j['emoji_id'] {
+					?Snowflake(Snowflake.parse(s)!)
+				} else {
+					none
+				}
+				emoji_name: if s := j['emoji_name'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				emoji_animated: if b := j['emoji_animated'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				title: j['title']! as string
+				description: j['description']! as string
+			}
+		}
+		else {
+			return error('expected prompt option to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (po PromptOption) build() json2.Any {
+	mut r := {
+		'channel_ids': json2.Any(po.channel_ids.map(|s| json2.Any(s.build())))
+		'role_ids': json2.Any(po.role_ids.map(|s| json2.Any(s.build())))
+		'title': po.title
+		'description': po.description
+	}
+	if emoji_id := po.emoji_id {
+		r['emoji_id'] = emoji_id.build()
+	}
+	if emoji_name := po.emoji_name {
+		r['emoji_name'] = emoji_name
+	}
+	if emoji_animated := po.emoji_animated {
+		r['emoji_animated'] = emoji_animated
+	}
+	return r
+}
+
+pub enum PromptType {
+	multiple_choice
+	dropdown
+}
+
+pub struct OnboardingPrompt {
+pub:
+	// ID of the prompt
+	id Snowflake
+	// Type of prompt
+	typ PromptType
+	// Options available within the prompt
+	options []PromptOption
+	// Title of the prompt
+	title string
+	// Indicates whether users are limited to selecting one option for the prompt
+	single_select bool
+	// Indicates whether the prompt is required before a user completes the onboarding flow
+	required bool
+	// Indicates whether the prompt is present in the onboarding flow. If `false`, the prompt will only appear in the Channels & Roles tab
+	in_onboarding bool
+}
+
+pub fn OnboardingPrompt.parse(j json2.Any) !OnboardingPrompt {
+	match j {
+		map[string]json2.Any {
+			return OnboardingPrompt{
+				id: Snowflake.parse(j['id']!)!
+				typ: unsafe { PromptType(j['type']!.int()) }
+				options: maybe_map(j['options']! as []json2.Any, fn (k json2.Any) !PromptOption {
+					return PromptOption.parse(k)!
+				})!
+				title: j['title']! as string
+				single_select: j['single_select']! as bool
+				required: j['required']! as bool
+				in_onboarding: j['in_onboarding']! as bool
+			}
+		}
+		else {
+			return error('expected onboarding prompt to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (op OnboardingPrompt) build() json2.Any {
+	return {
+		'type': json2.Any(int(op.typ))
+		'options': op.options.map(|o| o.build())
+		'title': op.title
+		'single_select': op.single_select
+		'required': op.required
+		'in_onboarding': op.in_onboarding
+	}
+}
+
+// Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
+pub enum OnboardingMode {
+	// Counts only Default Channels towards constraints
+	onboarding_default
+	// Counts Default Channels and Questions towards constraints
+	onboarding_advanced
+}
+
+pub struct GuildOnboarding {
+pub:
+	// ID of the guild this onboarding is part of
+	guild_id Snowflake
+	// Prompts shown during onboarding and in customize community
+	prompts []OnboardingPrompt
+	// Channel IDs that members get opted into automatically
+	default_channel_ids []Snowflake
+	// Whether onboarding is enabled in the guild
+	enabled bool
+	// Current mode of onboarding
+	mode OnboardingMode
+}
+
+pub fn GuildOnboarding.parse(j json2.Any) !GuildOnboarding {
+	match j {
+		map[string]json2.Any {
+			return GuildOnboarding{
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				prompts: maybe_map(j['prompts']! as []json2.Any, fn (k json2.Any) !OnboardingPrompt {
+					return OnboardingPrompt.parse(k)!
+				})!
+				default_channel_ids: maybe_map(j['default_channel_ids']! as []json2.Any, fn (k json2.Any) !Snowflake {
+					return Snowflake.parse(k)!
+				})!
+				enabled: j['enabled']! as bool
+				mode: unsafe { OnboardingMode(j['mode']!.int()) }
+			}
+		}
+		else {
+			return error('expected guild onboarding to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// Returns the Onboarding object for the guild.
+pub fn (c Client) fetch_guild_onboarding(guild_id Snowflake) !GuildOnboarding {
+	return GuildOnboarding.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/onboarding')!.body)!)!
+}
+
+@[params]
+pub struct EditGuildOnboardingParams {
+pub:
+	reason ?string
+
+	// Prompts shown during onboarding and in customize community
+	prompts ?[]OnboardingPrompt
+	// Channel IDs that members get opted into automatically
+	default_channel_ids ?[]Snowflake
+	// Whether onboarding is enabled in the guild
+	enabled ?bool
+	// Current mode of onboarding
+	mode ?OnboardingMode
+}
+
+pub fn (params EditGuildOnboardingParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if prompts := params.prompts {
+		r['prompts'] = prompts.map(|p| p.build())
+	}
+	if default_channel_ids := params.default_channel_ids {
+		r['default_channel_ids'] = default_channel_ids.map(|s| json2.Any(s.build()))
+	}
+	if enabled := params.enabled {
+		r['enabled'] = enabled
+	}
+	if mode := params.mode {
+		r['mode'] = int(mode)
+	}
+	return r
+}
+
+// Modifies the onboarding configuration of the guild. Returns a 200 with the Onboarding object for the guild. Requires the `.manage_guild` and `.manage_roles` permissions.
+// > i Onboarding enforces constraints when enabled. These constraints are that there must be at least 7 Default Channels and at least 5 of them must allow sending messages to the @everyone role. The mode field modifies what is considered when enforcing these constraints.
+pub fn (c Client) edit_guild_onboarding(guild_id Snowflake, params EditGuildOnboardingParams) !GuildOnboarding {
+	return GuildOnboarding.parse(json2.raw_decode(c.request(.put, '/guilds/${urllib.path_escape(guild_id.build())}/onboarding', json: params.build(), reason: params.reason)!.body)!)!
+}
+
+@[params]
+pub struct EditCurrentUserVoiceStateParams {
+pub:
+	// the id of the channel the user is currently in
+	channel_id ?Snowflake
+	// toggles the user's suppress state
+	suppress ?bool
+	// sets the user's request to speak
+	request_to_speak_timestamp ?time.Time = sentinel_time
+}
+
+pub fn (params EditCurrentUserVoiceStateParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if channel_id := params.channel_id {
+		r['channel_id'] = channel_id.build()
+	}
+	if suppress := params.suppress {
+		r['suppress'] = suppress
+	}
+	if request_to_speak_timestamp := params.request_to_speak_timestamp {
+		if !is_sentinel(request_to_speak_timestamp) {
+			r['request_to_speak_timestamp'] = format_iso8601(request_to_speak_timestamp)
+		}
+	} else {
+		r['request_to_speak_timestamp'] = json2.null
+	}
+	return r
+}
+
+// Updates the current user's voice state. Returns 204 No Content on success. Fires a Voice State Update Gateway event.
+// # Caveats
+// There are currently several caveats for this endpoint:
+// - `channel_id` must currently point to a stage channel.
+// - current user must already have joined `channel_id`.
+// - You must have the `.mute_members` permission to unsuppress yourself. You can always suppress yourself.
+// - You must have the `.request_to_speak` permission to request to speak. You can always clear your own request to speak.
+// - You are able to set `request_to_speak_timestamp` to any present or future time.
+pub fn (c Client) edit_current_user_voice_state(guild_id Snowflake, params EditCurrentUserVoiceStateParams) ! {
+	c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/voice-states/@me', json: params.build())!
+}
+
+
+@[params]
+pub struct EditUserVoiceStateParams {
+pub:
+	// the id of the channel the user is currently in
+	channel_id ?Snowflake
+	// toggles the user's suppress state
+	suppress ?bool
+}
+
+pub fn (params EditUserVoiceStateParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if channel_id := params.channel_id {
+		r['channel_id'] = channel_id.build()
+	}
+	if suppress := params.suppress {
+		r['suppress'] = suppress
+	}
+	return r
+}
+
+// Updates another user's voice state. Fires a Voice State Update Gateway event.
+// # Caveats
+// There are currently several caveats for this endpoint:
+// - `channel_id` must currently point to a stage channel.
+// - User must already have joined `channel_id`.
+// - You must have the `.mute_members` permission. (Since suppression is the only thing that is available currently.)
+// - When unsuppressed, non-bot users will have their `request_to_speak_timestamp` set to the current time. Bot users will not.
+// - When suppressed, the user will have their `request_to_speak_timestamp` removed.
+pub fn (c Client) edit_user_voice_state(guild_id Snowflake, user_id Snowflake, params EditUserVoiceStateParams) ! {
+	c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/voice-states/${urllib.path_escape(user_id.build())}', json: params.build())!
 }

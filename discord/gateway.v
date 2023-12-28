@@ -89,10 +89,8 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 		for client.ready {
 			client.logger.debug('Sleeping')
 			time.sleep(heartbeat_interval)
-			q := client.last_heartbeat_req
 			s := client.last_heartbeat_res
-			if q != none {
-				rq := q or { panic('corrupted') }
+			if rq := client.last_heartbeat_req {
 				rs := s or { time.unix(0) }
 				if rs < rq {
 					client.logger.error('Reconnecting due to zombied connection')
