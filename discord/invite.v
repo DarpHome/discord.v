@@ -33,7 +33,7 @@ pub:
 	// the expiration date of this invite, returned from the `GET /invites/<code>` endpoint when `with_expiration` is `true`
 	expires_at ?time.Time
 	// guild scheduled event data, only included if `guild_scheduled_event_id` contains a valid guild scheduled event id
-	// guild_scheduled_event? GuildScheduledEvent
+	guild_scheduled_event ?GuildScheduledEvent
 }
 
 // Extra information about an invite, will extend the invite object.
@@ -71,8 +71,74 @@ pub fn InviteMetadata.parse(j json2.Any) !InviteMetadata {
 }
 
 pub fn Invite.parse(j json2.Any) !Invite {
-	return error('TODO')
-}
+	match j {
+		map[string]json2.Any {
+			return Invite{
+				code: j['code']! as string
+				guild: if o := j['guild'] {
+					?PartialGuild(PartialGuild.parse(o)!)
+				} else {
+					none
+				}
+				channel: if o := j['channel'] {
+					if o !is json2.Null {
+						?PartialChannel(PartialChannel.parse(o)!)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				inviter: if o := j['inviter'] {
+					?User(User.parse(o)!)
+				} else {
+					none
+				}
+				target_type: if i := j['target_type'] {
+					?InviteTargetType(unsafe { InviteTargetType(i.int()) })
+				} else {
+					none
+				}
+				target_user: if o := j['target_user'] {
+					?User(User.parse(o)!)
+				} else {
+					none
+				}
+				target_application: if o := j['target_application'] {
+					?PartialApplication(PartialApplication.parse(o)!)
+				} else {
+					none
+				}
+				approximate_presence_count: if i := j['approximate_presence_count'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				approximate_member_count: if i := j['approximate_member_count'] {
+					?int(i.int())
+				} else {
+					none
+				}
+				expires_at: if s := j['expires_at'] {
+					if s !is json2.Null {
+						?time.Time(time.parse_iso8601(s as string)!)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				guild_scheduled_event: if o := j['guild_scheduled_event'] {
+					?GuildScheduledEvent(GuildScheduledEvent.parse(o)!)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected invite to be object, got ${j.type_name()}')
+		}
+	}}
 
 @[params]
 pub struct FetchInviteParams {

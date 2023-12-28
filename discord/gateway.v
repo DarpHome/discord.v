@@ -112,6 +112,9 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 }
 
 fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
+	$if windows && !no_vschannel ? {
+		$compile_warn('Websocket connection with Discord may die at some events with vschannel. Please pass `-d no_vschannel` if you want it work correctly.')
+	}
 	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, mut client GatewayClient) ! {
 		if reason != 'closed by client' {
 			client.close_code = code

@@ -5,7 +5,7 @@ import strconv
 
 fn run_testbot(token string) ! {
 	mut c := discord.bot(token,
-		intents: .message_content | .guild_messages | .guild_message_reactions | .direct_message_reactions
+		intents: .message_content | .guild_messages | .guild_message_reactions | .direct_message_reactions | .guild_message_typing
 		presence: discord.Presence{
 			activities: [
 				discord.Activity{
@@ -122,6 +122,9 @@ fn run_testbot(token string) ! {
 			}
 			else {}
 		}
+	})
+	c.events.on_typing_start.listen(fn (event discord.TypingStartEvent) ! {
+		dump(event)
 	})
 	c.launch()!
 }
