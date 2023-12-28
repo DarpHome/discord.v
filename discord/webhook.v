@@ -6,7 +6,7 @@ import x.json2
 
 pub enum WebhookType {
 	// Incoming Webhooks can post messages to channels with a generated token
-	incoming = 1
+	incoming         = 1
 	// Channel Follower Webhooks are internal webhooks used with Channel Following to post new messages into channels
 	channel_follower
 	// Application webhooks are webhooks used with Interactions
@@ -117,7 +117,6 @@ pub fn Webhook.parse(j json2.Any) !Webhook {
 pub struct CreateWebhookParams {
 pub:
 	reason ?string
-
 	// name of the webhook (1-80 characters)
 	name string @[required]
 	// image for the default webhook avatar
@@ -143,19 +142,24 @@ pub fn (params CreateWebhookParams) build() json2.Any {
 // - It does not contain the substrings `clyde` or `discord` (case-insensitive)
 // - It follows the nickname guidelines in the [Usernames and Nicknames](https://discord.com/developers/docs/resources/user#usernames-and-nicknames) documentation, with an exception that webhook names can be up to 80 characters
 pub fn (c Client) create_webhook(channel_id Snowflake, params CreateWebhookParams) !Webhook {
-	return Webhook.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/webhooks', json: params.build(), reason: params.reason)!.body)!)!
+	return Webhook.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/webhooks',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 // Returns a list of channel [webhook](#Webhook) objects. Requires the `.manage_webhooks` permission.
 pub fn (c Client) fetch_channel_webhooks(channel_id Snowflake) ![]Webhook {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/webhooks')!.body)! as []json2.Any, fn (k json2.Any) !Webhook {
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/webhooks')!.body)! as []json2.Any,
+		fn (k json2.Any) !Webhook {
 		return Webhook.parse(k)!
 	})
 }
 
 // Returns a list of guild [webhook](#Webhook) objects. Requires the `.manage_webhooks` permission.
 pub fn (c Client) fetch_guild_webhooks(guild_id Snowflake) ![]Webhook {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/webhooks')!.body)! as []json2.Any, fn (k json2.Any) !Webhook {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/webhooks')!.body)! as []json2.Any,
+		fn (k json2.Any) !Webhook {
 		return Webhook.parse(k)!
 	})
 }
@@ -167,14 +171,15 @@ pub fn (c Client) fetch_webhook(webhook_id Snowflake) !Webhook {
 
 // Same as above, except this call does not require authentication and returns no user in the webhook object.
 pub fn (c Client) fetch_webhook_with_token(webhook_id Snowflake, webhook_token string) !Webhook {
-	return Webhook.parse(json2.raw_decode(c.request(.get, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}', authenticate: false)!.body)!)!
+	return Webhook.parse(json2.raw_decode(c.request(.get, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}',
+		authenticate: false
+	)!.body)!)!
 }
 
 @[params]
 pub struct EditWebhookParams {
 pub:
 	reason ?string
-
 	// the default name of the webhook
 	name ?string
 	// image for the default webhook avatar
@@ -203,12 +208,19 @@ pub fn (params EditWebhookParams) build() json2.Any {
 
 // Modify a webhook. Requires the `.manage_webhooks` permission. Returns the updated [webhook](#Webhook) object on success. Fires a Webhooks Update Gateway event.
 pub fn (c Client) edit_webhook(webhook_id Snowflake, params EditWebhookParams) !Webhook {
-	return Webhook.parse(json2.raw_decode(c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}', json: params.build(), reason: params.reason)!.body)!)!
+	return Webhook.parse(json2.raw_decode(c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 // Same as above, except this call does not require authentication, does not accept a `channel_id` parameter in the body, and does not return a user in the webhook object.
 pub fn (c Client) edit_webhook_with_token(webhook_id Snowflake, webhook_token string, params EditWebhookParams) !Webhook {
-	return Webhook.parse(json2.raw_decode(c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}', json: params.build(), reason: params.reason, authenticate: false)!.body)!)!
+	return Webhook.parse(json2.raw_decode(c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}',
+		json: params.build()
+		reason: params.reason
+		authenticate: false
+	)!.body)!)!
 }
 
 // Delete a webhook permanently. Requires the `.manage_webhooks` permission. Returns a 204 No Content response on success. Fires a Webhooks Update Gateway event.
@@ -218,7 +230,10 @@ pub fn (c Client) delete_webhook(webhook_id Snowflake, params ReasonParam) ! {
 
 // Same as above, except this call does not require authentication.
 pub fn (c Client) delete_webhook_with_token(webhook_id Snowflake, webhook_token string, params ReasonParam) ! {
-	c.request(.delete, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}', reason: params.reason, authenticate: false)!
+	c.request(.delete, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}',
+		reason: params.reason
+		authenticate: false
+	)!
 }
 
 pub struct ExecuteWebhookParams {
@@ -227,7 +242,6 @@ pub:
 	wait ?bool
 	// Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived.
 	thread_id ?Snowflake
-
 	// the message contents (up to 2000 characters)
 	content ?string
 	// override the default username of the webhook
@@ -318,7 +332,10 @@ pub fn (c Client) execute_webhook(webhook_id Snowflake, webhook_token string, pa
 			authenticate: false
 		)!
 	} else {
-		c.request(.post, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}${encode_query(params.build_query_values())}', json: params.build(), authenticate: false)!
+		c.request(.post, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}${encode_query(params.build_query_values())}',
+			json: params.build()
+			authenticate: false
+		)!
 	}
 	if response.status() != .no_content {
 		m := Message.parse(json2.raw_decode(response.body)!)!
@@ -344,7 +361,9 @@ pub fn (params FetchWebhookMessageParams) build_query_values() urllib.Values {
 
 // Returns a previously-sent webhook message from the same token. Returns a [message](#Message) object on success.
 pub fn (c Client) fetch_webhook_message(webhook_id Snowflake, webhook_token string, message_id Snowflake, params FetchWebhookMessageParams) !Message {
-	return Message.parse(json2.raw_decode(c.request(.get, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}', authenticate: false)!.body)!)!
+	return Message.parse(json2.raw_decode(c.request(.get, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}',
+		authenticate: false
+	)!.body)!)!
 }
 
 @[params]
@@ -352,7 +371,6 @@ pub struct EditWebhookMessageParams {
 pub:
 	// id of the thread the message is in
 	thread_id ?Snowflake
-
 	// the message contents (up to 2000 characters)
 	content ?string
 	// embedded `rich` content
@@ -400,6 +418,7 @@ pub fn (params EditWebhookMessageParams) build_query_values() urllib.Values {
 pub fn (c Client) edit_webhook_message(webhook_id Snowflake, webhook_token string, message_id Snowflake, params EditWebhookMessageParams) !Message {
 	return Message.parse(json2.raw_decode(if files := params.files {
 		body, boundary := build_multipart_with_files(files, params.build())
+
 		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}',
 			body: body
 			common_headers: {
@@ -408,7 +427,10 @@ pub fn (c Client) edit_webhook_message(webhook_id Snowflake, webhook_token strin
 			authenticate: false
 		)!.body
 	} else {
-		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}', json: params.build(), authenticate: false)!.body
+		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}',
+			json: params.build()
+			authenticate: false
+		)!.body
 	})!)!
 }
 
@@ -428,5 +450,7 @@ pub fn (params DeleteWebhookMessageParams) build_query_values() urllib.Values {
 }
 
 pub fn (c Client) delete_webhook_message(webhook_id Snowflake, webhook_token string, message_id Snowflake, params DeleteWebhookMessageParams) ! {
-	c.request(.delete, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}', authenticate: false)!
+	c.request(.delete, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}',
+		authenticate: false
+	)!
 }
