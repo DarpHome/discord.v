@@ -47,7 +47,7 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 	for i, w in ec.wait_fors {
 		mut b := false
 		if w.check != none {
-			c := w.check or { panic(err) }
+			c := w.check or { panic('corrupted') }
 			b = c(e)
 		} else {
 			b = true
@@ -132,7 +132,7 @@ pub fn (mut a Awaitable[T]) do() ?T {
 }
 
 // `wait` returns Awaitable that can be used to get event
-// > ! Do not use that directly in events, please take a reference using `controller := &events.creator.events.on_x`
+// > ! Do not use that directly in events, please take a reference using `mut controller := &events.creator.events.on_x`
 pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] {
 	id := ec.generate_id()
 	ec.wait_fors[id] = EventWaiter[T]{

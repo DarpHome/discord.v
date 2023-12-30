@@ -209,6 +209,10 @@ struct GatewayCloseCode {
 }
 
 const gateway_close_code_table = {
+	1000: GatewayCloseCode{
+		message: ''
+		reconnect: true
+	}
 	4000: GatewayCloseCode{
 		message: "Unknown error: We're not sure what went wrong. Try reconnecting?"
 		reconnect: true
