@@ -6,10 +6,10 @@ import net.urllib
 
 pub enum InteractionType {
 	ping                             = 1
-	application_command              = 2
-	message_component                = 3
-	application_command_autocomplete = 4
-	modal_submit                     = 5
+	application_command
+	message_component
+	application_command_autocomplete
+	modal_submit
 }
 
 pub struct Interaction {
@@ -84,7 +84,9 @@ pub fn Interaction.parse(j json2.Any) !Interaction {
 				} else {
 					none
 				}
-				entitlements: (j['entitlements']! as []json2.Any).map(Entitlement.parse(it)!)
+				entitlements: maybe_map(j['entitlements']! as []json2.Any, fn (k json2.Any) !Entitlement {
+					return Entitlement.parse(k)!
+				})!
 			}
 		}
 		else {
@@ -192,9 +194,9 @@ pub fn ApplicationCommandInteractionDataOption.parse(j json2.Any) !ApplicationCo
 					none
 				}
 				options: if a := j['options'] {
-					?[]ApplicationCommandInteractionDataOption(maybe_map[json2.Any, ApplicationCommandInteractionDataOption](a as []json2.Any,
-						fn (o json2.Any) !ApplicationCommandInteractionDataOption {
-						return ApplicationCommandInteractionDataOption.parse(o)!
+					?[]ApplicationCommandInteractionDataOption(maybe_map(a as []json2.Any,
+						fn (k json2.Any) !ApplicationCommandInteractionDataOption {
+						return ApplicationCommandInteractionDataOption.parse(k)!
 					})!)
 				} else {
 					none
@@ -243,9 +245,9 @@ pub fn ApplicationCommandData.parse(j json2.Any) !ApplicationCommandData {
 					none
 				}
 				options: if a := j['options'] {
-					?[]ApplicationCommandInteractionDataOption(maybe_map[json2.Any, ApplicationCommandInteractionDataOption](a as []json2.Any,
-						fn (o json2.Any) !ApplicationCommandInteractionDataOption {
-						return ApplicationCommandInteractionDataOption.parse(o)!
+					?[]ApplicationCommandInteractionDataOption(maybe_map(a as []json2.Any,
+						fn (k json2.Any) !ApplicationCommandInteractionDataOption {
+						return ApplicationCommandInteractionDataOption.parse(k)!
 					})!)
 				} else {
 					none
@@ -336,9 +338,9 @@ pub fn ModalSubmitData.parse(j json2.Any) !ModalSubmitData {
 		map[string]json2.Any {
 			return ModalSubmitData{
 				custom_id: j['custom_id']! as string
-				components: maybe_map[json2.Any, Component](j['components']! as []json2.Any,
-					fn (o json2.Any) !Component {
-					return Component.parse(o)!
+				components: maybe_map(j['components']! as []json2.Any,
+					fn (k json2.Any) !Component {
+					return Component.parse(k)!
 				})!
 			}
 		}
@@ -351,7 +353,7 @@ pub fn ModalSubmitData.parse(j json2.Any) !ModalSubmitData {
 pub fn (msd ModalSubmitData) get(custom_id string) ?string {
 	return msd.components.find[TextInput](fn [custom_id] (c TextInput) bool {
 		return c.custom_id == custom_id
-	}) or { return none }.value
+	})?.value
 }
 
 pub fn (i Interaction) get_modal_submit_data() !ModalSubmitData {
@@ -534,7 +536,7 @@ pub struct UpdateMessageInteractionResponse {
 fn (_ UpdateMessageInteractionResponse) is_interaction_response() {}
 
 pub fn (r UpdateMessageInteractionResponse) get_files() ?[]File {
-	return r.files
+	return r.get_files()
 }
 
 pub fn (umir UpdateMessageInteractionResponse) build() json2.Any {
@@ -545,23 +547,19 @@ pub fn (umir UpdateMessageInteractionResponse) build() json2.Any {
 }
 
 pub struct AutocompleteInteractionResponse {
-pub:
-	// autocomplete choices (max of 25 choices)
-	choices []ApplicationCommandOptionChoice
+	AutocompleteResponseData
 }
 
 fn (_ AutocompleteInteractionResponse) is_interaction_response() {}
 
-pub fn (_ AutocompleteInteractionResponse) get_files() ?[]File {
-	return none
+pub fn (air AutocompleteInteractionResponse) get_files() ?[]File {
+	return air.AutocompleteResponseData.get_files()
 }
 
 pub fn (air AutocompleteInteractionResponse) build() json2.Any {
 	return {
 		'type': json2.Any(int(InteractionResponseType.application_command_autocomplete_result))
-		'data': {
-			'choices': json2.Any(air.choices.map(|choice| choice.build()))
-		}
+		'data': air.AutocompleteResponseData.build()
 	}
 }
 

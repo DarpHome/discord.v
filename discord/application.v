@@ -118,7 +118,7 @@ pub fn PartialApplication.parse(j json2.Any) !PartialApplication {
 				}
 				flags: unsafe { ApplicationFlags(j['flags']!.int()) }
 				tags: if a := j['tags'] {
-					?[]string((a as []json2.Any).map(it as string))
+					?[]string((a as []json2.Any).map(|s| s as string))
 				} else {
 					none
 				}
@@ -194,7 +194,9 @@ pub fn Team.parse(j json2.Any) !Team {
 				} else {
 					none
 				}
-				members: (j['members']! as []json2.Any).map(TeamMember.parse(it)!)
+				members: maybe_map(j['members']! as []json2.Any, fn (k json2.Any) !TeamMember {
+					return TeamMember.parse(k)!
+				})!
 				name: j['name']! as string
 				owner_user_id: Snowflake.parse(j['owner_user_id']!)!
 			}
@@ -217,7 +219,7 @@ pub fn InstallParams.parse(j json2.Any) !InstallParams {
 	match j {
 		map[string]json2.Any {
 			return InstallParams{
-				scopes: (j['scopes']! as []json2.Any).map(it as string)
+				scopes: (j['scopes']! as []json2.Any).map(|s| s as string)
 				permissions: Permissions.parse(j['permissions']!)!
 			}
 		}
@@ -229,7 +231,7 @@ pub fn InstallParams.parse(j json2.Any) !InstallParams {
 
 pub fn (ip InstallParams) build() json2.Any {
 	return {
-		'scopes':      json2.Any(ip.scopes.map(json2.Any(it)))
+		'scopes':      json2.Any(ip.scopes.map(|s| json2.Any(s)))
 		'permissions': u64(ip.permissions).str()
 	}
 }
@@ -305,7 +307,7 @@ pub fn Application.parse(j json2.Any) !Application {
 				}
 				description: j['description']! as string
 				rpc_origins: if a := j['rpc_origins'] {
-					?[]string((a as []json2.Any).map(it as string))
+					?[]string((a as []json2.Any).map(|s| s as string))
 				} else {
 					none
 				}
@@ -373,7 +375,7 @@ pub fn Application.parse(j json2.Any) !Application {
 					none
 				}
 				redirect_uris: if a := j['redirect_uris'] {
-					?[]string((a as []json2.Any).map(it as string))
+					?[]string((a as []json2.Any).map(|s| s as string))
 				} else {
 					none
 				}
@@ -396,7 +398,7 @@ pub fn Application.parse(j json2.Any) !Application {
 					none
 				}
 				tags: if a := j['tags'] {
-					?[]string((a as []json2.Any).map(it as string))
+					?[]string((a as []json2.Any).map(|s| s as string))
 				} else {
 					none
 				}
@@ -472,7 +474,7 @@ pub fn (params EditApplicationParams) build() json2.Any {
 			r['icon'] = icon.build()
 		}
 	} else {
-		r['icon'] = json2.Null{}
+		r['icon'] = json2.null
 	}
 	if cover_image := params.cover_image {
 		if !is_sentinel(cover_image) {
@@ -489,7 +491,7 @@ pub fn (params EditApplicationParams) build() json2.Any {
 		r['interactions_endpoint_url'] = json2.null
 	}
 	if tags := params.tags {
-		r['tags'] = json2.Any(tags.map(json2.Any(it)))
+		r['tags'] = json2.Any(tags.map(|s| json2.Any(s)))
 	}
 	return r
 }

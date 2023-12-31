@@ -46,7 +46,11 @@ fn (mut c GatewayClient) send(message WSMessage) ! {
 fn (mut c GatewayClient) heartbeat() ! {
 	c.send(WSMessage{
 		opcode: .heartbeat
-		data: if c.sequence == none { json2.null } else { json2.Any(c.sequence) }
+		data: if seq := c.sequence {
+			json2.Any(seq)
+		} else {
+			json2.null
+		}
 	})!
 }
 
@@ -112,9 +116,10 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 }
 
 fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
-	$if windows && !no_vschannel ? {
+	// did Microsoft updated vschannel, so TYPING_START does not kill bot?
+	/* $if windows && !no_vschannel ? {
 		$compile_warn('Websocket connection with Discord may die at some events with vschannel. Please pass `-d no_vschannel` if you want it work correctly.')
-	}
+	} */
 	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, mut client GatewayClient) ! {
 		if reason != 'closed by client' {
 			client.close_code = code
@@ -128,14 +133,18 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 				return error('First message was not HELLO')
 			}
 			client.ready = true
-			if seq := client.sequence {
+			if client.session_id != '' {
 				client.logger.info('Sending RESUME')
 				client.send(WSMessage{
 					opcode: .resume
 					data: json2.Any({
 						'token':      json2.Any(client.token)
 						'session_id': client.session_id
-						'seq':        seq
+						'seq':        if seq := client.sequence {
+							int(seq)
+						} else {
+							json2.null
+						}
 					})
 				})!
 				client.logger.info('Sent RESUME')
@@ -175,21 +184,15 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 				if client.settings.has(.dont_cut_debug) {
 					client.logger.debug('Dispatch ${message.event}: ${data}')
 				} else {
-					client.logger.debug('Dispatch ${message.event}: ${if data.len < 100 {
+					client.logger.debug('Dispatch ${message.event}: ' + if data.len < 100 {
 						data
 					} else {
-						data[..100] + '... ' + (data.len - 100).str() + ' chars'
-					}}')
+						'${data[..100]}... ${data.len - 100} chars'
+					})
 				}
 				if seq := message.seq {
 					client.sequence = seq
 				}
-				/* fn (creatorp voidptr, msg WSMessage) {
-					mut creator := unsafe { &GatewayClient(creatorp) }
-					creator.raw_dispatch(msg.event, msg.data) or {
-						creator.logger.error('Dispatching ${msg.event} failed: ${err}')
-					}
-				}(voidptr(client), message) */
 				client.raw_dispatch(message.event, message.data) or {
 					client.logger.error('Dispatching ${message.event} failed: ${err}')
 				}
@@ -197,6 +200,15 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 			}
 			.reconnect {
 				client.ws.close(1000, 'Discord restarting')!
+			}
+			.invalid_session {
+				if message.data as bool {
+					// resumable
+				} else {
+					// not resumable
+					client.resume_gateway_url = ''
+					client.session_id = ''
+				}
 			}
 			else {}
 		}
@@ -222,7 +234,7 @@ const gateway_close_code_table = {
 		reconnect: true
 	}
 	4002: GatewayCloseCode{
-		message: "Decode error: You sent an invalid payload to Dicsord. Don't do that!"
+		message: "Decode error: You sent an invalid payload to Discord. Don't do that!"
 		reconnect: true
 	}
 	4003: GatewayCloseCode{
@@ -306,11 +318,12 @@ pub fn (mut c GatewayClient) run() ! {
 		}
 		if c.resume_gateway_url != '' {
 			// resume
-			c.ready = false
 			mut ws := websocket.new_client(c.resume_gateway_url.trim_right('/?') +
 				'?v=10&encoding=json', c.websocket_opts())!
 			c.ws = ws
 			c.init_ws(mut ws)
+		} else {
+			c.init()!
 		}
 	}
 }

@@ -47,9 +47,13 @@ pub enum UserFlags {
 }
 
 pub enum PremiumType {
+	// None
 	none_
+	// Nitro Classic
 	nitro_classic
+	// Nitro
 	nitro
+	// Nitro Basic
 	nitro_basic
 }
 
@@ -95,7 +99,7 @@ pub:
 	banner ?string
 	// the user's banner color encoded as an integer representation of hexadecimal color code
 	accent_color ?int
-	// the user's chosen language option
+	// the user's chosen [language option](#Locale)
 	locale ?string
 	// whether the email on this account has been verified
 	verified ?bool
@@ -114,94 +118,98 @@ pub:
 pub fn User.parse(j json2.Any) !User {
 	match j {
 		map[string]json2.Any {
-			id := Snowflake.parse(j['id']!)!
-			username := j['username']! as string
-			discriminator := j['discriminator']! as string
-			tmp1 := j['global_name']!
-			global_name := if tmp1 is string { ?string(tmp1) } else { none }
-			tmp2 := j['avatar']!
-			avatar := if tmp2 is string { ?string(tmp2) } else { none }
-			bot := if b := j['bot'] { ?bool(b as bool) } else { none }
-			system := if b := j['system'] { ?bool(b as bool) } else { none }
-			mfa_enabled := if b := j['mfa_enabled'] { ?bool(b as bool) } else { none }
-			banner := if s := j['banner'] {
-				if s is string {
-					?string(s)
-				} else {
-					none
-				}
-			} else {
-				none
-			}
-			accent_color := if i := j['accent_color'] {
-				if i !is json2.Null {
-					?int(i.int())
-				} else {
-					none
-				}
-			} else {
-				none
-			}
-			locale := if s := j['locale'] {
-				?string(s as string)
-			} else {
-				none
-			}
-			verified := if b := j['verified'] {
-				?bool(b as bool)
-			} else {
-				none
-			}
-			email := if s := j['email'] {
-				if s is string {
-					?string(s)
-				} else {
-					none
-				}
-			} else {
-				none
-			}
-			flags := if i := j['flags'] {
-				unsafe { ?UserFlags(i.int()) }
-			} else {
-				none
-			}
-			premium_type := if i := j['premium_type'] {
-				unsafe { ?PremiumType(i.int()) }
-			} else {
-				none
-			}
-			avatar_decoration_data := if o := j['avatar_decoration_data'] {
-				if o !is json2.Null {
-					?AvatarDecorationData(AvatarDecorationData.parse(o)!)
-				} else {
-					none
-				}
-			} else {
-				none
-			}
+			global_name := j['global_name']!
+			avatar := j['avatar']!
 			return User{
-				id: id
-				username: username
-				discriminator: discriminator
-				global_name: global_name
-				avatar: avatar
-				bot: bot
-				system: system
-				mfa_enabled: mfa_enabled
-				banner: banner
-				accent_color: accent_color
-				locale: locale
-				verified: verified
-				email: email
-				flags: flags
-				premium_type: premium_type
+				id: Snowflake.parse(j['id']!)!
+				username: j['username']! as string
+				discriminator: j['discriminator']! as string
+				global_name: if global_name !is json2.Null {
+					?string(global_name as string)
+				} else {
+					none
+				}
+				avatar: if avatar !is json2.Null {
+					?string(avatar as string)
+				} else {
+					none
+				}
+				bot: if b := j['bot'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				system: if b := j['system'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				mfa_enabled: if b := j['mfa_enabled'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				banner: if s := j['banner'] {
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				accent_color: if i := j['accent_color'] {
+					if i !is json2.Null {
+						?int(i.int())
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				locale: if s := j['locale'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				verified: if b := j['verified'] {
+					?bool(b as bool)
+				} else {
+					none
+				}
+				email: if s := j['email'] {
+					if s !is json2.Null {
+						?string(s as string)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				flags: if i := j['flags'] {
+					unsafe { ?UserFlags(i.int()) }
+				} else {
+					none
+				}
+				premium_type: if i := j['premium_type'] {
+					unsafe { ?PremiumType(i.int()) }
+				} else {
+					none
+				}
 				public_flags: if i := j['public_flags'] {
 					unsafe { ?UserFlags(i.int()) }
 				} else {
 					none
 				}
-				avatar_decoration_data: avatar_decoration_data
+				avatar_decoration_data: if o := j['avatar_decoration_data'] {
+					if o !is json2.Null {
+						?AvatarDecorationData(AvatarDecorationData.parse(o)!)
+					} else {
+						none
+					}
+				} else {
+					none
+				}
 			}
 		}
 		else {
@@ -215,35 +223,41 @@ pub fn (c Client) fetch_my_user() !User {
 	return User.parse(json2.raw_decode(c.request(.get, '/users/@me')!.body)!)!
 }
 
-// Returns a user object for a given user ID.
+// Returns a [user](#User) object for a given user ID.
 pub fn (c Client) fetch_user(user_id Snowflake) !User {
 	return User.parse(json2.raw_decode(c.request(.get, '/users/${urllib.path_escape(user_id.build())}')!.body)!)!
 }
 
 @[params]
-pub struct MyUserEdit {
+pub struct EditMyUserParams {
 pub:
+	// user's username, if changed may cause the user's discriminator to be randomized.
 	username ?string
-	avatar   ?Image
+	// if passed, modifies the user's avatar
+	avatar   ?Image = sentinel_image
 }
 
-pub fn (mue MyUserEdit) build() json2.Any {
+pub fn (params EditMyUserParams) build() json2.Any {
 	mut r := map[string]json2.Any{}
-	if username := mue.username {
+	if username := params.username {
 		r['username'] = username
 	}
-	if avatar := mue.avatar {
-		r['avatar'] = avatar.build()
+	if avatar := params.avatar {
+		if !is_sentinel(avatar) {
+			r['avatar'] = avatar.build()
+		}
+	} else {
+		r['avatar'] = json2.null
 	}
 	return r
 }
 
 // Modify the requester's user account settings. Returns a user object on success. Fires a User Update Gateway event.
-pub fn (c Client) edit_my_user(params MyUserEdit) !User {
+pub fn (c Client) edit_my_user(params EditMyUserParams) !User {
 	return User.parse(json2.raw_decode(c.request(.patch, '/users/@me', json: params.build())!.body)!)!
 }
 
-// Returns a guild member object for the current user. Requires the guilds.members.read OAuth2 scope.
+// Returns a [guild member](#GuildMember) object for the current user. Requires the `guilds.members.read` OAuth2 scope.
 pub fn (c Client) fetch_my_guild_member(guild_id Snowflake) !GuildMember {
 	return GuildMember.parse(c.request(.get, '/users/@me/guilds/${urllib.path_escape(guild_id.build())}/member')!.body)!
 }
@@ -253,31 +267,34 @@ pub fn (c Client) leave_guild(guild_id Snowflake) ! {
 	c.request(.delete, '/users/@me/guilds/${urllib.path_escape(guild_id.build())}')!
 }
 
-pub fn (c Client) create_dm(recipient_id Snowflake) ! {
-	c.request(.post, '/users/@me/channels',
-		json: {
-			'recipient_id': json2.Any(recipient_id)
-		}
-	)!
+// Create a new DM channel with a user. Returns a [DM channel](#Channel) object (if one already exists, it will be returned instead).
+// > You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action. If you open a significant amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
+pub fn (c Client) create_dm(recipient_id Snowflake) !Channel {
+	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels', json: {'recipient_id': json2.Any(recipient_id.build())})!.body)!)!
 }
 
 @[params]
 pub struct CreateGroupDMParams {
 pub:
-	access_tokens []string
-	nicks         map[Snowflake]string
+	// access tokens of users that have granted your app the `gdm.join` scope
+	access_tokens []string @[required]
+	// a dictionary of user ids to their respective nicknames
+	nicks         map[Snowflake]string @[required]
 }
 
-pub fn (c Client) create_group_dm(params CreateGroupDMParams) ! {
-	c.request(.post, '/users/@me/channels',
-		json: {
-			'access_tokens': json2.Any(params.access_tokens.map(json2.Any(it)))
-			'nicks':         maps.to_map[Snowflake, string, string, json2.Any](params.nicks,
-				fn (k Snowflake, v string) (string, json2.Any) {
-				return k.build(), json2.Any(v)
-			})
-		}
-	)!
+pub fn (params CreateGroupDMParams) build() json2.Any {
+	return {
+		'access_tokens': json2.Any(params.access_tokens.map(json2.Any(it)))
+		'nicks':         maps.to_map[Snowflake, string, string, json2.Any](params.nicks,
+			fn (k Snowflake, v string) (string, json2.Any) {
+			return k.build(), json2.Any(v)
+		})
+	}
+}
+
+// Create a new group DM channel with multiple users. Returns a [DM channel](#Channel) object. This endpoint was intended to be used with the now-deprecated GameBridge SDK. Fires a Channel Create Gateway event.
+pub fn (c Client) create_group_dm(params CreateGroupDMParams) !Channel {
+	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels', json: params.build())!.body)!)!
 }
 
 pub struct PartialUser {

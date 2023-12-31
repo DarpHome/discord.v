@@ -7,25 +7,25 @@ pub enum WSMessageOpcode {
 	// An event was dispatched.
 	dispatch              = 0
 	// Fired periodically by the client to keep the connection alive.
-	heartbeat             = 1
+	heartbeat
 	// Starts a new session during the initial handshake.
-	identify              = 2
+	identify
 	// Update the client's presence.
-	update_presence       = 3
+	update_presence
 	// Used to join/leave or move between voice channels.
-	voice_state_update    = 4
+	voice_state_update
 	// Resume a previous session that was disconnected.
 	resume                = 6
 	// You should attempt to reconnect and resume immediately.
-	reconnect             = 7
+	reconnect
 	// Request information about offline guild members in a large guild.
-	request_guild_members = 8
+	request_guild_members
 	// The session has been invalidated. You should reconnect and identify/resume accordingly.
-	invalid_session       = 9
+	invalid_session
 	// Sent immediately after connecting, contains the `heartbeat_interval` to use.
-	hello                 = 10
+	hello
 	// Sent in response to receiving a heartbeat to acknowledge that it has been received.
-	heartbeat_ack         = 11
+	heartbeat_ack
 }
 
 pub struct WSMessage {
@@ -36,12 +36,15 @@ pub:
 	event  string
 }
 
-fn decode_message(payload json2.Any) !WSMessage {
-	if payload !is map[string]json2.Any {
+fn decode_message(j json2.Any) !WSMessage {
+	$if trace ? {
+		eprintln('Gateway < ${j}')
+	}
+	if j !is map[string]json2.Any {
 		return error('expected object')
 	}
 	mut opcode := 0
-	m := payload.as_map()
+	m := j.as_map()
 	if op := m['op'] {
 		match op {
 			i64 { opcode = int(op) }
@@ -94,5 +97,9 @@ fn ws_recv_message(mut client websocket.Client) !WSMessage {
 }
 
 fn ws_send_message(mut client websocket.Client, message WSMessage) ! {
-	client.write(encode_message(message)!.json_str().bytes(), websocket.OPCode.text_frame)!
+	payload := encode_message(message)!.json_str()
+	$if trace ? {
+		eprintln('Gateway > ${payload}')
+	}
+	client.write(payload.bytes(), websocket.OPCode.text_frame)!
 }

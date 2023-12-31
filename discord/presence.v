@@ -123,14 +123,14 @@ pub fn (a Activity) build() json2.Any {
 			r['url'] = url
 		}
 	} else {
-		r['url'] = json2.Null{}
+		r['url'] = json2.null
 	}
 	if state := a.state {
 		if !is_sentinel(state) {
 			r['state'] = state
 		}
 	} else {
-		r['state'] = json2.Null{}
+		r['state'] = json2.null
 	}
 	return r
 }
@@ -175,9 +175,9 @@ pub fn (p Presence) build() json2.Any {
 		'since':      if since := p.since {
 			json2.Any(since.unix_time_milli())
 		} else {
-			json2.Any(json2.Null{})
+			json2.null
 		}
-		'activities': p.activities.map(it.build())
+		'activities': p.activities.map(|a| a.build())
 		'status':     p.status.build()
 		'afk':        p.afk
 	}

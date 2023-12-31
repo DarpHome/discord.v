@@ -144,10 +144,12 @@ pub fn multipart_form_body(files map[string][]http.FileData) (string, string) {
 				sb.write_string(f.filename)
 				sb.write_string('"')
 			}
-
-			sb.write_string('\r\nContent-Type: ')
-			sb.write_string(f.content_type)
-			sb.write_string('\r\n\r\n')
+			if f.content_type != '' {
+				sb.write_string('\r\nContent-Type: ')
+				sb.write_string(f.content_type)
+				sb.write_string('\r\n')
+			}
+			sb.write_string('\r\n')
 			sb.write_string(f.data)
 		}
 	}

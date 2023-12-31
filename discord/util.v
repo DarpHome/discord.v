@@ -33,7 +33,7 @@ pub fn extract_id_from_token(token string) !Snowflake {
 }
 
 pub fn maybe_map[T, X](a []T, f fn (T) !X) ![]X {
-	mut r := []X{cap: a.cap}
+	mut r := []X{cap: a.len}
 	for v in a {
 		r << f(v)!
 	}

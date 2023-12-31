@@ -52,7 +52,13 @@ pub:
 pub fn VoiceRegion.parse(j json2.Any) !VoiceRegion {
 	match j {
 		map[string]json2.Any {
-			return VoiceRegion{}
+			return VoiceRegion{
+				id: j['id']! as string
+				name: j['name']! as string
+				optimal: j['optimal']! as bool
+				deprecated: j['deprecated']! as bool
+				custom: j['custom']! as bool
+			}
 		}
 		else {
 			return error('expected voice region to be object, got ${j.type_name()}')

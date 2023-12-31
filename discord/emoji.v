@@ -1,6 +1,7 @@
 module discord
 
 import strconv
+import net.urllib
 import x.json2
 
 pub struct PartialEmoji {
@@ -167,4 +168,81 @@ pub fn Reaction.parse(j json2.Any) !Reaction {
 			return error('expected reaction to be object, got ${j.type_name()}')
 		}
 	}
+}
+
+// Returns a list of [emoji](#Emoji) objects for the given guild. Includes user fields if the bot has the `.create_guild_expressions` or `.manage_guild_expressions` permission.
+pub fn (c Client) list_guild_emojis(guild_id Snowflake) ![]Emoji {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/emojis')!.body)! as []json2.Any, fn (j json2.Any) !Emoji {
+		return Emoji.parse(j)!
+	})!
+}
+
+// Returns an [emoji](#Emoji) object for the given guild and emoji IDs. Includes the user field if the bot has the `.manage_guild_expressions` permission, or if the bot created the emoji and has the the `.create_guild_expressions` permission.
+pub fn (c Client) fetch_guild_emoji(guild_id Snowflake, emoji_id Snowflake) !Emoji {
+	return Emoji.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/emojis/${urllib.path_escape(emoji_id.build())}')!.body)!)!
+}
+
+@[params]
+pub struct CreateGuildEmojiParams {
+pub:
+	reason ?string
+
+	// name of the emoji
+	name string @[required]
+	// the 128x128 emoji image
+	image Image @[required]
+	// roles allowed to use this emoji
+	roles ?[]Snowflake
+}
+
+pub fn (params CreateGuildEmojiParams) build() json2.Any {
+	mut r := {
+		'name': json2.Any(params.name)
+		'image': params.image.build()
+	}
+	if roles := params.roles {
+		r['roles'] = roles.map(|s| json2.Any(s.build()))
+	}
+	return r
+}
+
+// Create a new emoji for the guild. Requires the `.create_guild_expressions` permission. Returns the new [emoji](#Emoji) object on success. Fires a Guild Emojis Update Gateway event.
+pub fn (c Client) create_guild_emoji(guild_id Snowflake, params CreateGuildEmojiParams) !Emoji {
+	return Emoji.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/emojis', json: params.build(), reason: params.reason)!.body)!)!
+}
+
+@[params]
+pub struct EditGuildEmojiParams {
+pub:
+	reason ?string
+
+	// name of the emoji
+	name ?string
+	// roles allowed to use this emoji
+	roles ?[]Snowflake = sentinel_snowflakes
+}
+
+pub fn (params EditGuildEmojiParams) build() json2.Any {
+	mut r := map[string]json2.Any{}
+	if name := params.name {
+		r['name'] = name
+	}
+	if roles := params.roles {
+		if !is_sentinel(roles) {
+			r['roles'] = roles.map(|s| json2.Any(s.build()))
+		}
+	} else {
+		r['roles'] = json2.null
+	}
+	return r
+}
+
+// Modify the given emoji. For emojis created by the current user, requires either the `.create_guild_expressions` or `.manage_guild_expressions` permission. For other emojis, requires the `.manage_guild_expressions` permission. Returns the updated [emoji](#Emoji) object on success. Fires a Guild Emojis Update Gateway event.
+pub fn (c Client) edit_guild_emoji(guild_id Snowflake, emoji_id Snowflake, params EditGuildEmojiParams) !Emoji {
+	return Emoji.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/emojis/${urllib.path_escape(emoji_id.build())}', json: params.build(), reason: params.reason)!.body)!)!
+}
+
+// Delete the given emoji. For emojis created by the current user, requires either the `.create_guild_expressions` or `.manage_guild_expressions` permission. For other emojis, requires the `.manage_guild_expressions` permission. Returns 204 No Content on success. Fires a Guild Emojis Update Gateway event.
+pub fn (c Client) delete_guild_emoji(guild_id Snowflake, emoji_id Snowflake, params ReasonParam) ! {
+	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/emojis/${urllib.path_escape(emoji_id.build())}', reason: params.reason)!
 }

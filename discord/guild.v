@@ -40,7 +40,7 @@ pub fn PartialGuild.parse(j json2.Any) !PartialGuild {
 				} else {
 					none
 				}
-				features: (j['features']! as []json2.Any).map(GuildFeature(it as string))
+				features: (j['features']! as []json2.Any).map(|s| GuildFeature(s as string))
 				approximate_member_count: if i := j['approximate_member_count'] {
 					?int(i.int())
 				} else {
@@ -68,7 +68,7 @@ pub:
 	with_counts ?bool
 }
 
-pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
+pub fn (params FetchMyGuildsParams) build_query_values() urllib.Values {
 	mut vs := urllib.new_values()
 	if before := params.before {
 		vs.add('before', before.build())
@@ -82,9 +82,13 @@ pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
 	if with_counts := params.with_counts {
 		vs.add('with_counts', with_counts.str())
 	}
-	tmp1 := vs.encode()
-	tmp2 := if tmp1 == '' { '' } else { '?${tmp1}' }
-	return (json2.raw_decode(c.request(.get, '/users/@me/guilds${tmp2}')!.body)! as []json2.Any).map(PartialGuild.parse(it)!)
+	return vs
+}
+
+pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
+	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/guilds${encode_query(params.build_query_values())}')!.body)! as []json2.Any, fn (j json2.Any) !PartialGuild {
+		return PartialGuild.parse(j)!
+	})!
 }
 
 pub enum VerificationLevel {
@@ -365,7 +369,9 @@ pub fn WelcomeScreen.parse(j json2.Any) !WelcomeScreen {
 				} else {
 					none
 				}
-				welcome_channels: (j['welcome_channels']! as []json2.Any).map(WelcomeChannel.parse(it)!)
+				welcome_channels: maybe_map(j['welcome_channels']! as []json2.Any, fn (k json2.Any) !WelcomeChannel {
+					return WelcomeChannel.parse(k)!
+				})!
 			}
 		}
 		else {
@@ -523,8 +529,12 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				}
 				verification_level: unsafe { VerificationLevel(j['verification_level']!.int()) }
 				explicit_content_filter: unsafe { ExplicitContentFilterLevel(j['explicit_content_filter']!.int()) }
-				roles: (j['roles']! as []json2.Any).map(Role.parse(it)!)
-				emojis: (j['emojis']! as []json2.Any).map(Emoji.parse(it)!)
+				roles: maybe_map(j['roles']! as []json2.Any, fn (k json2.Any) !Role {
+					return Role.parse(k)!
+				})!
+				emojis: maybe_map(j['emojis']! as []json2.Any, fn (k json2.Any) !Emoji {
+					return Emoji.parse(k)!
+				})!
 				features: (j['features']! as []json2.Any).map(GuildFeature(it as string))
 				mfa_level: unsafe { MFALevel(j['mfa_level']!.int()) }
 				application_id: if application_id !is json2.Null {
@@ -614,7 +624,9 @@ pub fn Guild.parse(j json2.Any) !Guild {
 					none
 				}
 				nsfw_level: unsafe { NSFWLevel(j['nsfw_level']!.int()) }
-				stickers: ((j['stickers'] or { []json2.Any{} }) as []json2.Any).map(Sticker.parse(it)!)
+				stickers: maybe_map((j['stickers'] or { []json2.Any{} }) as []json2.Any, fn (k json2.Any) !Sticker {
+					return Sticker.parse(k)!
+				})!
 				premium_progress_bar_enabled: j['premium_progress_bar_enabled']! as bool
 				safety_alerts_channel_id: if safety_alerts_channel_id !is json2.Null {
 					?Snowflake(Snowflake.parse(safety_alerts_channel_id)!)
@@ -696,7 +708,9 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 				} else {
 					none
 				}
-				roles: (j['roles']! as []json2.Any).map(Snowflake.parse(it)!)
+				roles: maybe_map(j['roles']! as []json2.Any, fn (k json2.Any) !Snowflake {
+					return Snowflake.parse(k)!
+				})!
 				joined_at: time.parse_iso8601(j['joined_at']! as string)!
 				premium_since: if s := j['premium_since'] {
 					if s !is json2.Null {
@@ -781,7 +795,9 @@ pub fn PartialGuildMember.parse(j json2.Any) !PartialGuildMember {
 					none
 				}
 				roles: if a := j['roles'] {
-					?[]Snowflake((a as []json2.Any).map(Snowflake.parse(it)!))
+					?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
+						return Snowflake.parse(k)!
+					})!)
 				} else {
 					none
 				}
@@ -953,7 +969,9 @@ pub fn GuildPreview.parse(j json2.Any) !GuildPreview {
 				} else {
 					none
 				}
-				emojis: (j['emojis']! as []json2.Any).map(Emoji.parse(it)!)
+				emojis: maybe_map(j['emojis']! as []json2.Any, fn (k json2.Any) !Emoji {
+					return Emoji.parse(k)!
+				})!
 				features: (j['features']! as []json2.Any).map(|f| GuildFeature(f as string))
 				approximate_member_count: j['approximate_member_count']!.int()
 				approximate_presence_count: j['approximate_presence_count']!.int()
@@ -962,7 +980,9 @@ pub fn GuildPreview.parse(j json2.Any) !GuildPreview {
 				} else {
 					none
 				}
-				stickers: (j['stickers']! as []json2.Any).map(Sticker.parse(it)!)
+				stickers: maybe_map(j['stickers']! as []json2.Any, fn (k json2.Any) !Sticker {
+					return Sticker.parse(k)!
+				})!
 			}
 		}
 		else {
@@ -1161,7 +1181,9 @@ pub fn (c Client) delete_guild(guild_id Snowflake) ! {
 
 // Returns a list of guild channel objects. Does not include threads.
 pub fn (c Client) fetch_guild_channels(guild_id Snowflake) ![]Channel {
-	return (json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/channels')!.body)! as []json2.Any).map(Channel.parse(it)!)
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/channels')!.body)! as []json2.Any, fn (j json2.Any) !Channel {
+		return Channel.parse(j)!
+	})!
 }
 
 pub struct EditGuildChannelPositionsParams {
