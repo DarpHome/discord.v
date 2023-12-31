@@ -206,7 +206,7 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 					// not resumable
 					client.resume_gateway_url = ''
 					client.session_id = ''
-					client.ws.close(1000, 'Invalid session')
+					client.ws.close(1000, 'Invalid session')!
 				}
 			}
 			else {}

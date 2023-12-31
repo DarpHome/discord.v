@@ -733,7 +733,7 @@ pub fn Channel.parse(j json2.Any) !Channel {
 				applied_tags: if a := j['applied_tags'] {
 					?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
 						return Snowflake.parse(k)!
-					})
+					})!)
 				} else {
 					none
 				}
