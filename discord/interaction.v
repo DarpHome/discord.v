@@ -338,8 +338,7 @@ pub fn ModalSubmitData.parse(j json2.Any) !ModalSubmitData {
 		map[string]json2.Any {
 			return ModalSubmitData{
 				custom_id: j['custom_id']! as string
-				components: maybe_map(j['components']! as []json2.Any,
-					fn (k json2.Any) !Component {
+				components: maybe_map(j['components']! as []json2.Any, fn (k json2.Any) !Component {
 					return Component.parse(k)!
 				})!
 			}

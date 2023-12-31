@@ -7,9 +7,9 @@ import x.json2
 // Characterizes the type of content which can trigger the rule.
 pub enum TriggerType {
 	// check if content contains words from a user defined list of keywords
-	keyword = 1
+	keyword        = 1
 	// check if content represents generic spam
-	spam = 3
+	spam           = 3
 	// check if content contains words from internal pre-defined wordsets
 	keyword_preset
 	// check if content contains more unique mentions than allowed
@@ -18,7 +18,7 @@ pub enum TriggerType {
 
 pub enum KeywordPresetType {
 	// words that may be considered forms of swearing or cursing
-	profanity = 1
+	profanity      = 1
 	// words that refer to sexually explicit behavior or activity
 	sexual_content
 	// personal insults or words that may be considered hate speech
@@ -115,7 +115,7 @@ pub fn TriggerMetadata.parse(j json2.Any) !TriggerMetadata {
 
 pub enum ActionType {
 	// blocks a member's message and prevents it from being posted. A custom explanation can be specified and shown to members whenever their message is blocked.
-	block_message = 1
+	block_message      = 1
 	// logs user content to a specified channel
 	send_alert_message
 	// timeout user for a specified duration
@@ -266,7 +266,8 @@ pub fn AutoModerationRule.parse(j json2.Any) !AutoModerationRule {
 
 // Get a list of all rules currently configured for the guild. Returns a list of auto moderation rule objects for the given guild.
 pub fn (c Client) list_auto_moderation_rules_for_guild(guild_id Snowflake) ![]AutoModerationRule {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules')!.body)! as []json2.Any, fn (j json2.Any) !AutoModerationRule {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules')!.body)! as []json2.Any,
+		fn (j json2.Any) !AutoModerationRule {
 		return AutoModerationRule.parse(j)!
 	})!
 }
@@ -280,7 +281,6 @@ pub fn (c Client) fetch_auto_moderation_rule(guild_id Snowflake, auto_moderation
 pub struct CreateAutoModerationRuleParams {
 pub:
 	reason ?string
-
 	// the rule name
 	name string @[required]
 	// the event type
@@ -301,10 +301,10 @@ pub:
 
 pub fn (params CreateAutoModerationRuleParams) build() json2.Any {
 	mut r := {
-		'name': json2.Any(params.name)
-		'event_type': int(params.event_type)
+		'name':         json2.Any(params.name)
+		'event_type':   int(params.event_type)
 		'trigger_type': int(params.trigger_type)
-		'actions': params.actions.map(|a| a.build())
+		'actions':      params.actions.map(|a| a.build())
 	}
 	if trigger_metadata := params.trigger_metadata {
 		r['trigger_metadata'] = trigger_metadata.build()
@@ -323,20 +323,22 @@ pub fn (params CreateAutoModerationRuleParams) build() json2.Any {
 
 // Create a new rule. Returns an auto moderation rule on success. Fires an Auto Moderation Rule Create Gateway event.
 pub fn (c Client) create_auto_moderation_rule(guild_id Snowflake, params CreateAutoModerationRuleParams) !AutoModerationRule {
-	return AutoModerationRule.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules', json: params.build(), reason: params.reason)!.body)!)!
+	return AutoModerationRule.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 @[params]
 pub struct EditAutoModerationRuleParams {
 pub:
 	reason ?string
-
 	// the rule name
 	name ?string
 	// the event type
 	event_type ?EventType
 	// the trigger type
-	trigger_type ?TriggerType 
+	trigger_type ?TriggerType
 	// the trigger metadata
 	trigger_metadata ?TriggerMetadata
 	// the actions which will execute when the rule is triggered
@@ -380,10 +382,15 @@ pub fn (params EditAutoModerationRuleParams) build() json2.Any {
 
 // Modify an existing rule. Returns an auto moderation rule on success. Fires an Auto Moderation Rule Update Gateway event.
 pub fn (c Client) edit_auto_moderation_rule(guild_id Snowflake, auto_moderation_rule_id Snowflake, params EditAutoModerationRuleParams) !AutoModerationRule {
-	return AutoModerationRule.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.build())}', json: params.build(), reason: params.reason)!.body)!)!
+	return AutoModerationRule.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.build())}',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
 }
 
 // Delete a rule. Returns a 204 on success. Fires an Auto Moderation Rule Delete Gateway event.
 pub fn (c Client) delete_auto_moderation_rule(guild_id Snowflake, auto_moderation_rule_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.build())}', reason: params.reason)!
+	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.build())}',
+		reason: params.reason
+	)!
 }

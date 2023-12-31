@@ -234,7 +234,7 @@ pub:
 	// user's username, if changed may cause the user's discriminator to be randomized.
 	username ?string
 	// if passed, modifies the user's avatar
-	avatar   ?Image = sentinel_image
+	avatar ?Image = sentinel_image
 }
 
 pub fn (params EditMyUserParams) build() json2.Any {
@@ -270,7 +270,11 @@ pub fn (c Client) leave_guild(guild_id Snowflake) ! {
 // Create a new DM channel with a user. Returns a [DM channel](#Channel) object (if one already exists, it will be returned instead).
 // > You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action. If you open a significant amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
 pub fn (c Client) create_dm(recipient_id Snowflake) !Channel {
-	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels', json: {'recipient_id': json2.Any(recipient_id.build())})!.body)!)!
+	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels',
+		json: {
+			'recipient_id': json2.Any(recipient_id.build())
+		}
+	)!.body)!)!
 }
 
 @[params]
@@ -279,7 +283,7 @@ pub:
 	// access tokens of users that have granted your app the `gdm.join` scope
 	access_tokens []string @[required]
 	// a dictionary of user ids to their respective nicknames
-	nicks         map[Snowflake]string @[required]
+	nicks map[Snowflake]string @[required]
 }
 
 pub fn (params CreateGroupDMParams) build() json2.Any {
@@ -294,7 +298,9 @@ pub fn (params CreateGroupDMParams) build() json2.Any {
 
 // Create a new group DM channel with multiple users. Returns a [DM channel](#Channel) object. This endpoint was intended to be used with the now-deprecated GameBridge SDK. Fires a Channel Create Gateway event.
 pub fn (c Client) create_group_dm(params CreateGroupDMParams) !Channel {
-	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels', json: params.build())!.body)!)!
+	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels',
+		json: params.build()
+	)!.body)!)!
 }
 
 pub struct PartialUser {

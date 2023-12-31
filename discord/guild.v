@@ -86,7 +86,8 @@ pub fn (params FetchMyGuildsParams) build_query_values() urllib.Values {
 }
 
 pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
-	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/guilds${encode_query(params.build_query_values())}')!.body)! as []json2.Any, fn (j json2.Any) !PartialGuild {
+	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/guilds${encode_query(params.build_query_values())}')!.body)! as []json2.Any,
+		fn (j json2.Any) !PartialGuild {
 		return PartialGuild.parse(j)!
 	})!
 }
@@ -624,7 +625,8 @@ pub fn Guild.parse(j json2.Any) !Guild {
 					none
 				}
 				nsfw_level: unsafe { NSFWLevel(j['nsfw_level']!.int()) }
-				stickers: maybe_map((j['stickers'] or { []json2.Any{} }) as []json2.Any, fn (k json2.Any) !Sticker {
+				stickers: maybe_map((j['stickers'] or { []json2.Any{} }) as []json2.Any,
+					fn (k json2.Any) !Sticker {
 					return Sticker.parse(k)!
 				})!
 				premium_progress_bar_enabled: j['premium_progress_bar_enabled']! as bool
@@ -1181,7 +1183,8 @@ pub fn (c Client) delete_guild(guild_id Snowflake) ! {
 
 // Returns a list of guild channel objects. Does not include threads.
 pub fn (c Client) fetch_guild_channels(guild_id Snowflake) ![]Channel {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/channels')!.body)! as []json2.Any, fn (j json2.Any) !Channel {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/channels')!.body)! as []json2.Any,
+		fn (j json2.Any) !Channel {
 		return Channel.parse(j)!
 	})!
 }

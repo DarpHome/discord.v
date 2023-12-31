@@ -331,7 +331,6 @@ pub fn StringSelect.internal_parse(j map[string]json2.Any) !StringSelect {
 	}
 }
 
-
 pub fn StringSelect.parse(j json2.Any) !StringSelect {
 	match j {
 		map[string]json2.Any {
@@ -473,7 +472,6 @@ pub fn UserSelect.internal_parse(j map[string]json2.Any) !UserSelect {
 	}
 }
 
-
 pub fn UserSelect.parse(j json2.Any) !UserSelect {
 	match j {
 		map[string]json2.Any {
@@ -561,7 +559,6 @@ pub fn RoleSelect.internal_parse(j map[string]json2.Any) !RoleSelect {
 		}
 	}
 }
-
 
 pub fn RoleSelect.parse(j json2.Any) !RoleSelect {
 	match j {
@@ -814,7 +811,6 @@ pub fn (ti TextInput) build() json2.Any {
 	}
 	return r
 }
-
 
 pub fn TextInput.internal_parse(j map[string]json2.Any) !TextInput {
 	return TextInput{

@@ -477,7 +477,8 @@ pub fn (c Client) fetch_global_application_commands(application_id Snowflake, pa
 	if with_localizations := params.with_localizations {
 		query_params.set('with_localizations', with_localizations.str())
 	}
-	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/commands${encode_query(query_params)}')!.body)! as []json2.Any, fn (j json2.Any) !ApplicationCommand {
+	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/commands${encode_query(query_params)}')!.body)! as []json2.Any,
+		fn (j json2.Any) !ApplicationCommand {
 		return ApplicationCommand.parse(j)!
 	})!
 }
@@ -740,7 +741,8 @@ pub fn GuildApplicationCommandPermissions.parse(j json2.Any) !GuildApplicationCo
 
 // Fetches permissions for all commands for your application in a guild. Returns an array of guild application command permissions objects.
 pub fn (c Client) fetch_guild_application_command_permissions(application_id Snowflake, guild_id Snowflake) ![]GuildApplicationCommandPermissions {
-	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands/permissions')!.body)! as []json2.Any, fn (j json2.Any) !GuildApplicationCommandPermissions {
+	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands/permissions')!.body)! as []json2.Any,
+		fn (j json2.Any) !GuildApplicationCommandPermissions {
 		return GuildApplicationCommandPermissions.parse(j)!
 	})!
 }

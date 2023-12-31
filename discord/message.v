@@ -1220,7 +1220,8 @@ pub fn (params GetChannelMessagesParams) build_values() urllib.Values {
 }
 
 pub fn (c Client) fetch_messages(channel_id Snowflake, params GetChannelMessagesParams) ![]Message {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages${encode_query(params.build_values())}')!.body)! as []json2.Any, fn (j json2.Any) !Message {
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages${encode_query(params.build_values())}')!.body)! as []json2.Any,
+		fn (j json2.Any) !Message {
 		return Message.parse(j)!
 	})!
 }
@@ -1413,7 +1414,8 @@ pub fn (params FetchReactionsParams) build_query_values() urllib.Values {
 
 // Get a list of users that reacted with this emoji. Returns an array of [user](#User) objects on success.
 pub fn (c Client) fetch_reactions(channel_id Snowflake, message_id Snowflake, params FetchReactionsParams) ![]User {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions/${params.build()}${encode_query(params.build_query_values())}')!.body)! as []json2.Any, fn (j json2.Any) !User {
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/messages/${urllib.path_escape(message_id.build())}/reactions/${params.build()}${encode_query(params.build_query_values())}')!.body)! as []json2.Any,
+		fn (j json2.Any) !User {
 		return User.parse(j)!
 	})!
 }
@@ -1511,7 +1513,8 @@ pub fn (c Client) delete_messages(channel_id Snowflake, message_ids []Snowflake,
 
 // Returns all pinned messages in the channel as an array of message objects.
 pub fn (c Client) fetch_pinned_messagse(channel_id Snowflake) ![]Message {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/pins')!.body)! as []json2.Any, fn (j json2.Any) !Message {
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/pins')!.body)! as []json2.Any,
+		fn (j json2.Any) !Message {
 		return Message.parse(j)!
 	})!
 }
