@@ -18,12 +18,12 @@ fn test_action_row() {
 			}),
 		]
 	})
-	assert ActionRow.parse({
+	assert ActionRow.internal_parse({
 		'components': []json2.Any{}
 	}) or { panic('That case should not return error: ${err}') } == ActionRow{
 		components: []
 	}
-	assert ActionRow.parse({
+	assert ActionRow.internal_parse({
 		'components': [
 			json2.Any({
 				'type':       json2.Any(1)
