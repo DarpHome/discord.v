@@ -27,3 +27,4 @@ token.txt
 test.v
 *.def
 /*.c
+/*.db

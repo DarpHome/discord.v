@@ -45,13 +45,26 @@ fn (_ ActionRow) is_component() {}
 pub fn (ar ActionRow) build() json2.Any {
 	return {
 		'type':       ComponentType.action_row.build()
-		'components': ar.components.map(it.build())
+		'components': ar.components.map(|c| c.build())
 	}
 }
 
-pub fn ActionRow.parse(j map[string]json2.Any) !ActionRow {
+pub fn ActionRow.internal_parse(j map[string]json2.Any) !ActionRow {
 	return ActionRow{
-		components: (j['components']! as []json2.Any).map(Component.parse(it)!)
+		components: maybe_map(j['components']! as []json2.Any, fn (k json2.Any) !Component {
+			return Component.parse(k)!
+		})!
+	}
+}
+
+pub fn ActionRow.parse(j json2.Any) !ActionRow {
+	match j {
+		map[string]json2.Any {
+			return ActionRow.internal_parse(j)!
+		}
+		else {
+			return error('expected action row to be object, got ${j.type_name()}')
+		}
 	}
 }
 
@@ -148,37 +161,41 @@ pub fn (b Button) build() json2.Any {
 	return r
 }
 
+pub fn Button.internal_parse(j map[string]json2.Any) !Button {
+	return Button{
+		style: unsafe { ButtonStyle(j['style']!.int()) }
+		label: if s := j['label'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		emoji: if o := j['emoji'] {
+			?PartialEmoji(PartialEmoji.parse(o)!)
+		} else {
+			none
+		}
+		custom_id: if s := j['custom_id'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		url: if s := j['url'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		disabled: if b := j['disabled'] {
+			?bool(b as bool)
+		} else {
+			none
+		}
+	}
+}
+
 pub fn Button.parse(j json2.Any) !Button {
 	match j {
 		map[string]json2.Any {
-			return Button{
-				style: unsafe { ButtonStyle(j['style']!.int()) }
-				label: if s := j['label'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				emoji: if o := j['emoji'] {
-					?PartialEmoji(PartialEmoji.parse(o)!)
-				} else {
-					none
-				}
-				custom_id: if s := j['custom_id'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				url: if s := j['url'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				disabled: if b := j['disabled'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-			}
+			return Button.internal_parse(j)!
 		}
 		else {
 			return error('expected button to be object, got ${j.type_name()}')
@@ -268,7 +285,7 @@ pub fn (ss StringSelect) build() json2.Any {
 	mut r := {
 		'type':      ComponentType.string_select.build()
 		'custom_id': ss.custom_id
-		'options':   ss.options.map(it.build())
+		'options':   ss.options.map(|o| o.build())
 	}
 	if placeholder := ss.placeholder {
 		r['placeholder'] = placeholder
@@ -285,33 +302,40 @@ pub fn (ss StringSelect) build() json2.Any {
 	return r
 }
 
+pub fn StringSelect.internal_parse(j map[string]json2.Any) !StringSelect {
+	return StringSelect{
+		custom_id: j['custom_id']! as string
+		options: maybe_map(j['options']! as []json2.Any, fn (k json2.Any) !SelectOption {
+			return SelectOption.parse(k)!
+		})!
+		placeholder: if s := j['placeholder'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		min_values: if i := j['min_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		max_values: if i := j['max_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		disabled: if b := j['disabled'] {
+			?bool(b as bool)
+		} else {
+			none
+		}
+	}
+}
+
+
 pub fn StringSelect.parse(j json2.Any) !StringSelect {
 	match j {
 		map[string]json2.Any {
-			return StringSelect{
-				custom_id: j['custom_id']! as string
-				options: (j['options']! as []json2.Any).map(SelectOption.parse(it)!)
-				placeholder: if s := j['placeholder'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				min_values: if i := j['min_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				max_values: if i := j['max_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				disabled: if b := j['disabled'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-			}
+			return StringSelect.internal_parse(j)!
 		}
 		else {
 			return error('expected string select to be object, got ${j.type_name()}')
@@ -399,8 +423,8 @@ pub fn (us UserSelect) build() json2.Any {
 		r['placeholder'] = placeholder
 	}
 	if default_values := us.default_values {
-		r['default_values'] = default_values.map(json2.Any({
-			'id':   json2.Any(it.build())
+		r['default_values'] = default_values.map(|dv| json2.Any({
+			'id':   json2.Any(dv.build())
 			'type': 'user'
 		}))
 	}
@@ -416,40 +440,47 @@ pub fn (us UserSelect) build() json2.Any {
 	return r
 }
 
+pub fn UserSelect.internal_parse(j map[string]json2.Any) !UserSelect {
+	return UserSelect{
+		custom_id: j['custom_id']! as string
+		placeholder: if s := j['placeholder'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		default_values: if a := j['default_values'] {
+			?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
+				return DefaultValue.parse(k)!
+			})!.filter(|dv| dv.typ == .user).map(|dv| dv.id))
+		} else {
+			none
+		}
+		min_values: if i := j['min_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		max_values: if i := j['max_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		disabled: if b := j['disabled'] {
+			?bool(b as bool)
+		} else {
+			none
+		}
+	}
+}
+
+
 pub fn UserSelect.parse(j json2.Any) !UserSelect {
 	match j {
 		map[string]json2.Any {
-			return UserSelect{
-				custom_id: j['custom_id']! as string
-				placeholder: if s := j['placeholder'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				default_values: if a := j['default_values'] {
-					?[]Snowflake((a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .user).map(it.id))
-				} else {
-					none
-				}
-				min_values: if i := j['min_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				max_values: if i := j['max_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				disabled: if b := j['disabled'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-			}
+			return UserSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected string select to be object, got ${j.type_name()}')
+			return error('expected user select to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -481,8 +512,8 @@ pub fn (rs RoleSelect) build() json2.Any {
 		r['placeholder'] = placeholder
 	}
 	if default_values := rs.default_values {
-		r['default_values'] = default_values.map(json2.Any({
-			'id':   json2.Any(it.build())
+		r['default_values'] = default_values.map(|dv| json2.Any({
+			'id':   json2.Any(dv.build())
 			'type': 'role'
 		}))
 	}
@@ -498,40 +529,47 @@ pub fn (rs RoleSelect) build() json2.Any {
 	return r
 }
 
+pub fn RoleSelect.internal_parse(j map[string]json2.Any) !RoleSelect {
+	return RoleSelect{
+		custom_id: j['custom_id']! as string
+		placeholder: if s := j['placeholder'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		default_values: if a := j['default_values'] {
+			?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
+				return DefaultValue.parse(k)!
+			})!.filter(|dv| dv.typ == .role).map(|dv| dv.id))
+		} else {
+			none
+		}
+		min_values: if i := j['min_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		max_values: if i := j['max_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		disabled: if b := j['disabled'] {
+			?bool(b as bool)
+		} else {
+			none
+		}
+	}
+}
+
+
 pub fn RoleSelect.parse(j json2.Any) !RoleSelect {
 	match j {
 		map[string]json2.Any {
-			return RoleSelect{
-				custom_id: j['custom_id']! as string
-				placeholder: if s := j['placeholder'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				default_values: if a := j['default_values'] {
-					?[]Snowflake((a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .role).map(it.id))
-				} else {
-					none
-				}
-				min_values: if i := j['min_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				max_values: if i := j['max_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				disabled: if b := j['disabled'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-			}
+			return RoleSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected string select to be object, got ${j.type_name()}')
+			return error('expected role select to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -563,7 +601,7 @@ pub fn (ms MentionableSelect) build() json2.Any {
 		r['placeholder'] = placeholder
 	}
 	if default_values := ms.default_values {
-		r['default_values'] = default_values.map(it.build())
+		r['default_values'] = default_values.map(|dv| dv.build())
 	}
 	if min_values := ms.min_values {
 		r['min_values'] = min_values
@@ -577,40 +615,46 @@ pub fn (ms MentionableSelect) build() json2.Any {
 	return r
 }
 
+pub fn MentionableSelect.internal_parse(j map[string]json2.Any) !MentionableSelect {
+	return MentionableSelect{
+		custom_id: j['custom_id']! as string
+		placeholder: if s := j['placeholder'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		default_values: if a := j['default_values'] {
+			?[]DefaultValue(maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
+				return DefaultValue.parse(k)!
+			})!)
+		} else {
+			none
+		}
+		min_values: if i := j['min_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		max_values: if i := j['max_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		disabled: if b := j['disabled'] {
+			?bool(b as bool)
+		} else {
+			none
+		}
+	}
+}
+
 pub fn MentionableSelect.parse(j json2.Any) !MentionableSelect {
 	match j {
 		map[string]json2.Any {
-			return MentionableSelect{
-				custom_id: j['custom_id']! as string
-				placeholder: if s := j['placeholder'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				default_values: if a := j['default_values'] {
-					?[]DefaultValue((a as []json2.Any).map(DefaultValue.parse(it)!))
-				} else {
-					none
-				}
-				min_values: if i := j['min_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				max_values: if i := j['max_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				disabled: if b := j['disabled'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-			}
+			return MentionableSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected string select to be object, got ${j.type_name()}')
+			return error('expected mentionable select to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -641,14 +685,14 @@ pub fn (cs ChannelSelect) build() json2.Any {
 		'custom_id': cs.custom_id
 	}
 	if channel_types := cs.channel_types {
-		r['channel_types'] = channel_types.map(json2.Any(int(it)))
+		r['channel_types'] = channel_types.map(|ct| json2.Any(int(ct)))
 	}
 	if placeholder := cs.placeholder {
 		r['placeholder'] = placeholder
 	}
 	if default_values := cs.default_values {
-		r['default_values'] = default_values.map(json2.Any({
-			'id':   json2.Any(it.build())
+		r['default_values'] = default_values.map(|dv| json2.Any({
+			'id':   json2.Any(dv.build())
 			'type': 'channel'
 		}))
 	}
@@ -664,45 +708,49 @@ pub fn (cs ChannelSelect) build() json2.Any {
 	return r
 }
 
+pub fn ChannelSelect.internal_parse(j map[string]json2.Any) !ChannelSelect {
+	return ChannelSelect{
+		custom_id: j['custom_id']! as string
+		channel_types: if a := j['channel_types'] {
+			?[]ChannelType((a as []json2.Any).map(|i| unsafe { ChannelType(i as i64) }))
+		} else {
+			none
+		}
+		placeholder: if s := j['placeholder'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		default_values: if a := j['default_values'] {
+			?[]Snowflake((a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .channel).map(it.id))
+		} else {
+			none
+		}
+		min_values: if i := j['min_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		max_values: if i := j['max_values'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		disabled: if b := j['disabled'] {
+			?bool(b as bool)
+		} else {
+			none
+		}
+	}
+}
+
 pub fn ChannelSelect.parse(j json2.Any) !ChannelSelect {
 	match j {
 		map[string]json2.Any {
-			return ChannelSelect{
-				custom_id: j['custom_id']! as string
-				channel_types: if a := j['channel_types'] {
-					?[]ChannelType((a as []json2.Any).map(unsafe { ChannelType(it as i64) }))
-				} else {
-					none
-				}
-				placeholder: if s := j['placeholder'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				default_values: if a := j['default_values'] {
-					?[]Snowflake((a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .channel).map(it.id))
-				} else {
-					none
-				}
-				min_values: if i := j['min_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				max_values: if i := j['max_values'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				disabled: if b := j['disabled'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-			}
+			return ChannelSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected string select to be object, got ${j.type_name()}')
+			return error('expected channel select to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -767,38 +815,43 @@ pub fn (ti TextInput) build() json2.Any {
 	return r
 }
 
+
+pub fn TextInput.internal_parse(j map[string]json2.Any) !TextInput {
+	return TextInput{
+		custom_id: j['custom_id']! as string
+		label: ''
+		min_length: if i := j['min_length'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		max_length: if i := j['max_length'] {
+			?int(i.int())
+		} else {
+			none
+		}
+		required: if b := j['required'] {
+			?bool(b as bool)
+		} else {
+			none
+		}
+		value: if s := j['value'] {
+			?string(s as string)
+		} else {
+			none
+		}
+		placeholder: if s := j['placeholder'] {
+			?string(s as string)
+		} else {
+			none
+		}
+	}
+}
+
 pub fn TextInput.parse(j json2.Any) !TextInput {
 	match j {
 		map[string]json2.Any {
-			return TextInput{
-				custom_id: j['custom_id']! as string
-				label: ''
-				min_length: if i := j['min_length'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				max_length: if i := j['max_length'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				required: if b := j['required'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-				value: if s := j['value'] {
-					?string(s as string)
-				} else {
-					none
-				}
-				placeholder: if s := j['placeholder'] {
-					?string(s as string)
-				} else {
-					none
-				}
-			}
+			return TextInput.internal_parse(j)!
 		}
 		else {
 			return error('expected text input to be object, got ${j.type_name()}')
@@ -812,28 +865,28 @@ pub fn Component.parse(j json2.Any) !Component {
 			typ := unsafe { ComponentType(j['type']!.int()) }
 			match typ {
 				.action_row {
-					return ActionRow.parse(j)!
+					return ActionRow.internal_parse(j)!
 				}
 				.button {
-					return Button.parse(j)!
+					return Button.internal_parse(j)!
 				}
 				.string_select {
-					return StringSelect.parse(j)!
+					return StringSelect.internal_parse(j)!
 				}
 				.text_input {
-					return TextInput.parse(j)!
+					return TextInput.internal_parse(j)!
 				}
 				.user_select {
-					return UserSelect.parse(j)!
+					return UserSelect.internal_parse(j)!
 				}
 				.role_select {
-					return RoleSelect.parse(j)!
+					return RoleSelect.internal_parse(j)!
 				}
 				.mentionable_select {
-					return MentionableSelect.parse(j)!
+					return MentionableSelect.internal_parse(j)!
 				}
 				.channel_select {
-					return ChannelSelect.parse(j)!
+					return ChannelSelect.internal_parse(j)!
 				}
 			}
 		}
