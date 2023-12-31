@@ -31,6 +31,7 @@ pub fn (s Snowflake) build() string {
 pub fn Snowflake.parse(j json2.Any) !Snowflake {
 	match j {
 		string { return j.u64() }
+		i8, i16, int, i64, u8, u16, u32, u64 { return Snowflake(u64(j)) }
 		else { return error('expected snowflake to be string, got ${j.type_name()}') }
 	}
 }

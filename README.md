@@ -57,3 +57,48 @@ fn main() {
 > V panic: result not set (Disallowed intent(s): You sent a disallowed intent for a Gateway Intent. You may have tried to specify an intent that you have not enabled or are not approved for.)      
 > ...
 > ```
+
+## TODO (stolen from Terisback 💀)
+
+### First milestone
+- [x] Connect to gateway
+- [x] Handle heartbeat
+- [x] Event system (pub/sub)
+- [x] REST for sending messages
+- [x] Implement `multipart/form-data` for file sending
+- [x] Do usual `application/json` for sending without binary data
+- [x] Handle Gateway events
+  - [ ] Audit Log
+  - [ ] Channel
+  - [ ] Emoji
+  - [ ] Guild
+  - [ ] Invite
+  - [ ] User
+  - [ ] Voice
+  - [ ] Webhook
+  - [x] Slash Command
+- [ ] Create examples (3/4)
+- [ ] Documentation
+
+### Second milestone
+- [ ] Handle REST
+  - [x] Audit Log
+  - [x] Channel
+  - [x] Emoji
+  - [x] Guild
+  - [x] Invite
+  - [x] User
+  - [x] Voice
+  - [x] Webhook
+  - [x] Slash Command
+  - [ ] Observe rate limits
+- [x] Slash Commands
+- [x] Fancy log
+- [ ] Command router
+- [ ] Think about tests
+
+### Third milestone (till V v0.3)
+- [ ] Build cache ontop map's (memcache, redis in future)
+
+### The Main one
+- [ ] Make a cool library

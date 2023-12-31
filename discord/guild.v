@@ -6,92 +6,6 @@ import net.urllib
 
 pub type GuildFeature = string
 
-pub struct PartialGuild {
-pub:
-	id                         Snowflake
-	name                       string
-	icon                       ?string
-	owner                      ?bool
-	permissions                ?Permissions
-	features                   []GuildFeature
-	approximate_member_count   ?int
-	approximate_presence_count ?int
-}
-
-pub fn PartialGuild.parse(j json2.Any) !PartialGuild {
-	match j {
-		map[string]json2.Any {
-			icon := j['icon']!
-			return PartialGuild{
-				id: Snowflake.parse(j['id']!)!
-				name: j['name']! as string
-				icon: if icon is string {
-					?string(icon)
-				} else {
-					none
-				}
-				owner: if b := j['owner'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-				permissions: if s := j['permissions'] {
-					?Permissions(Permissions.parse(s)!)
-				} else {
-					none
-				}
-				features: (j['features']! as []json2.Any).map(|s| GuildFeature(s as string))
-				approximate_member_count: if i := j['approximate_member_count'] {
-					?int(i.int())
-				} else {
-					none
-				}
-				approximate_presence_count: if i := j['approximate_presence_count'] {
-					?int(i.int())
-				} else {
-					none
-				}
-			}
-		}
-		else {
-			return error('expected partial guild to be object, got ${j.type_name()}')
-		}
-	}
-}
-
-@[params]
-pub struct FetchMyGuildsParams {
-pub:
-	before      ?Snowflake
-	after       ?Snowflake
-	limit       ?int
-	with_counts ?bool
-}
-
-pub fn (params FetchMyGuildsParams) build_query_values() urllib.Values {
-	mut vs := urllib.new_values()
-	if before := params.before {
-		vs.add('before', before.build())
-	}
-	if after := params.after {
-		vs.add('after', after.build())
-	}
-	if limit := params.limit {
-		vs.add('limit', limit.str())
-	}
-	if with_counts := params.with_counts {
-		vs.add('with_counts', with_counts.str())
-	}
-	return vs
-}
-
-pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
-	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/guilds${encode_query(params.build_query_values())}')!.body)! as []json2.Any,
-		fn (j json2.Any) !PartialGuild {
-		return PartialGuild.parse(j)!
-	})!
-}
-
 pub enum VerificationLevel {
 	// unrestricted
 	none_
@@ -254,7 +168,7 @@ pub fn Role.parse(j json2.Any) !Role {
 				} else {
 					none
 				}
-				flags: unsafe { RoleFlags(j['flags']! as i64) }
+				flags: unsafe { RoleFlags(j['flags']!.int()) }
 			}
 		}
 		else {
@@ -381,6 +295,170 @@ pub fn WelcomeScreen.parse(j json2.Any) !WelcomeScreen {
 	}
 }
 
+pub struct PartialGuild {
+pub:
+	// guild id
+	id ?Snowflake
+	// guild name (2-100 characters, excluding trailing and leading whitespace)
+	name string
+	// icon hash
+	icon ?string
+	// icon hash, returned when in the template object
+	icon_hash ?string
+	// true if the user is the owner of the guild
+	owner ?bool
+	// total permissions for the user in the guild (excludes overwrites and implicit permissions)
+	permissions ?Permissions
+	// verification level required for the guild
+	verification_level ?VerificationLevel
+	// default message notifications level
+	default_message_notifications ?MessageNotificationsLevel
+	// explicit content filter level
+	explicit_content_filter ?ExplicitContentFilterLevel
+	// roles in the guild
+	roles ?[]Role
+	// enabled guild features
+	features ?[]GuildFeature
+	// the id of the channel where guild notices such as welcome messages and boost events are posted
+	system_channel_id ?Snowflake
+	// system channel flags
+	system_channel_flags ?SystemChannelFlags
+	// approximate number of members in this guild, returned from the `GET /guilds/<id>` and `/users/@me/guilds` endpoints when `with_counts` is true
+	approximate_member_count ?int
+	// approximate number of non-offline members in this guild, returned from the `GET /guilds/<id>` and `/users/@me/guilds` endpoints when `with_counts` is true
+	approximate_presence_count ?int
+}
+
+pub fn PartialGuild.parse(j json2.Any) !PartialGuild {
+	match j {
+		map[string]json2.Any {
+			return PartialGuild{
+				id: if s := j['id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				name: j['name']! as string
+				icon: if s := j['icon'] {
+					if s !is json2.Null {
+						s as string
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				icon_hash: if s := j['icon_hash'] {
+					if s !is json2.Null {
+						s as string
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				owner: if b := j['owner'] {
+					b as bool
+				} else {
+					none
+				}
+				permissions: if s := j['permissions'] {
+					Permissions.parse(s)!
+				} else {
+					none
+				}
+				verification_level: if i := j['verification_level'] {
+					unsafe { VerificationLevel(i.int()) }
+				} else {
+					none
+				}
+				default_message_notifications: if i := j['default_message_notifications'] {
+					unsafe { MessageNotificationsLevel(i.int()) }
+				} else {
+					none
+				}
+				explicit_content_filter: if i := j['explicit_content_filter'] {
+					unsafe { ExplicitContentFilterLevel(i.int()) }
+				} else {
+					none
+				}
+				roles: if a := j['roles'] {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !Role {
+						return Role.parse(k)!
+					})!
+				} else {
+					none
+				}
+				features: if a := j['features'] {
+					(a as []json2.Any).map(|s| GuildFeature(s as string))
+				} else {
+					none
+				}
+				system_channel_id: if s := j['system_channel_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				system_channel_flags: if i := j['system_channel_flags'] {
+					unsafe { SystemChannelFlags(i.int()) }
+				} else {
+					none
+				}
+				approximate_member_count: if i := j['approximate_member_count'] {
+					i.int()
+				} else {
+					none
+				}
+				approximate_presence_count: if i := j['approximate_presence_count'] {
+					i.int()
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected partial guild to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+@[params]
+pub struct FetchMyGuildsParams {
+pub:
+	// get guilds before this guild ID
+	before ?Snowflake
+	// get guilds after this guild ID
+	after ?Snowflake
+	// max number of guilds to return (1-200)
+	limit ?int
+	// include approximate member and presence counts in response
+	with_counts ?bool
+}
+
+pub fn (params FetchMyGuildsParams) build_query_values() urllib.Values {
+	mut vs := urllib.new_values()
+	if before := params.before {
+		vs.add('before', before.build())
+	}
+	if after := params.after {
+		vs.add('after', after.build())
+	}
+	if limit := params.limit {
+		vs.add('limit', limit.str())
+	}
+	if with_counts := params.with_counts {
+		vs.add('with_counts', with_counts.str())
+	}
+	return vs
+}
+
+pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
+	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/guilds${encode_query(params.build_query_values())}')!.body)! as []json2.Any,
+		fn (j json2.Any) !PartialGuild {
+		return PartialGuild.parse(j)!
+	})!
+}
+
 pub struct Guild {
 pub:
 	// guild id
@@ -468,7 +546,7 @@ pub:
 pub fn Guild.parse(j json2.Any) !Guild {
 	match j {
 		map[string]json2.Any {
-			icon := j['icon'] or { return error('expected guild.icon to be present') }
+			icon := j['icon']!
 			splash := j['splash']!
 			discovery_splash := j['discovery_splash']!
 			afk_channel_id := j['afk_channel_id']!
@@ -529,6 +607,7 @@ pub fn Guild.parse(j json2.Any) !Guild {
 					none
 				}
 				verification_level: unsafe { VerificationLevel(j['verification_level']!.int()) }
+				default_message_notifications: unsafe { MessageNotificationsLevel(j['default_message_notifications']!.int()) }
 				explicit_content_filter: unsafe { ExplicitContentFilterLevel(j['explicit_content_filter']!.int()) }
 				roles: maybe_map(j['roles']! as []json2.Any, fn (k json2.Any) !Role {
 					return Role.parse(k)!
@@ -536,27 +615,27 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				emojis: maybe_map(j['emojis']! as []json2.Any, fn (k json2.Any) !Emoji {
 					return Emoji.parse(k)!
 				})!
-				features: (j['features']! as []json2.Any).map(GuildFeature(it as string))
+				features: (j['features']! as []json2.Any).map(|s| GuildFeature(s as string))
 				mfa_level: unsafe { MFALevel(j['mfa_level']!.int()) }
 				application_id: if application_id !is json2.Null {
-					?Snowflake(Snowflake.parse(application_id)!)
+					Snowflake.parse(application_id)!
 				} else {
 					none
 				}
 				system_channel_id: if system_channel_id !is json2.Null {
-					?Snowflake(Snowflake.parse(system_channel_id)!)
+					Snowflake.parse(system_channel_id)!
 				} else {
 					none
 				}
 				system_channel_flags: unsafe { SystemChannelFlags(j['system_channel_flags']!.int()) }
 				rules_channel_id: if rules_channel_id !is json2.Null {
-					?Snowflake(Snowflake.parse(rules_channel_id)!)
+					Snowflake.parse(rules_channel_id)!
 				} else {
 					none
 				}
 				max_presences: if i := j['max_presences'] {
 					if i !is json2.Null {
-						?int(i.int())
+						i.int()
 					} else {
 						none
 					}
@@ -565,7 +644,7 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				}
 				max_members: if i := j['max_members'] {
 					if i !is json2.Null {
-						?int(i.int())
+						i.int()
 					} else {
 						none
 					}
@@ -573,54 +652,54 @@ pub fn Guild.parse(j json2.Any) !Guild {
 					none
 				}
 				vanity_url_code: if vanity_url_code !is json2.Null {
-					?string(vanity_url_code as string)
+					vanity_url_code as string
 				} else {
 					none
 				}
 				description: if description !is json2.Null {
-					?string(description as string)
+					description as string
 				} else {
 					none
 				}
 				banner: if banner !is json2.Null {
-					?string(banner as string)
+					banner as string
 				} else {
 					none
 				}
 				premium_tier: unsafe { PremiumTier(j['premium_tier']!.int()) }
 				premium_subscription_count: if i := j['premium_subscription_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				preferred_locale: j['preferred_locale']! as string
 				public_updates_channel_id: if public_updates_channel_id !is json2.Null {
-					?Snowflake(Snowflake.parse(public_updates_channel_id)!)
+					Snowflake.parse(public_updates_channel_id)!
 				} else {
 					none
 				}
 				max_video_channel_users: if i := j['max_video_channel_users'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				max_stage_video_channel_users: if i := j['max_stage_video_channel_users'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				approximate_member_count: if i := j['approximate_member_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				approximate_presence_count: if i := j['approximate_presence_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				welcome_screen: if o := j['welcome_screen'] {
-					?WelcomeScreen(WelcomeScreen.parse(o)!)
+					WelcomeScreen.parse(o)!
 				} else {
 					none
 				}
@@ -631,7 +710,7 @@ pub fn Guild.parse(j json2.Any) !Guild {
 				})!
 				premium_progress_bar_enabled: j['premium_progress_bar_enabled']! as bool
 				safety_alerts_channel_id: if safety_alerts_channel_id !is json2.Null {
-					?Snowflake(Snowflake.parse(safety_alerts_channel_id)!)
+					Snowflake.parse(safety_alerts_channel_id)!
 				} else {
 					none
 				}
@@ -725,7 +804,7 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 				}
 				deaf: j['deaf']! as bool
 				mute: j['mute']! as bool
-				flags: unsafe { GuildMemberFlags(j['flags']! as i64) }
+				flags: unsafe { GuildMemberFlags(j['flags']!.int()) }
 				pending: if b := j['pending'] {
 					?bool(b as bool)
 				} else {

@@ -1082,7 +1082,8 @@ pub fn (c Client) edit_channel_permissions(channel_id Snowflake, overwrite_id Sn
 
 // Returns a list of invite objects (with invite metadata) for the channel. Only usable for guild channels. Requires the `.manage_channels` permission.
 pub fn (c Client) fetch_invites(channel_id Snowflake) ![]InviteMetadata {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/invites')!.body)! as []json2.Any, fn (j json2.Any) !InviteMetadata {
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/invites')!.body)! as []json2.Any,
+		fn (j json2.Any) !InviteMetadata {
 		return InviteMetadata.parse(j)!
 	})!
 }
@@ -1366,7 +1367,8 @@ pub fn (params ListThreadMembersParams) build_query_values() urllib.Values {
 // Returns array of thread members objects that are members of the thread.
 // When with_member is set to `true`, the results will be paginated and each thread member object will include a `member` field containing a guild member object.
 pub fn (c Client) list_thread_members(channel_id Snowflake, params FetchThreadMemberParams) ![]ThreadMember {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members${encode_query(params.build_query_values())}')!.body)! as []json2.Any, fn (j json2.Any) !ThreadMember {
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members${encode_query(params.build_query_values())}')!.body)! as []json2.Any,
+		fn (j json2.Any) !ThreadMember {
 		return ThreadMember.parse(j)!
 	})!
 }
