@@ -206,8 +206,8 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 					// not resumable
 					client.resume_gateway_url = ''
 					client.session_id = ''
-					client.ws.close(1000, 'Invalid session')!
 				}
+				client.ws.close(1000, 'Invalid session')!
 			}
 			else {}
 		}
@@ -221,7 +221,7 @@ struct GatewayCloseCode {
 
 const gateway_close_code_table = {
 	1000: GatewayCloseCode{
-		message: ''
+		message: 'Ignore that'
 		reconnect: true
 	}
 	4000: GatewayCloseCode{
