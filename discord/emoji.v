@@ -70,40 +70,48 @@ pub fn Emoji.parse(j json2.Any) !Emoji {
 		map[string]json2.Any {
 			id := j['id']!
 			name := j['name']!
-			roles := if a := j['roles'] {
-				?[]Snowflake((a as []json2.Any).map(Snowflake.parse(it)!))
-			} else {
-				?[]Snowflake(none)
-			}
-			user := if o := j['user'] {
-				?User(User.parse(o)!)
-			} else {
-				?User(none)
-			}
 			return Emoji{
-				id: if id is json2.Null { none } else { Snowflake.parse(id)! }
-				name: if name is json2.Null { none } else { ?string(name as string) }
-				roles: roles
-				user: user
-				require_colons: if b := j['require_colons'] {
-					b as bool
+				id: if id !is json2.Null {
+					?Snowflake(Snowflake.parse(id)!)
 				} else {
-					?bool(none)
+					none
+				}
+				name: if name !is json2.Null {
+					?string(name as string)
+				} else {
+					none
+				}
+				roles: if a := j['roles'] {
+					?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
+						return Snowflake.parse(k)!
+					})!)
+				} else {
+					none
+				}
+				user: if o := j['user'] {
+					?User(User.parse(o)!)
+				} else {
+					none
+				}
+				require_colons: if b := j['require_colons'] {
+					?bool(b as bool)
+				} else {
+					none
 				}
 				managed: if b := j['managed'] {
-					b as bool
+					?bool(b as bool)
 				} else {
-					?bool(none)
+					none
 				}
 				animated: if b := j['animated'] {
-					b as bool
+					?bool(b as bool)
 				} else {
-					?bool(none)
+					none
 				}
 				available: if b := j['available'] {
-					b as bool
+					?bool(b as bool)
 				} else {
-					?bool(none)
+					none
 				}
 			}
 		}

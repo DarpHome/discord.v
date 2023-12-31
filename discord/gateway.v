@@ -202,12 +202,11 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 				client.ws.close(1000, 'Discord restarting')!
 			}
 			.invalid_session {
-				if message.data as bool {
-					// resumable
-				} else {
+				if !(message.data as bool) {
 					// not resumable
 					client.resume_gateway_url = ''
 					client.session_id = ''
+					client.ws.close(1000, 'Invalid session')
 				}
 			}
 			else {}

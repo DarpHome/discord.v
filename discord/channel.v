@@ -160,6 +160,7 @@ pub:
 	user_limit                    ?int
 	parent_id                     ?Snowflake
 	default_auto_archive_duration ?time.Duration
+	permissions                   ?Permissions
 	flags                         ?ChannelFlags
 	available_tags                ?[]ForumTag
 }
@@ -213,6 +214,21 @@ pub fn PartialChannel.parse(j json2.Any) !PartialChannel {
 				id: Snowflake.parse(j['id']!)!
 				typ: unsafe { ChannelType(j['type']!.int()) }
 				name: j['name']! as string
+				topic: if s := j['topic'] {
+					?string(s as string)
+				} else {
+					none
+				}
+				permissions: if s := j['permissions'] {
+					?Permissions(Permissions.parse(s)!)
+				} else {
+					none
+				}
+				flags: if i := j['flags'] {
+					?ChannelFlags(unsafe { ChannelFlags(i.int()) })
+				} else {
+					none
+				}
 			}
 		}
 		else {
@@ -551,7 +567,9 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				permission_overwrites: if a := j['permission_overwrites'] {
-					?[]PermissionOverwrite((a as []json2.Any).map(PermissionOverwrite.parse(it)!))
+					?[]PermissionOverwrite(maybe_map(a as []json2.Any, fn (k json2.Any) !PermissionOverwrite {
+						return PermissionOverwrite.parse(k)!
+					})!)
 				} else {
 					none
 				}
@@ -603,7 +621,9 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				recipients: if a := j['recipients'] {
-					?[]User((a as []json2.Any).map(User.parse(it)!))
+					?[]User(maybe_map(a as []json2.Any, fn (k json2.Any) !User {
+						return User.parse(k)!
+					})!)
 				} else {
 					none
 				}
@@ -704,12 +724,16 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				available_tags: if a := j['available_tags'] {
-					?[]ForumTag((a as []json2.Any).map(ForumTag.parse(it)!))
+					?[]ForumTag(maybe_map(a as []json2.Any, fn (k json2.Any) !ForumTag {
+						return ForumTag.parse(k)!
+					})!)
 				} else {
 					none
 				}
 				applied_tags: if a := j['applied_tags'] {
-					?[]Snowflake((a as []json2.Any).map(Snowflake.parse(it)!))
+					?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
+						return Snowflake.parse(k)!
+					})
 				} else {
 					none
 				}
@@ -1058,7 +1082,9 @@ pub fn (c Client) edit_channel_permissions(channel_id Snowflake, overwrite_id Sn
 
 // Returns a list of invite objects (with invite metadata) for the channel. Only usable for guild channels. Requires the `.manage_channels` permission.
 pub fn (c Client) fetch_invites(channel_id Snowflake) ![]InviteMetadata {
-	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/invites')!.body)! as []json2.Any).map(InviteMetadata.parse(it)!)
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/invites')!.body)! as []json2.Any, fn (j json2.Any) !InviteMetadata {
+		return InviteMetadata.parse(j)!
+	})!
 }
 
 @[params]
@@ -1340,7 +1366,9 @@ pub fn (params ListThreadMembersParams) build_query_values() urllib.Values {
 // Returns array of thread members objects that are members of the thread.
 // When with_member is set to `true`, the results will be paginated and each thread member object will include a `member` field containing a guild member object.
 pub fn (c Client) list_thread_members(channel_id Snowflake, params FetchThreadMemberParams) ![]ThreadMember {
-	return (json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members${encode_query(params.build_query_values())}')!.body)! as []json2.Any).map(ThreadMember.parse(it)!)
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members${encode_query(params.build_query_values())}')!.body)! as []json2.Any, fn (j json2.Any) !ThreadMember {
+		return ThreadMember.parse(j)!
+	})!
 }
 
 @[params]
@@ -1377,8 +1405,12 @@ pub fn ListThreadsResponse.parse(j json2.Any) !ListThreadsResponse {
 	match j {
 		map[string]json2.Any {
 			return ListThreadsResponse{
-				threads: (j['threads']! as []json2.Any).map(Channel.parse(it)!)
-				members: (j['members']! as []json2.Any).map(ThreadMember.parse(it)!)
+				threads: maybe_map(j['threads']! as []json2.Any, fn (k json2.Any) !Channel {
+					return Channel.parse(k)!
+				})!
+				members: maybe_map(j['members']! as []json2.Any, fn (k json2.Any) !ThreadMember {
+					return ThreadMember.parse(k)!
+				})!
 				has_more: j['has_more']! as bool
 			}
 		}

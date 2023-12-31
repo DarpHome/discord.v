@@ -288,7 +288,7 @@ pub:
 
 pub fn (params CreateGroupDMParams) build() json2.Any {
 	return {
-		'access_tokens': json2.Any(params.access_tokens.map(json2.Any(it)))
+		'access_tokens': json2.Any(params.access_tokens.map(|t| json2.Any(t)))
 		'nicks':         maps.to_map[Snowflake, string, string, json2.Any](params.nicks,
 			fn (k Snowflake, v string) (string, json2.Any) {
 			return k.build(), json2.Any(v)
