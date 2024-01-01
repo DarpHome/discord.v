@@ -80,6 +80,16 @@ pub fn (r []Component) flatten() []Component {
 	return t
 }
 
+
+pub fn (cs []Component) find_where(f fn (Component) bool) ?Component {
+	for c in cs.flatten() {
+		if f(c) {
+			return c
+		}
+	}
+	return none
+}
+
 pub fn (cs []Component) find[T](f fn (T) bool) ?T {
 	for c in cs.flatten() {
 		if c is T {
