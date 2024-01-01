@@ -359,9 +359,17 @@ pub fn (params FetchWebhookMessageParams) build_query_values() urllib.Values {
 	return query_values
 }
 
+fn unwrap_optional_id(id ?Snowflake, default string) string {
+	return if s := id {
+		urllib.path_escape(s.build())
+	} else {
+		default
+	}
+}
+
 // Returns a previously-sent webhook message from the same token. Returns a [message](#Message) object on success.
-pub fn (c Client) fetch_webhook_message(webhook_id Snowflake, webhook_token string, message_id Snowflake, params FetchWebhookMessageParams) !Message {
-	return Message.parse(json2.raw_decode(c.request(.get, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}',
+pub fn (c Client) fetch_webhook_message(webhook_id Snowflake, webhook_token string, message_id ?Snowflake, params FetchWebhookMessageParams) !Message {
+	return Message.parse(json2.raw_decode(c.request(.get, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${unwrap_optional_id(message_id, '@original')}${encode_query(params.build_query_values())}',
 		authenticate: false
 	)!.body)!)!
 }
@@ -415,11 +423,10 @@ pub fn (params EditWebhookMessageParams) build_query_values() urllib.Values {
 
 // Edits a previously-sent webhook message from the same token. Returns a [message](#Message) object on success.
 // When the `content` field is edited, the `mentions` array in the message object will be reconstructed from scratch based on the new content. The `allowed_mentions` field of the edit request controls how this happens. If there is no explicit `allowed_mentions` in the edit request, the content will be parsed with default allowances, that is, without regard to whether or not an `allowed_mentions` was present in the request that originally created the message.
-pub fn (c Client) edit_webhook_message(webhook_id Snowflake, webhook_token string, message_id Snowflake, params EditWebhookMessageParams) !Message {
+pub fn (c Client) edit_webhook_message(webhook_id Snowflake, webhook_token string, message_id ?Snowflake, params EditWebhookMessageParams) !Message {
 	return Message.parse(json2.raw_decode(if files := params.files {
 		body, boundary := build_multipart_with_files(files, params.build())
-
-		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}',
+		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${unwrap_optional_id(message_id, '@original')}${encode_query(params.build_query_values())}',
 			body: body
 			common_headers: {
 				.content_type: 'multipart/form-data; boundary="${boundary}"'
@@ -427,7 +434,7 @@ pub fn (c Client) edit_webhook_message(webhook_id Snowflake, webhook_token strin
 			authenticate: false
 		)!.body
 	} else {
-		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}',
+		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${unwrap_optional_id(message_id, '@original')}${encode_query(params.build_query_values())}',
 			json: params.build()
 			authenticate: false
 		)!.body
@@ -449,8 +456,9 @@ pub fn (params DeleteWebhookMessageParams) build_query_values() urllib.Values {
 	return query_values
 }
 
-pub fn (c Client) delete_webhook_message(webhook_id Snowflake, webhook_token string, message_id Snowflake, params DeleteWebhookMessageParams) ! {
-	c.request(.delete, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${urllib.path_escape(message_id.build())}${encode_query(params.build_query_values())}',
+// Deletes a message that was created by the webhook. Returns a 204 No Content response on success.
+pub fn (c Client) delete_webhook_message(webhook_id Snowflake, webhook_token string, message_id ?Snowflake, params DeleteWebhookMessageParams) ! {
+	c.request(.delete, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${unwrap_optional_id(message_id, '@original')}${encode_query(params.build_query_values())}',
 		authenticate: false
 	)!
 }

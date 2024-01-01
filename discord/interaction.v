@@ -589,6 +589,9 @@ pub fn (mir ModalInteractionResponse) build() json2.Any {
 	}
 }
 
+// Create a response to an Interaction from the gateway. Body is an [interaction response](#IInteractionResponse). Returns 204 No Content.
+// This endpoint also supports file attachments similar to the webhook endpoints. Refer to Uploading Files for details on uploading files and multipart/form-data requests.
+
 pub fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response IInteractionResponse) ! {
 	if files := response.get_files() {
 		body, boundary := build_multipart_with_files(files, response.build())
@@ -603,6 +606,41 @@ pub fn (c Client) create_interaction_response(interaction_id Snowflake, interact
 		c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
 			json: response.build()
 			authenticate: false
+		)!
+	}
+}
+
+// Returns the initial Interaction response. Functions the same as [`c.fetch_webhook_message`](#Client.fetch_webhook_message).
+pub fn (c Client) fetch_original_interaction_response(application_id Snowflake, interaction_token string) !Message {
+	return c.fetch_webhook_message(application_id, interaction_token, none)!
+}
+
+// Edits the initial Interaction response. Functions the same as [`c.edit_webhook_message`](#Client.edit_webhook_message).
+pub fn (c Client) edit_original_interaction_response(application_id Snowflake, interaction_token string, params EditWebhookMessageParams) !Message {
+	return c.edit_webhook_message(application_id, interaction_token, none, params)!
+}
+
+// Deletes the initial Interaction response. Returns 204 No Content on success.
+pub fn (c Client) delete_original_interaction_response(application_id Snowflake, interaction_token string) ! {
+	c.delete_webhook_message(application_id, interaction_token, none)!
+}
+
+// Create a followup message for an Interaction. Functions the same as [`c.execute_webhook`](#Client.execute_webhook), but `wait` is always `true`. The thread_id, avatar_url, and username parameters are not supported when using this endpoint for interaction followups.
+// `flags` can be set to `64` to mark the message as ephemeral, except when it is the first followup message to a deferred Interactions Response. In that case, the `flags` field will be ignored, and the ephemerality of the message will be determined by the `flags` value in your original ACK.
+pub fn (c Client) create_followup_message(application_id Snowflake, interaction_token string, params ExecuteWebhookParams) !Message {
+	unsafe {
+		return *c.execute_webhook(
+			application_id,
+			interaction_token,
+			ExecuteWebhookParams{
+				...params,
+				wait: none,
+				thread_id: none,
+				username: none,
+				avatar_url: none,
+				thread_name: none,
+				applied_tags: none,
+			}
 		)!
 	}
 }
