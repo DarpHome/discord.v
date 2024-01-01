@@ -149,11 +149,12 @@ pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] 
 // `override` removes all listeners and inserts `listener`
 pub fn (mut ec EventController[T]) override(listener EventListener[T]) EventController[T] {
 	// ec.listeners = {ec.generate_id(): listener}
-	return ec
+	// ec.listeners.clear()
+	return ec.listen(listener)
 }
 
 // `listen` adds function to listener list
 pub fn (mut ec EventController[T]) listen(listener EventListener[T]) EventController[T] {
-	// ec.listeners[ec.generate_id()] = listener
+	ec.listeners[ec.generate_id()] = listener
 	return ec
 }

@@ -136,11 +136,11 @@ pub type ApplicationCommandOptionChoiceValue = f64 | int | string
 pub struct ApplicationCommandOptionChoice {
 pub:
 	// 1-100 character choice name
-	name string
+	name string @[required]
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
 	name_localizations ?LocaleMapping
 	// Value for the choice, up to 100 characters if string
-	value ApplicationCommandOptionChoiceValue
+	value ApplicationCommandOptionChoiceValue @[required]
 }
 
 pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOptionChoice {
@@ -163,7 +163,7 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 					string {
 						ApplicationCommandOptionChoiceValue(value)
 					}
-					int, i64 {
+					i8, i16, int, i64, u8, u16, u32, u64 {
 						ApplicationCommandOptionChoiceValue(int(value))
 					}
 					f32, f64 {
@@ -186,9 +186,7 @@ pub fn (acoc ApplicationCommandOptionChoice) build() json2.Any {
 	mut r := {
 		'name':  json2.Any(acoc.name)
 		'value': match value {
-			string { value }
-			int { value }
-			f64 { value }
+			string, int, f64 { value }
 		}
 	}
 	if name_localizations := acoc.name_localizations {
@@ -200,16 +198,40 @@ pub fn (acoc ApplicationCommandOptionChoice) build() json2.Any {
 	return r
 }
 
+pub type Number = int | f64
+
+pub fn Number.parse(j json2.Any) !Number {
+	match j {
+		i8, i16, int, i64, u8, u16, u32, u64 {
+			return Number(int(j))
+		}
+		f32, f64 {
+			return Number(f64(j))
+		}
+		else {
+			return error('expected number to be int/f64, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (n Number) build() json2.Any {
+	match n {
+		int, f64 {
+			return n
+		}
+	}
+}
+
 pub struct ApplicationCommandOption {
 pub:
 	// Type of option
-	typ ApplicationCommandOptionType
+	typ ApplicationCommandOptionType @[required]
 	// 1-32 character name
-	name string
+	name string @[required]
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
 	name_localizations ?LocaleMapping
 	// 1-100 character description
-	description string
+	description string @[required]
 	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
 	description_localizations ?LocaleMapping
 	// If the parameter is required or optional--default `false`
@@ -221,9 +243,9 @@ pub:
 	// If the option is a channel type, the channels shown will be restricted to these types
 	channel_types ?[]ChannelType
 	// If the option is an `.integer` or `.number` type, the minimum value permitted
-	min_value ?int
+	min_value ?Number
 	// If the option is an `.integer` or `.number` type, the maximum value permitted
-	max_value ?int
+	max_value ?Number
 	// For option type `.string`, the minimum allowed length (minimum of `0`, maximum of `6000`)
 	min_length ?int
 	// For option type `.string`, the maximum allowed length (minimum of `1`, maximum of `6000`)
@@ -264,51 +286,51 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 					none
 				}
 				required: if b := j['required'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				choices: if a := j['choices'] {
-					?[]ApplicationCommandOptionChoice(maybe_map(a as []json2.Any, fn (k json2.Any) !ApplicationCommandOptionChoice {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !ApplicationCommandOptionChoice {
 						return ApplicationCommandOptionChoice.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				options: if a := j['options'] {
-					?[]ApplicationCommandOption(maybe_map(a as []json2.Any, fn (k json2.Any) !ApplicationCommandOption {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !ApplicationCommandOption {
 						return ApplicationCommandOption.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				channel_types: if a := j['channel_types'] {
-					?[]ChannelType((a as []json2.Any).map(|i| unsafe { ChannelType(i as i64) }))
+					(a as []json2.Any).map(|i| unsafe { ChannelType(i as i64) })
 				} else {
 					none
 				}
-				min_value: if i := j['min_value'] {
-					?int(i.int())
+				min_value: if v := j['min_value'] {
+					Number.parse(v)!
 				} else {
 					none
 				}
-				max_value: if i := j['max_value'] {
-					?int(i.int())
+				max_value: if v := j['max_value'] {
+					Number.parse(v)!
 				} else {
 					none
 				}
 				min_length: if i := j['min_length'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				max_length: if i := j['max_length'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				autocomplete: if b := j['autocomplete'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
@@ -351,16 +373,16 @@ pub fn (aco ApplicationCommandOption) build() json2.Any {
 		r['channel_types'] = channel_types.map(|ct| json2.Any(int(ct)))
 	}
 	if min_value := aco.min_value {
-		r['min_value'] = min_value
+		r['min_value'] = min_value.build()
 	}
 	if max_value := aco.max_value {
-		r['max_value'] = max_value
+		r['max_value'] = max_value.build()
 	}
 	if min_length := aco.min_length {
 		r['min_length'] = min_length
 	}
 	if max_length := aco.max_length {
-		r['min_length'] = max_length
+		r['max_length'] = max_length
 	}
 	if autocomplete := aco.autocomplete {
 		r['autocomplete'] = autocomplete
