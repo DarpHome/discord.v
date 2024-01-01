@@ -629,18 +629,14 @@ pub fn (c Client) delete_original_interaction_response(application_id Snowflake,
 // `flags` can be set to `64` to mark the message as ephemeral, except when it is the first followup message to a deferred Interactions Response. In that case, the `flags` field will be ignored, and the ephemerality of the message will be determined by the `flags` value in your original ACK.
 pub fn (c Client) create_followup_message(application_id Snowflake, interaction_token string, params ExecuteWebhookParams) !Message {
 	unsafe {
-		return *c.execute_webhook(
-			application_id,
-			interaction_token,
-			ExecuteWebhookParams{
-				...params,
-				wait: none,
-				thread_id: none,
-				username: none,
-				avatar_url: none,
-				thread_name: none,
-				applied_tags: none,
-			}
-		)!
+		return *c.execute_webhook(application_id, interaction_token, ExecuteWebhookParams{
+			...params
+			wait: none
+			thread_id: none
+			username: none
+			avatar_url: none
+			thread_name: none
+			applied_tags: none
+		})!
 	}
 }
