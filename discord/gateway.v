@@ -20,7 +20,7 @@ pub:
 	properties  Properties
 	gateway_url string = 'wss://gateway.discord.gg'
 mut:
-	presence           ?Presence
+	presence           ?UpdatePresenceParams
 	ready              bool
 	sequence           ?int
 	last_heartbeat_req ?time.Time
@@ -374,13 +374,35 @@ pub fn (c Client) fetch_gateway_url() !string {
 }
 
 @[params]
-pub struct UpdatePresence {
-	Presence
+pub struct UpdatePresenceParams {
+pub:
+	// Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
+	since ?time.Time
+	// User's activities
+	activities []Activity
+	// User's new status
+	status Status = .online
+	// Whether or not the client is afk
+	afk bool
 }
 
-pub fn (mut gc GatewayClient) update_presence(up UpdatePresence) ! {
+pub fn (params UpdatePresenceParams) build() json2.Any {
+	return {
+		'since':      if since := params.since {
+			json2.Any(since.unix_time_milli())
+		} else {
+			json2.null
+		}
+		'activities': params.activities.map(|a| a.build())
+		'status':     params.status.build()
+		'afk':        params.afk
+	}
+}
+
+
+pub fn (mut gc GatewayClient) update_presence(params UpdatePresenceParams) ! {
 	gc.send(WSMessage{
 		opcode: .update_presence
-		data: up.build()
+		data:   params.build()
 	})!
 }

@@ -709,6 +709,19 @@ pub fn TypingStartEvent.parse(j json2.Any, base BaseEvent) !TypingStartEvent {
 	}
 }
 
+pub struct PresenceUpdateEvent {
+	BaseEvent
+pub:
+	presence Presence
+}
+
+pub fn PresenceUpdateEvent.parse(j json2.Any, base BaseEvent) !PresenceUpdateEvent {
+	return PresenceUpdateEvent{
+		BaseEvent: base
+		presence: Presence.parse(j)!
+	}
+}
+
 pub struct Events {
 pub mut:
 	on_raw_event                              EventController[DispatchEvent]
@@ -744,6 +757,7 @@ pub mut:
 	on_message_create                         EventController[MessageCreateEvent]
 	on_interaction_create                     EventController[InteractionCreateEvent]
 	on_typing_start                           EventController[TypingStartEvent]
+	on_presence_update                        EventController[PresenceUpdateEvent]
 }
 
 fn event_process_ready(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -944,6 +958,12 @@ fn event_process_typing_start(mut gc GatewayClient, data json2.Any, options Emit
 	})!, options)
 }
 
+fn event_process_presence_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_presence_update.emit(PresenceUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
 type EventsTable = map[string]fn (mut GatewayClient, json2.Any, EmitOptions) !
 
 const events_table = EventsTable({
@@ -978,6 +998,7 @@ const events_table = EventsTable({
 	'MESSAGE_CREATE':                         event_process_message_create
 	'INTERACTION_CREATE':                     event_process_interaction_create
 	'TYPING_START':                           event_process_typing_start
+	'PRESENCE_UPDATE':                        event_process_presence_update
 })
 
 pub fn (mut c GatewayClient) process_dispatch(event DispatchEvent) !bool {

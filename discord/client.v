@@ -46,7 +46,7 @@ fn (config ClientConfig) get_level() log.Level {
 pub struct BotConfig {
 	ClientConfig
 pub:
-	presence      ?Presence
+	presence      ?UpdatePresenceParams
 	properties    Properties
 	intents       Intents
 	settings      GatewayClientSettings

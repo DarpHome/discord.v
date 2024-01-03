@@ -125,33 +125,33 @@ pub fn User.parse(j json2.Any) !User {
 				username: j['username']! as string
 				discriminator: j['discriminator']! as string
 				global_name: if global_name !is json2.Null {
-					?string(global_name as string)
+					global_name as string
 				} else {
 					none
 				}
 				avatar: if avatar !is json2.Null {
-					?string(avatar as string)
+					avatar as string
 				} else {
 					none
 				}
 				bot: if b := j['bot'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				system: if b := j['system'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				mfa_enabled: if b := j['mfa_enabled'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				banner: if s := j['banner'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -160,7 +160,7 @@ pub fn User.parse(j json2.Any) !User {
 				}
 				accent_color: if i := j['accent_color'] {
 					if i !is json2.Null {
-						?int(i.int())
+						i.int()
 					} else {
 						none
 					}
@@ -168,18 +168,18 @@ pub fn User.parse(j json2.Any) !User {
 					none
 				}
 				locale: if s := j['locale'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				verified: if b := j['verified'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				email: if s := j['email'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -187,23 +187,23 @@ pub fn User.parse(j json2.Any) !User {
 					none
 				}
 				flags: if i := j['flags'] {
-					unsafe { ?UserFlags(i.int()) }
+					unsafe { UserFlags(i.int()) }
 				} else {
 					none
 				}
 				premium_type: if i := j['premium_type'] {
-					unsafe { ?PremiumType(i.int()) }
+					unsafe { PremiumType(i.int()) }
 				} else {
 					none
 				}
 				public_flags: if i := j['public_flags'] {
-					unsafe { ?UserFlags(i.int()) }
+					unsafe { UserFlags(i.int()) }
 				} else {
 					none
 				}
 				avatar_decoration_data: if o := j['avatar_decoration_data'] {
 					if o !is json2.Null {
-						?AvatarDecorationData(AvatarDecorationData.parse(o)!)
+						AvatarDecorationData.parse(o)!
 					} else {
 						none
 					}
@@ -311,28 +311,133 @@ pub:
 	username ?string
 	// the user's Discord-tag
 	discriminator ?string
+	// the user's display name, if it is set. For bots, this is the application name
+	global_name ?string
 	// the user's avatar hash
 	avatar ?string
+	// whether the user belongs to an OAuth2 application
+	bot ?bool
+	// whether the user is an Official Discord System user (part of the urgent message system)
+	system ?bool
+	// whether the user has two factor enabled on their account
+	mfa_enabled ?bool
+	// the user's banner hash
+	banner ?string
+	// the user's banner color encoded as an integer representation of hexadecimal color code
+	accent_color ?int
+	// the user's chosen [language option](#Locale)
+	locale ?string
+	// whether the email on this account has been verified
+	verified ?bool
+	// the user's email
+	email ?string
+	// the flags on a user's account
+	flags ?UserFlags
+	// the type of Nitro subscription on a user's account
+	premium_type ?PremiumType
+	// the public flags on a user's account
+	public_flags ?UserFlags
+	// data for the user's avatar decoration
+	avatar_decoration_data ?AvatarDecorationData
 }
 
 pub fn PartialUser.parse(j json2.Any) !PartialUser {
 	match j {
 		map[string]json2.Any {
-			avatar := j['avatar']!
 			return PartialUser{
 				id: Snowflake.parse(j['id']!)!
 				username: if s := j['username'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				discriminator: if s := j['discriminator'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
-				avatar: if avatar !is json2.Null {
-					?string(avatar as string)
+				avatar: if s := j['avatar'] {
+					if s !is json2.Null {
+						s as string
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				bot: if b := j['bot'] {
+					b as bool
+				} else {
+					none
+				}
+				system: if b := j['system'] {
+					b as bool
+				} else {
+					none
+				}
+				mfa_enabled: if b := j['mfa_enabled'] {
+					b as bool
+				} else {
+					none
+				}
+				banner: if s := j['banner'] {
+					if s !is json2.Null {
+						s as string
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				accent_color: if i := j['accent_color'] {
+					if i !is json2.Null {
+						i.int()
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				locale: if s := j['locale'] {
+					s as string
+				} else {
+					none
+				}
+				verified: if b := j['verified'] {
+					b as bool
+				} else {
+					none
+				}
+				email: if s := j['email'] {
+					if s !is json2.Null {
+						s as string
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				flags: if i := j['flags'] {
+					unsafe { UserFlags(i.int()) }
+				} else {
+					none
+				}
+				premium_type: if i := j['premium_type'] {
+					unsafe { PremiumType(i.int()) }
+				} else {
+					none
+				}
+				public_flags: if i := j['public_flags'] {
+					unsafe { UserFlags(i.int()) }
+				} else {
+					none
+				}
+				avatar_decoration_data: if o := j['avatar_decoration_data'] {
+					if o !is json2.Null {
+						AvatarDecorationData.parse(o)!
+					} else {
+						none
+					}
 				} else {
 					none
 				}

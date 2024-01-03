@@ -26,14 +26,62 @@ pub:
 	end ?time.Time
 }
 
+pub fn ActivityTimestamps.parse(j json2.Any) !ActivityTimestamps {
+	match j {
+		map[string]json2.Any {
+			return ActivityTimestamps{
+				start: if i := j['start'] {
+					milliseconds_as_time(i.i64())
+				} else {
+					none
+				}
+				end: if i := j['end'] {
+					milliseconds_as_time(i.i64())
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected activity timestamps to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct ActivityParty {
 pub:
 	// ID of the party
-	id ?Snowflake
-	// Used to show the party's current and maximum size
+	id ?string
+	// Used to show the party's current size
 	current_size ?int
-	// Used to show the party's current and maximum size
+	// Used to show the party's maximum size
 	max_size ?int
+}
+
+pub fn ActivityParty.parse(j json2.Any) !ActivityParty {
+	match j {
+		map[string]json2.Any {
+			mut current_size := ?int(none)
+			mut max_size := ?int(none)
+			if t := j['size'] {
+				a := t as []json2.Any
+				current_size = a[0].int()
+				max_size = a[1].int()
+			}
+			return ActivityParty{
+				id: if s := j['id'] {
+					s as string
+				} else {
+					none
+				}
+				current_size: current_size
+				max_size: max_size
+			}
+		}
+		else {
+			return error('expected activity party to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 pub struct ActivityAssets {
@@ -48,6 +96,38 @@ pub:
 	small_text ?string
 }
 
+pub fn ActivityAssets.parse(j json2.Any) !ActivityAssets {
+	match j {
+		map[string]json2.Any {
+			return ActivityAssets{
+				large_image: if s := j['large_image'] {
+					s as string
+				} else {
+					none
+				}
+				large_text: if s := j['large_text'] {
+					s as string
+				} else {
+					none
+				}
+				small_image: if s := j['small_image'] {
+					s as string
+				} else {
+					none
+				}
+				small_text: if s := j['small_text'] {
+					s as string
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected activity assets to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct ActivitySecrets {
 pub:
 	// Secret for joining a party
@@ -56,6 +136,33 @@ pub:
 	spectate ?string
 	// Secret for a specific instanced match
 	match_ ?string
+}
+
+pub fn ActivitySecrets.parse(j json2.Any) !ActivitySecrets {
+	match j {
+		map[string]json2.Any {
+			return ActivitySecrets{
+				join: if s := j['join'] {
+					s as string
+				} else {
+					none
+				}
+				spectate: if s := j['spectate'] {
+					s as string
+				} else {
+					none
+				}
+				match_: if s := j['match'] {
+					s as string
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected activity secrets to be object, got ${j.type_name()}')
+		}
+	}
 }
 
 @[flag]
@@ -79,6 +186,53 @@ pub:
 	url string
 }
 
+pub fn ActivityButton.parse(j json2.Any) !ActivityButton {
+	match j {
+		map[string]json2.Any {
+			return ActivityButton{
+				label: j['label']! as string
+				url: j['url']! as string
+			}
+		}
+		else {
+			return error('expected activity button to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct ActivityEmoji {
+pub:
+	// Name of the emoji
+	name string
+	// ID of the emoji
+	id ?Snowflake
+	// Whether the emoji is animated
+	animated ?bool
+}
+
+pub fn ActivityEmoji.parse(j json2.Any) !ActivityEmoji {
+match j {
+		map[string]json2.Any {
+			return ActivityEmoji{
+				name: j['name']! as string
+				id: if s := j['id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				animated: if b := j['animated'] {
+					b as bool
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected activity emoji to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct Activity {
 pub:
 	// Activity's name
@@ -86,19 +240,19 @@ pub:
 	// Activity type
 	typ ActivityType @[required]
 	// Stream URL, is validated when type is 1
-	url ?string = sentinel_string
-	// Unix timestamp (in milliseconds) of when the aactivity was added to the user's session
+	url ?NullOr[string]
+	// Unix timestamp (in milliseconds) of when the activity was added to the user's session
 	created_at time.Time
 	// Unix timestamps for start and/or end of the game
 	timestamps ?ActivityTimestamps
 	// Application ID for the game
 	application_id ?Snowflake
 	// What the player is currently doing
-	details ?string
+	details ?NullOr[string]
 	// User's current party status, or text used for a custom status
-	state ?string = sentinel_string
+	state ?NullOr[string]
 	// Emoji used for a custom status
-	emoji ?PartialEmoji
+	emoji ?NullOr[ActivityEmoji]
 	// Information for the current party of the player
 	party ?ActivityParty
 	// Images for the presence and their hover texts
@@ -113,24 +267,117 @@ pub:
 	buttons ?[]ActivityButton
 }
 
+pub fn Activity.parse(j json2.Any) !Activity {
+	match j {
+		map[string]json2.Any {
+			return Activity{
+				name: j['name']! as string
+				typ: unsafe { ActivityType(j['type']!.int()) }
+				url: if s := j['url'] {
+					if s !is json2.Null {
+						some(s as string)
+					} else {
+						null[string]()
+					}
+				} else {
+					none
+				}
+				created_at: milliseconds_as_time(j['created_at']!.i64())
+				timestamps: if o := j['timestamps'] {
+					ActivityTimestamps.parse(o)!
+				} else {
+					none
+				}
+				application_id: if s := j['application_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				details: if s := j['details'] {
+					if s !is json2.Null {
+						some(s as string)
+					} else {
+						null[string]()
+					}
+				} else {
+					none
+				}
+				state: if s := j['state'] {
+					if s !is json2.Null {
+						some(s as string)
+					} else {
+						null[string]()
+					}
+				} else {
+					none
+				}
+				emoji: if o := j['emoji'] {
+					if o !is json2.Null {
+						some(ActivityEmoji.parse(o)!)
+					} else {
+						null[ActivityEmoji]()
+					}
+				} else {
+					none
+				}
+				party: if o := j['party'] {
+					ActivityParty.parse(o)!
+				} else {
+					none
+				}
+				assets: if o := j['assets'] {
+					ActivityAssets.parse(o)!
+				} else {
+					none
+				}
+				secrets: if o := j['secrets'] {
+					ActivitySecrets.parse(o)!
+				} else {
+					none
+				}
+				instance: if b := j['instance'] {
+					b as bool
+				} else {
+					none
+				}
+				flags: if i := j['flags'] {
+					unsafe { ActivityFlags(i.int()) }
+				} else {
+					none
+				}
+				buttons: if a := j['buttons'] {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !ActivityButton {
+						return ActivityButton.parse(k)!
+					})!
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected activity to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub fn (a Activity) build() json2.Any {
 	mut r := {
 		'name': json2.Any(a.name)
 		'type': int(a.typ)
 	}
 	if url := a.url {
-		if !is_sentinel(url) {
-			r['url'] = url
+		if url.is_null {
+			r['url'] = json2.null
+		} else {
+			r['url'] = url.val
 		}
-	} else {
-		r['url'] = json2.null
 	}
 	if state := a.state {
-		if !is_sentinel(state) {
-			r['state'] = state
+		if state.is_null {
+			r['state'] = json2.null
+		} else {
+			r['state'] = state.val
 		}
-	} else {
-		r['state'] = json2.null
 	}
 	return r
 }
@@ -148,6 +395,26 @@ pub enum Status {
 	offline
 }
 
+pub fn Status.parse(j json2.Any) !Status {
+	match j {
+		string {
+			return match j {
+				'online' { .online }
+				'dnd' { .dnd }
+				'idle' { .idle }
+				'invisible' { .invisible }
+				'offline' { .offline }
+				else {
+					return error('unknown status: ${j}')
+				}
+			}
+		}
+		else {
+			return error('expected status to be string, got ${j.type_name()}')
+		}
+	}
+}
+
 pub fn (s Status) build() string {
 	return match s {
 		.online { 'online' }
@@ -158,27 +425,72 @@ pub fn (s Status) build() string {
 	}
 }
 
-pub struct Presence {
+pub struct ClientStatus {
 pub:
-	// Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
-	since ?time.Time
-	// User's activities
-	activities []Activity
-	// User's new status
-	status Status = .online
-	// Whether or not the client is afk
-	afk bool
+	// User's status set for an active desktop (Windows, Linux, Mac) application session
+	desktop ?Status
+	// User's status set for an active mobile (iOS, Android) application session
+	mobile ?Status
+	// User's status set for an active web (browser, bot user) application session
+	web ?Status
 }
 
-pub fn (p Presence) build() json2.Any {
-	return {
-		'since':      if since := p.since {
-			json2.Any(since.unix_time_milli())
-		} else {
-			json2.null
+pub fn ClientStatus.parse(j json2.Any) !ClientStatus {
+	match j {
+		map[string]json2.Any {
+			return ClientStatus{
+				desktop: if s := j['desktop'] {
+					Status.parse(s)!
+				} else {
+					none
+				}
+				mobile: if s := j['mobile'] {
+					Status.parse(s)!
+				} else {
+					none
+				}
+				web: if s := j['web'] {
+					Status.parse(s)!
+				} else {
+					none
+				}
+			}
 		}
-		'activities': p.activities.map(|a| a.build())
-		'status':     p.status.build()
-		'afk':        p.afk
+		else {
+			return error('expected client status to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct Presence {
+pub:
+	// User whose presence is being updated
+	user PartialUser
+	// ID of the guild
+	guild_id Snowflake
+	// Either "idle", "dnd", "online", or "offline"
+	status Status
+	// User's current activities
+	activities []Activity
+	// User's platform-dependent status
+	client_status ClientStatus
+}
+
+pub fn Presence.parse(j json2.Any) !Presence {
+	match j {
+		map[string]json2.Any {
+			return Presence{
+				user: PartialUser.parse(j['user']!)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				status: Status.parse(j['status']!)!
+				activities: maybe_map(j['activities']! as []json2.Any, fn (k json2.Any) !Activity {
+					return Activity.parse(k)!
+				})!
+				client_status: ClientStatus.parse(j['client_status']!)!
+			}
+		}
+		else {
+			return error('expected presence to be object, got ${j.type_name()}')
+		}
 	}
 }

@@ -57,3 +57,7 @@ pub fn verify_request(public_key ed25519.PublicKey, req http.Request) bool {
 		return false
 	}) or { return false }
 }
+
+pub fn milliseconds_as_time(ts i64) time.Time {
+	return time.unix_microsecond(ts / 1000, int(ts % 1000) * 1000)
+}

@@ -6,12 +6,12 @@ import strconv
 fn run_testbot(token string, _ []string) ! {
 	mut c := discord.bot(token,
 		intents: .message_content | .guild_messages | .guild_message_reactions | .direct_message_reactions | .guild_presences // | .guild_message_typing
-		presence: discord.Presence{
+		presence: discord.UpdatePresenceParams{
 			activities: [
 				discord.Activity{
 					typ: .custom
 					name: 'Custom Status'
-					state: 'Testing discord.v'
+					state: discord.some('Testing discord.v')
 				},
 			]
 			status: .dnd
@@ -137,6 +137,9 @@ fn run_testbot(token string, _ []string) ! {
 	c.events.on_typing_start.listen(fn (event discord.TypingStartEvent) ! {
 		println('typing')
 		// event.creator.create_message(event.channel_id, content: "i see, you're typing something, <@${event.user_id}>")!
+	})
+	c.events.on_presence_update.listen(fn (event discord.PresenceUpdateEvent) ! {
+		dump(event.presence)
 	})
 	c.launch()!
 }
