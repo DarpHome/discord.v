@@ -378,6 +378,26 @@ pub fn ThreadMember.parse(j json2.Any) !ThreadMember {
 	}
 }
 
+pub struct ThreadMember2 {
+	ThreadMember
+pub:
+	guild_id Snowflake
+}
+
+pub fn ThreadMember2.parse(j json2.Any) !ThreadMember2 {
+	match j {
+		map[string]json2.Any {
+			return ThreadMember2{
+				ThreadMember: ThreadMember.parse(j)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+			}
+		}
+		else {
+			return error('expected thread member to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct EditForumTag {
 pub:
 	// the id of the tag

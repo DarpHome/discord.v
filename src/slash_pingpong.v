@@ -2,7 +2,7 @@ module main
 
 import discord
 
-fn run_slash_pingpong(token string) ! {
+fn run_slash_pingpong(token string, _ []string) ! {
 	mut c := discord.bot(token)
 	c.events.on_ready.listen(fn (event discord.ReadyEvent) ! {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')

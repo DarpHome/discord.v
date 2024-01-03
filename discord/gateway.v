@@ -32,7 +32,7 @@ mut:
 	write_timeout      ?time.Duration
 pub mut:
 	events Events
-	ws                 &websocket.Client = unsafe { nil }
+	ws     &websocket.Client = unsafe { nil }
 }
 
 fn (mut c GatewayClient) recv() !WSMessage {
@@ -99,7 +99,15 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 				if rs < rq {
 					client.logger.error('Reconnecting due to zombied connection')
 					client.ws.close(1000, 'No HEARTBEAT acks') or {
-						client.logger.error('Unable to close websocket: ${err}')
+						client.logger.error('Unable to close websocket: ${err}. Making new connection.')
+						client.init() or {
+							client.logger.error('Unable to initialize new connection: ${err}')
+							return
+						}
+						client.run() or {
+							client.logger.error('Unable to run connection: ${err}')
+							return
+						}
 					}
 					return
 				}

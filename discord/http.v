@@ -48,6 +48,9 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 	for k, v in options.headers {
 		req.header.add_custom(k, v)!
 	}
+	if req.data == '' {
+		req.header.add(.content_length, '0')
+	}
 	if f := options.prepare {
 		f(mut &req)!
 	}

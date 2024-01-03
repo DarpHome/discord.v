@@ -2,7 +2,7 @@ module main
 
 import discord
 
-fn run_interactions(token string) ! {
+fn run_interactions(token string, _ []string) ! {
 	mut c := discord.bot(token,
 		intents: .message_content | .guild_messages | .direct_messages
 	)

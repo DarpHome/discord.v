@@ -4,7 +4,7 @@ import discord
 import strconv
 import time
 
-fn run_concurrency(token string) ! {
+fn run_concurrency(token string, _ []string) ! {
 	mut c := discord.bot(token,
 		intents: .message_content | .guild_messages | .direct_messages
 	)

@@ -198,7 +198,7 @@ pub fn (acoc ApplicationCommandOptionChoice) build() json2.Any {
 	return r
 }
 
-pub type Number = int | f64
+pub type Number = f64 | int
 
 pub fn Number.parse(j json2.Any) !Number {
 	match j {

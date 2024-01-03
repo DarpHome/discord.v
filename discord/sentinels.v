@@ -22,32 +22,31 @@ pub const sentinel_image = Image(NoneImage{})
 pub const sentinel_duration = time.infinite
 pub const sentinel_bool = unsafe { bool(126) }
 
-pub struct Undefined {}
-
-pub type UndefinedOr[T] = T | Undefined
+pub struct NullOr[T] {
+pub:
+	is_null bool
+	val T
+}
 
 // we are not going to support JavaScript
-pub fn undefined[T]() UndefinedOr[T] {
-	return Undefined{}
+pub fn null[T]() NullOr[T] {
+	return NullOr[T]{}
 }
 
-pub fn (u UndefinedOr[T]) is_present[T]() bool {
-	return u !is Undefined
+pub fn some[T](val T) NullOr[T] {
+	return NullOr[T]{is_null: true, val: val}
 }
 
-pub fn (u UndefinedOr[T]) is_undefined[T]() bool {
-	return u is Undefined
+pub fn (no NullOr[T]) is_present[T]() bool {
+	return !no.is_null
 }
 
-pub fn (u UndefinedOr[T]) value[T]() T {
-	match u {
-		T {
-			return u
-		}
-		else {
-			panic('UndefinedOr[${typeof[T]()}].value() called on none')
-		}
+
+pub fn (no NullOr[T]) value[T]() T {
+	if no.is_null {
+		panic('NullOr[${typeof[T]()}].value() called on null')
 	}
+	return no.val
 }
 
 // is_sentinel reports whether `target` is sentinel
@@ -72,10 +71,8 @@ pub fn is_sentinel[T](target T) bool {
 		return target.str == discord.sentinel_string.str
 	} $else $if T is f32 || T is f64 {
 		return math.is_nan(f64(target))
-	} $else $if T is Undefined {
-		return true
-	} $else $if T is UndefinedOr {
-		return target == Undefined{}
+	} $else $if T is NullOr {
+		return target.is_null()
 	} $else $if T is time.Duration {
 		return target == discord.sentinel_duration
 	} $else $if T is bool {

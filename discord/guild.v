@@ -832,6 +832,27 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 	}
 }
 
+pub struct GuildMember2 {
+	GuildMember
+pub:
+	// ID of the guild
+	guild_id Snowflake
+}
+
+pub fn GuildMember2.parse(j json2.Any) !GuildMember2 {
+	match j {
+		map[string]json2.Any {
+			return GuildMember2{
+				GuildMember: GuildMember.parse(j)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+			}
+		}
+		else {
+			return error('expected guild member 2 to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct PartialGuildMember {
 pub:
 	user                         ?User

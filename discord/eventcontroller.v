@@ -78,7 +78,14 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 		}
 		return
 	}
-	mut ts := []thread{}
+	for i, l in ec.listeners {
+		l(e) or {
+			if g := options.error_handler {
+				g(i, err)
+			}
+		}
+	}
+	/* mut ts := []thread{}
 	for i, l in ec.listeners {
 		ts << spawn fn [options] [T](f EventListener[T], j int, e T) {
 			f(e) or {
@@ -88,7 +95,7 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 			}
 		}(l, i, e)
 	}
-	ts.wait()
+	ts.wait() */
 }
 
 @[params]
@@ -148,7 +155,9 @@ pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] 
 
 // `override` removes all listeners and inserts `listener`
 pub fn (mut ec EventController[T]) override(listener EventListener[T]) EventController[T] {
-	ec.listeners = {ec.generate_id(): listener}
+	ec.listeners = {
+		ec.generate_id(): listener
+	}
 	return ec
 }
 

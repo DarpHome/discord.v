@@ -73,13 +73,13 @@ pub fn PartialApplication.parse(j json2.Any) !PartialApplication {
 			return PartialApplication{
 				id: Snowflake.parse(j['id']!)!
 				name: if s := j['name'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				icon: if s := j['icon'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -87,38 +87,38 @@ pub fn PartialApplication.parse(j json2.Any) !PartialApplication {
 					none
 				}
 				description: if s := j['description'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				bot_public: if b := j['bot_public'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				bot_require_code_grant: if b := j['bot_require_code_grant'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				terms_of_service_url: if s := j['terms_of_service_url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				privacy_policy_url: if s := j['privacy_policy_url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				verify_key: if s := j['verify_key'] {
-					?[]u8(hex.decode(s as string)!)
+					hex.decode(s as string)!
 				} else {
 					none
 				}
 				flags: unsafe { ApplicationFlags(j['flags']!.int()) }
 				tags: if a := j['tags'] {
-					?[]string((a as []json2.Any).map(|s| s as string))
+					(a as []json2.Any).map(|s| s as string)
 				} else {
 					none
 				}
@@ -190,7 +190,7 @@ pub fn Team.parse(j json2.Any) !Team {
 			return Team{
 				id: Snowflake.parse(j['id']!)!
 				icon: if icon !is json2.Null {
-					?string(icon as string)
+					icon as string
 				} else {
 					none
 				}
@@ -301,66 +301,66 @@ pub fn Application.parse(j json2.Any) !Application {
 				id: Snowflake.parse(j['id']!)!
 				name: j['name']! as string
 				icon: if icon !is json2.Null {
-					?string(icon as string)
+					icon as string
 				} else {
 					none
 				}
 				description: j['description']! as string
 				rpc_origins: if a := j['rpc_origins'] {
-					?[]string((a as []json2.Any).map(|s| s as string))
+					(a as []json2.Any).map(|s| s as string)
 				} else {
 					none
 				}
 				bot_public: j['bot_public']! as bool
 				bot_require_code_grant: j['bot_require_code_grant']! as bool
 				bot: if o := j['user'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				terms_of_service_url: if s := j['terms_of_service_url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				privacy_policy_url: if s := j['privacy_policy_url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				owner: if o := j['owner'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				verify_key: hex.decode(j['verify_key']! as string)!
 				team: if team !is json2.Null {
-					?Team(Team.parse(team)!)
+					Team.parse(team)!
 				} else {
 					none
 				}
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				guild: if o := j['guild'] {
-					?PartialGuild(PartialGuild.parse(o)!)
+					PartialGuild.parse(o)!
 				} else {
 					none
 				}
 				primary_sku_id: if s := j['primary_sku_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				slug: if s := j['slug'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				cover_image: if s := j['cover_image'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
@@ -370,18 +370,18 @@ pub fn Application.parse(j json2.Any) !Application {
 					none
 				}
 				approximate_guild_count: if i := j['approximate_guild_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				redirect_uris: if a := j['redirect_uris'] {
-					?[]string((a as []json2.Any).map(|s| s as string))
+					(a as []json2.Any).map(|s| s as string)
 				} else {
 					none
 				}
 				interactions_endpoint_url: if s := j['interactions_endpoint_url'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -390,7 +390,7 @@ pub fn Application.parse(j json2.Any) !Application {
 				}
 				role_connections_verification_url: if s := j['role_connections_verification_url'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -398,17 +398,17 @@ pub fn Application.parse(j json2.Any) !Application {
 					none
 				}
 				tags: if a := j['tags'] {
-					?[]string((a as []json2.Any).map(|s| s as string))
+					(a as []json2.Any).map(|s| s as string)
 				} else {
 					none
 				}
 				install_params: if o := j['install_params'] {
-					?InstallParams(InstallParams.parse(o)!)
+					InstallParams.parse(o)!
 				} else {
 					none
 				}
 				custom_install_url: if s := j['custom_install_url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
