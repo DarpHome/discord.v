@@ -399,10 +399,9 @@ pub fn (params UpdatePresenceParams) build() json2.Any {
 	}
 }
 
-
 pub fn (mut gc GatewayClient) update_presence(params UpdatePresenceParams) ! {
 	gc.send(WSMessage{
 		opcode: .update_presence
-		data:   params.build()
+		data: params.build()
 	})!
 }

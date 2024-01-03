@@ -211,7 +211,7 @@ pub:
 }
 
 pub fn ActivityEmoji.parse(j json2.Any) !ActivityEmoji {
-match j {
+	match j {
 		map[string]json2.Any {
 			return ActivityEmoji{
 				name: j['name']! as string
@@ -399,11 +399,21 @@ pub fn Status.parse(j json2.Any) !Status {
 	match j {
 		string {
 			return match j {
-				'online' { .online }
-				'dnd' { .dnd }
-				'idle' { .idle }
-				'invisible' { .invisible }
-				'offline' { .offline }
+				'online' {
+					.online
+				}
+				'dnd' {
+					.dnd
+				}
+				'idle' {
+					.idle
+				}
+				'invisible' {
+					.invisible
+				}
+				'offline' {
+					.offline
+				}
 				else {
 					return error('unknown status: ${j}')
 				}
