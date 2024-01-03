@@ -5,7 +5,7 @@ import strconv
 
 fn run_testbot(token string) ! {
 	mut c := discord.bot(token,
-		intents: .message_content | .guild_messages | .guild_message_reactions | .direct_message_reactions | .guild_message_typing
+		intents: .message_content | .guild_messages | .guild_message_reactions | .direct_message_reactions // | .guild_message_typing
 		presence: discord.Presence{
 			activities: [
 				discord.Activity{
@@ -120,11 +120,21 @@ fn run_testbot(token string) ! {
 					}
 				)!
 			}
+			'disconnect' {
+				mut c := event.creator
+				c.ws.close(1000, 'discord')!
+			}
+			'webhook' {
+				println('asdsad')
+				// i dont care about webhook.
+				event.creator.execute_webhook(1191507563443912755, '3G9KkD27pnBA3M2aybzKcCa9TtV5yci5XTb8gUA-DCEU8NZl9x6MxIchYjv1CiDZNNGs', content: 'Hey')!
+			}
 			else {}
 		}
 	})
 	c.events.on_typing_start.listen(fn (event discord.TypingStartEvent) ! {
-		dump(event)
+		println('typing')
+		// event.creator.create_message(event.channel_id, content: "i see, you're typing something, <@${event.user_id}>")!
 	})
 	c.launch()!
 }

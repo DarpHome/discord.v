@@ -20,7 +20,6 @@ pub:
 	properties  Properties
 	gateway_url string = 'wss://gateway.discord.gg'
 mut:
-	ws                 &websocket.Client = unsafe { nil }
 	presence           ?Presence
 	ready              bool
 	sequence           ?int
@@ -33,6 +32,7 @@ mut:
 	write_timeout      ?time.Duration
 pub mut:
 	events Events
+	ws                 &websocket.Client = unsafe { nil }
 }
 
 fn (mut c GatewayClient) recv() !WSMessage {
@@ -221,7 +221,7 @@ struct GatewayCloseCode {
 
 const gateway_close_code_table = {
 	1000: GatewayCloseCode{
-		message: 'Ignore that'
+		message: 'Discord disconnected us for some reason'
 		reconnect: true
 	}
 	4000: GatewayCloseCode{

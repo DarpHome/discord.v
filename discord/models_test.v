@@ -411,6 +411,15 @@ fn test_application_command_option() {
 		'min_length': 2
 		'max_length': 100
 	})
+
+	/* assert ApplicationCommandOption.parse({
+		'type': json2.Any(3)
+		'name': 'foo'
+		'description': 'This is my first command.'
+	}) or {
+		assert false, 'Should not return error: ${err}'
+		return
+	} == ApplicationCommandOption{typ: .string, name: 'foo', description: 'This is my first command.'} */
 }
 
 fn test_channel_edit() {

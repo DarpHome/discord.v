@@ -62,20 +62,20 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 		return
 	}
 	if ec.listeners.len == 1 {
-		spawn fn [options] [T](f EventListener[T], e T) { //, options EmitOptions) {
+		/* spawn fn [options] [T](f EventListener[T], e T) { //, options EmitOptions) {
 			f(e) or {
 				if g := options.error_handler {
 					g(0, err)
 				}
 			}
-		}(ec.listeners.values()[0], e)
+		}(ec.listeners.values()[0], e) */
 
-		/* f := (ec.listeners.values()[0])
+		f := (ec.listeners.values()[0])
 		f(e) or {
 			if g := options.error_handler {
 				g(0, err)
 			}
-		} */
+		}
 		return
 	}
 	mut ts := []thread{}
@@ -148,9 +148,8 @@ pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] 
 
 // `override` removes all listeners and inserts `listener`
 pub fn (mut ec EventController[T]) override(listener EventListener[T]) EventController[T] {
-	// ec.listeners = {ec.generate_id(): listener}
-	// ec.listeners.clear()
-	return ec.listen(listener)
+	ec.listeners = {ec.generate_id(): listener}
+	return ec
 }
 
 // `listen` adds function to listener list
