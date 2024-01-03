@@ -48,6 +48,9 @@ fn main() {
 }
 ```
 
+> [!NOTE]
+> Returning an error from event handler logs error, not panic the whole program.
+
 > Don't forget toggle `Message Content` intent in Developer Portal! Otherwise, your bot will shutdown with error:
 > ```
 > ...
@@ -69,8 +72,8 @@ fn main() {
 - [x] Do usual `application/json` for sending without binary data
 - [x] Handle Gateway events
   - [ ] Audit Log
-  - [ ] Channel
-  - [ ] Emoji
+  - [x] Channel
+  - [x] Emoji
   - [ ] Guild
   - [ ] Invite
   - [ ] User
