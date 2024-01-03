@@ -384,6 +384,7 @@ pub fn GuildDeleteEvent.parse(j json2.Any, base BaseEvent) !GuildDeleteEvent {
 		guild: UnavailableGuild.parse(j)!
 	}
 }
+
 pub struct GuildBanAddEvent {
 	BaseEvent
 pub:
@@ -878,49 +879,50 @@ fn event_process_guild_delete(mut gc GatewayClient, data json2.Any, options Emit
 
 fn event_process_guild_ban_add(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_guild_ban_add.emit(GuildBanAddEvent.parse(data, BaseEvent{
-		creator: gc,
+		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_ban_remove(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_guild_ban_remove.emit(GuildBanRemoveEvent.parse(data, BaseEvent{
-		creator: gc,
+		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_emojis_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_guild_emojis_update.emit(GuildEmojisUpdateEvent.parse(data, BaseEvent{
-		creator: gc,
+		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_stickers_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_guild_stickers_update.emit(GuildStickersUpdateEvent.parse(data, BaseEvent{
-		creator: gc,
+		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_integrations_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_integrations_update.emit(GuildIntegrationsUpdateEvent.parse(data, BaseEvent{
-		creator: gc,
+	gc.events.on_guild_integrations_update.emit(GuildIntegrationsUpdateEvent.parse(data,
+		BaseEvent{
+		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_member_add(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_guild_member_add.emit(GuildMemberAddEvent.parse(data, BaseEvent{
-		creator: gc,
+		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_member_remove(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_guild_member_remove.emit(GuildMemberRemoveEvent.parse(data, BaseEvent{
-		creator: gc,
+		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_member_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_guild_member_update.emit(GuildMemberUpdateEvent.parse(data, BaseEvent{
-		creator: gc,
+		creator: gc
 	})!, options)
 }
 

@@ -25,7 +25,7 @@ pub const sentinel_bool = unsafe { bool(126) }
 pub struct NullOr[T] {
 pub:
 	is_null bool
-	val T
+	val     T
 }
 
 // we are not going to support JavaScript
@@ -34,13 +34,15 @@ pub fn null[T]() NullOr[T] {
 }
 
 pub fn some[T](val T) NullOr[T] {
-	return NullOr[T]{is_null: true, val: val}
+	return NullOr[T]{
+		is_null: true
+		val: val
+	}
 }
 
 pub fn (no NullOr[T]) is_present[T]() bool {
 	return !no.is_null
 }
-
 
 pub fn (no NullOr[T]) value[T]() T {
 	if no.is_null {
