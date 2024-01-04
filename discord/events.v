@@ -703,7 +703,7 @@ pub struct GuildRoleCreateEvent {
 	BaseEvent
 pub:
 	guild_id Snowflake
-	role Role
+	role     Role
 }
 
 pub fn GuildRoleCreateEvent.parse(j json2.Any, base BaseEvent) !GuildRoleCreateEvent {
@@ -725,7 +725,7 @@ pub struct GuildRoleUpdateEvent {
 	BaseEvent
 pub:
 	guild_id Snowflake
-	role Role
+	role     Role
 }
 
 pub fn GuildRoleUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildRoleUpdateEvent {
@@ -747,7 +747,7 @@ pub struct GuildRoleDeleteEvent {
 	BaseEvent
 pub:
 	guild_id Snowflake
-	role_id Snowflake
+	role_id  Snowflake
 }
 
 pub fn GuildRoleDeleteEvent.parse(j json2.Any, base BaseEvent) !GuildRoleDeleteEvent {
@@ -1250,31 +1250,36 @@ fn event_process_guild_role_delete(mut gc GatewayClient, data json2.Any, options
 }
 
 fn event_process_guild_scheduled_event_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_scheduled_event_create.emit(GuildScheduledEventCreateEvent.parse(data, BaseEvent{
+	gc.events.on_guild_scheduled_event_create.emit(GuildScheduledEventCreateEvent.parse(data,
+		BaseEvent{
 		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_scheduled_event_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_scheduled_event_update.emit(GuildScheduledEventUpdateEvent.parse(data, BaseEvent{
+	gc.events.on_guild_scheduled_event_update.emit(GuildScheduledEventUpdateEvent.parse(data,
+		BaseEvent{
 		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_scheduled_event_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_scheduled_event_delete.emit(GuildScheduledEventDeleteEvent.parse(data, BaseEvent{
+	gc.events.on_guild_scheduled_event_delete.emit(GuildScheduledEventDeleteEvent.parse(data,
+		BaseEvent{
 		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_scheduled_event_user_add(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_scheduled_event_user_add.emit(GuildScheduledEventUserAddEvent.parse(data, BaseEvent{
+	gc.events.on_guild_scheduled_event_user_add.emit(GuildScheduledEventUserAddEvent.parse(data,
+		BaseEvent{
 		creator: gc
 	})!, options)
 }
 
 fn event_process_guild_scheduled_event_user_remove(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_scheduled_event_user_remove.emit(GuildScheduledEventUserRemoveEvent.parse(data, BaseEvent{
+	gc.events.on_guild_scheduled_event_user_remove.emit(GuildScheduledEventUserRemoveEvent.parse(data,
+		BaseEvent{
 		creator: gc
 	})!, options)
 }
