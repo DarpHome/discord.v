@@ -1050,6 +1050,83 @@ pub fn MessageCreateEvent.parse(j json2.Any, base BaseEvent) !MessageCreateEvent
 	}
 }
 
+pub struct MessageUpdateEvent {
+	BaseEvent
+pub:
+	message Message2
+}
+
+pub fn MessageUpdateEvent.parse(j json2.Any, base BaseEvent) !MessageUpdateEvent {
+	return MessageUpdateEvent{
+		BaseEvent: base
+		message: Message2.parse(j)!
+	}
+}
+
+pub struct MessageDeleteEvent {
+	BaseEvent
+pub:
+	// ID of the message
+	id Snowflake
+	// ID of the channel
+	channel_id Snowflake
+	// ID of the guild
+	guild_id ?Snowflake
+}
+
+pub fn MessageDeleteEvent.parse(j json2.Any, base BaseEvent) !MessageDeleteEvent {
+	match j {
+		map[string]json2.Any {
+			return MessageDeleteEvent{
+				BaseEvent: base
+				id: Snowflake.parse(j['id']!)!
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				guild_id: if s := j['guild_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message delete event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct MessageDeleteBulkEvent {
+	BaseEvent
+pub:
+	// IDs of the messages
+	ids []Snowflake
+	// ID of the channel
+	channel_id Snowflake
+	// ID of the guild
+	guild_id ?Snowflake
+}
+
+pub fn MessageDeleteBulkEvent.parse(j json2.Any, base BaseEvent) !MessageDeleteBulkEvent {
+	match j {
+		map[string]json2.Any {
+			return MessageDeleteBulkEvent{
+				BaseEvent: base
+				ids: maybe_map(j['ids']! as []json2.Any, fn (k json2.Any) !Snowflake {
+					return Snowflake.parse(k)!
+				})!
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				guild_id: if s := j['guild_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message delete bulk event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct InteractionCreateEvent {
 	BaseEvent
 pub:
@@ -1164,6 +1241,9 @@ pub mut:
 	on_invite_create                          EventController[InviteCreateEvent]
 	on_invite_delete                          EventController[InviteDeleteEvent]
 	on_message_create                         EventController[MessageCreateEvent]
+	on_message_update                         EventController[MessageUpdateEvent]
+	on_message_delete                         EventController[MessageDeleteEvent]
+	on_message_delete_bulk                    EventController[MessageDeleteBulkEvent]
 	on_interaction_create                     EventController[InteractionCreateEvent]
 	on_typing_start                           EventController[TypingStartEvent]
 	on_presence_update                        EventController[PresenceUpdateEvent]
@@ -1444,6 +1524,24 @@ fn event_process_message_create(mut gc GatewayClient, data json2.Any, options Em
 	})!, options)
 }
 
+fn event_process_message_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_message_update.emit(MessageUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_message_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_message_delete.emit(MessageDeleteEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_message_delete_bulk(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_message_delete_bulk.emit(MessageDeleteBulkEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
 fn event_process_interaction_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_interaction_create.emit(InteractionCreateEvent.parse(data, BaseEvent{
 		creator: gc
@@ -1503,6 +1601,9 @@ const events_table = EventsTable({
 	'INVITE_CREATE':                          event_process_invite_create
 	'INVITE_DELETE':                          event_process_invite_delete
 	'MESSAGE_CREATE':                         event_process_message_create
+	'MESSAGE_UPDATE':                         event_process_message_update
+	'MESSAGE_DELETE':                         event_process_message_delete
+	'MESSAGE_DELETE_BULK':                    event_process_message_delete_bulk
 	'INTERACTION_CREATE':                     event_process_interaction_create
 	'TYPING_START':                           event_process_typing_start
 	'PRESENCE_UPDATE':                        event_process_presence_update
