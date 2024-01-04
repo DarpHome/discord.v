@@ -915,6 +915,128 @@ pub fn IntegrationDeleteEvent.parse(j json2.Any, base BaseEvent) !IntegrationDel
 	}
 }
 
+pub struct InviteCreateEvent {
+	BaseEvent
+pub:
+	// Channel the invite is for
+	channel_id Snowflake
+	// Unique invite code
+	code string
+	// Time at which the invite was created
+	created_at time.Time
+	// Guild of the invite
+	guild_id ?Snowflake
+	// User that created the invite
+	inviter ?User
+	// How long the invite is valid for
+	max_age time.Duration
+	// Maximum number of times the invite can be used
+	max_uses int
+	// Type of target for this voice channel invite
+	target_type ?InviteTargetType
+	// User whose stream to display for this voice channel stream invite
+	target_user ?User
+	// Embedded application to open for this voice channel embedded application invite
+	target_application ?PartialApplication
+	// Whether or not the invite is temporary (invited users will be kicked on disconnect unless they're assigned a role)
+	temporary bool
+	// How many times the invite has been used (always will be 0)
+	// uses int // not provided because it is always 0 in event
+}
+
+pub fn InviteCreateEvent.parse(j json2.Any, base BaseEvent) !InviteCreateEvent {
+	match j {
+		map[string]json2.Any {
+			return InviteCreateEvent{
+				BaseEvent: base
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				code: j['code']! as string
+				created_at: time.parse_iso8601(j['created_at']! as string)!
+				guild_id: if s := j['guild_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				inviter: if o := j['inviter'] {
+					User.parse(o)!
+				} else {
+					none
+				}
+				max_age: j['max_age']!.int() * time.second
+				max_uses: j['max_uses']!.int()
+				target_type: if i := j['target_type'] {
+					unsafe { InviteTargetType(i.int()) }
+				} else {
+					none
+				}
+				target_user: if o := j['target_user'] {
+					User.parse(o)!
+				} else {
+					none
+				}
+				target_application: if o := j['target_application'] {
+					PartialApplication.parse(o)!
+				} else {
+					none
+				}
+				temporary: j['temporary']! as bool
+			}
+		}
+		else {
+			return error('expected invite create event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct InviteDeleteEvent {
+	BaseEvent
+pub:
+	// Channel the invite is for
+	channel_id Snowflake
+	// Unique invite code
+	code string
+	// Time at which the invite was created
+	created_at time.Time
+	// Guild of the invite
+	guild_id ?Snowflake
+	// User that created the invite
+	inviter ?User
+	// How long the invite is valid for
+	max_age time.Duration
+	// Maximum number of times the invite can be used
+	max_uses int
+	// Type of target for this voice channel invite
+	target_type ?InviteTargetType
+	// User whose stream to display for this voice channel stream invite
+	target_user ?User
+	// Embedded application to open for this voice channel embedded application invite
+	target_application ?PartialApplication
+	// Whether or not the invite is temporary (invited users will be kicked on disconnect unless they're assigned a role)
+	temporary bool
+	// How many times the invite has been used (always will be 0)
+	// uses int // not provided because it is always 0 in event
+}
+
+pub fn InviteDeleteEvent.parse(j json2.Any, base BaseEvent) !InviteDeleteEvent {
+	match j {
+		map[string]json2.Any {
+			return InviteDeleteEvent{
+				BaseEvent: base
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				guild_id: if s := j['guild_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				code: j['code']! as string
+			}
+		}
+		else {
+			return error('expected invite delete event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct MessageCreateEvent {
 	BaseEvent
 pub:
@@ -1039,6 +1161,8 @@ pub mut:
 	on_integration_create                     EventController[IntegrationCreateEvent]
 	on_integration_update                     EventController[IntegrationUpdateEvent]
 	on_integration_delete                     EventController[IntegrationDeleteEvent]
+	on_invite_create                          EventController[InviteCreateEvent]
+	on_invite_delete                          EventController[InviteDeleteEvent]
 	on_message_create                         EventController[MessageCreateEvent]
 	on_interaction_create                     EventController[InteractionCreateEvent]
 	on_typing_start                           EventController[TypingStartEvent]
@@ -1302,6 +1426,18 @@ fn event_process_integration_delete(mut gc GatewayClient, data json2.Any, option
 	})!, options)
 }
 
+fn event_process_invite_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_invite_create.emit(InviteCreateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_invite_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_invite_delete.emit(InviteDeleteEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
 fn event_process_message_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_message_create.emit(MessageCreateEvent.parse(data, BaseEvent{
 		creator: gc
@@ -1364,6 +1500,8 @@ const events_table = EventsTable({
 	'GUILD_SCHEDULED_EVENT_CREATE':           event_process_guild_scheduled_event_create
 	'GUILD_SCHEDULED_EVENT_UPDATE':           event_process_guild_scheduled_event_update
 	'GUILD_SCHEDULED_EVENT_DELETE':           event_process_guild_scheduled_event_delete
+	'INVITE_CREATE':                          event_process_invite_create
+	'INVITE_DELETE':                          event_process_invite_delete
 	'MESSAGE_CREATE':                         event_process_message_create
 	'INTERACTION_CREATE':                     event_process_interaction_create
 	'TYPING_START':                           event_process_typing_start
