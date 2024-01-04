@@ -86,20 +86,19 @@ fn test_button() {
 	})
 	assert Button{
 		style: .success
-		emoji: PartialEmoji{
+		emoji: ComponentEmoji{
 			name: '💀'
 		}
 	}.build() == json2.Any({
 		'type':  json2.Any(2)
 		'emoji': {
-			'id':   json2.Any(json2.null)
-			'name': '💀'
+			'name': json2.Any('💀')
 		}
 		'style': 3
 	})
 	assert Button{
 		style: .danger
-		emoji: PartialEmoji{
+		emoji: ComponentEmoji{
 			id: 1148381548144500837
 			name: 'dh_pl_logo_v'
 		}
@@ -115,7 +114,7 @@ fn test_button() {
 	assert Button{
 		style: .link
 		url: 'https://github.com'
-		emoji: PartialEmoji{
+		emoji: ComponentEmoji{
 			id: 1148326591517167709
 			name: 'dh_aclyde_v1_ol'
 			animated: true

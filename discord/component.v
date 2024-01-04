@@ -41,12 +41,10 @@ pub:
 
 pub fn (ce ComponentEmoji) build() json2.Any {
 	mut r := {
-		'id':   if id := ce.id {
-			json2.Any(id.build())
-		} else {
-			json2.null
-		}
-		'name': ce.name
+		'name': json2.Any(ce.name)
+	}
+	if id := ce.id {
+		r['id'] = id.build()
 	}
 	if ce.id != none {
 		r['animated'] = ce.animated
