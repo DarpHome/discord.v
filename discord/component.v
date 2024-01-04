@@ -32,6 +32,51 @@ pub interface Component {
 	build() json2.Any
 }
 
+pub struct ComponentEmoji {
+pub:
+	id       ?Snowflake
+	name     string     @[required]
+	animated bool
+}
+
+pub fn (ce ComponentEmoji) build() json2.Any {
+	mut r := {
+		'id':   if id := ce.id {
+			json2.Any(id.build())
+		} else {
+			json2.null
+		}
+		'name': ce.name
+	}
+	if ce.id != none {
+		r['animated'] = ce.animated
+	}
+	return r
+}
+
+pub fn ComponentEmoji.parse(j json2.Any) !ComponentEmoji {
+	match j {
+		map[string]json2.Any {
+			return ComponentEmoji{
+				id: if s := j['id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				name: j['name']! as string
+				animated: if b := j['animated'] {
+					b as bool
+				} else {
+					false
+				}
+			}
+		}
+		else {
+			return error('expected component emoji to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 // An Action Row is a non-interactive container component for other types of components. It has a sub-array of components of other types.
 // - You can have up to 5 Action Rows per message
 // - An Action Row cannot contain another Action Row
@@ -136,7 +181,7 @@ pub:
 	// Text that appears on the button; max 80 characters
 	label ?string
 	// `name`, `id`, and `animated`
-	emoji ?PartialEmoji
+	emoji ?ComponentEmoji
 	// Developer-defined identifier for the button; max 100 characters
 	custom_id ?string
 	// URL for link-style buttons
@@ -174,27 +219,27 @@ pub fn Button.internal_parse(j map[string]json2.Any) !Button {
 	return Button{
 		style: unsafe { ButtonStyle(j['style']!.int()) }
 		label: if s := j['label'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}
 		emoji: if o := j['emoji'] {
-			?PartialEmoji(PartialEmoji.parse(o)!)
+			ComponentEmoji.parse(o)!
 		} else {
 			none
 		}
 		custom_id: if s := j['custom_id'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}
 		url: if s := j['url'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}
 		disabled: if b := j['disabled'] {
-			?bool(b as bool)
+			b as bool
 		} else {
 			none
 		}
@@ -221,7 +266,7 @@ pub:
 	// Additional description of the option; max 100 characters
 	description ?string
 	// `id`, `name`, and `animated`
-	emoji ?PartialEmoji
+	emoji ?ComponentEmoji
 	// Will show this option as selected by default
 	default ?bool
 }
@@ -250,17 +295,17 @@ pub fn SelectOption.parse(j json2.Any) !SelectOption {
 				label: j['label']! as string
 				value: j['value']! as string
 				description: if s := j['description'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				emoji: if o := j['emoji'] {
-					?PartialEmoji(PartialEmoji.parse(o)!)
+					ComponentEmoji.parse(o)!
 				} else {
 					none
 				}
 				default: if b := j['default'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
@@ -318,22 +363,22 @@ pub fn StringSelect.internal_parse(j map[string]json2.Any) !StringSelect {
 			return SelectOption.parse(k)!
 		})!
 		placeholder: if s := j['placeholder'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}
 		min_values: if i := j['min_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		max_values: if i := j['max_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		disabled: if b := j['disabled'] {
-			?bool(b as bool)
+			b as bool
 		} else {
 			none
 		}
@@ -452,29 +497,29 @@ pub fn UserSelect.internal_parse(j map[string]json2.Any) !UserSelect {
 	return UserSelect{
 		custom_id: j['custom_id']! as string
 		placeholder: if s := j['placeholder'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}
 		default_values: if a := j['default_values'] {
-			?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
+			maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
 				return DefaultValue.parse(k)!
-			})!.filter(|dv| dv.typ == .user).map(|dv| dv.id))
+			})!.filter(|dv| dv.typ == .user).map(|dv| dv.id)
 		} else {
 			none
 		}
 		min_values: if i := j['min_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		max_values: if i := j['max_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		disabled: if b := j['disabled'] {
-			?bool(b as bool)
+			b as bool
 		} else {
 			none
 		}
@@ -545,24 +590,24 @@ pub fn RoleSelect.internal_parse(j map[string]json2.Any) !RoleSelect {
 			none
 		}
 		default_values: if a := j['default_values'] {
-			?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
+			maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
 				return DefaultValue.parse(k)!
-			})!.filter(|dv| dv.typ == .role).map(|dv| dv.id))
+			})!.filter(|dv| dv.typ == .role).map(|dv| dv.id)
 		} else {
 			none
 		}
 		min_values: if i := j['min_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		max_values: if i := j['max_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		disabled: if b := j['disabled'] {
-			?bool(b as bool)
+			b as bool
 		} else {
 			none
 		}
@@ -625,29 +670,29 @@ pub fn MentionableSelect.internal_parse(j map[string]json2.Any) !MentionableSele
 	return MentionableSelect{
 		custom_id: j['custom_id']! as string
 		placeholder: if s := j['placeholder'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}
 		default_values: if a := j['default_values'] {
-			?[]DefaultValue(maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
+			maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
 				return DefaultValue.parse(k)!
-			})!)
+			})!
 		} else {
 			none
 		}
 		min_values: if i := j['min_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		max_values: if i := j['max_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		disabled: if b := j['disabled'] {
-			?bool(b as bool)
+			b as bool
 		} else {
 			none
 		}
@@ -718,32 +763,32 @@ pub fn ChannelSelect.internal_parse(j map[string]json2.Any) !ChannelSelect {
 	return ChannelSelect{
 		custom_id: j['custom_id']! as string
 		channel_types: if a := j['channel_types'] {
-			?[]ChannelType((a as []json2.Any).map(|i| unsafe { ChannelType(i as i64) }))
+			(a as []json2.Any).map(|i| unsafe { ChannelType(i as i64) })
 		} else {
 			none
 		}
 		placeholder: if s := j['placeholder'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}
 		default_values: if a := j['default_values'] {
-			?[]Snowflake((a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .channel).map(it.id))
+			(a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .channel).map(|dv| dv.id)
 		} else {
 			none
 		}
 		min_values: if i := j['min_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		max_values: if i := j['max_values'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		disabled: if b := j['disabled'] {
-			?bool(b as bool)
+			b as bool
 		} else {
 			none
 		}
@@ -826,27 +871,27 @@ pub fn TextInput.internal_parse(j map[string]json2.Any) !TextInput {
 		custom_id: j['custom_id']! as string
 		label: ''
 		min_length: if i := j['min_length'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		max_length: if i := j['max_length'] {
-			?int(i.int())
+			i.int()
 		} else {
 			none
 		}
 		required: if b := j['required'] {
-			?bool(b as bool)
+			b as bool
 		} else {
 			none
 		}
 		value: if s := j['value'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}
 		placeholder: if s := j['placeholder'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}

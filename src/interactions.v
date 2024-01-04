@@ -101,7 +101,7 @@ fn run_interactions(token string, _ []string) ! {
 									style: .secondary
 									custom_id: 'emoji:guild'
 									label: 'Guild emoji'
-									emoji: discord.PartialEmoji{
+									emoji: discord.ComponentEmoji{
 										id: 1187456884224045167
 										name: 'dv_logo'
 									}
@@ -110,14 +110,14 @@ fn run_interactions(token string, _ []string) ! {
 									style: .secondary
 									custom_id: 'emoji:unicode'
 									label: 'Unicode emoji'
-									emoji: discord.PartialEmoji{
+									emoji: discord.ComponentEmoji{
 										name: '🐈'
 									}
 								},
 								discord.Button{
 									style: .secondary
 									custom_id: 'disabled:guild'
-									emoji: discord.PartialEmoji{
+									emoji: discord.ComponentEmoji{
 										id: 1187456884224045167
 										name: 'dv_logo'
 									}
@@ -126,7 +126,7 @@ fn run_interactions(token string, _ []string) ! {
 								discord.Button{
 									style: .secondary
 									custom_id: 'disabled:unicode'
-									emoji: discord.PartialEmoji{
+									emoji: discord.ComponentEmoji{
 										name: '🐈'
 									}
 									disabled: true
@@ -157,7 +157,7 @@ fn run_interactions(token string, _ []string) ! {
 										discord.SelectOption{
 											label: 'discord.v'
 											value: 'discordv'
-											emoji: discord.PartialEmoji{
+											emoji: discord.ComponentEmoji{
 												name: '❤️'
 											}
 										},

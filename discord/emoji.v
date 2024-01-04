@@ -6,24 +6,14 @@ import x.json2
 
 pub struct PartialEmoji {
 pub:
-	id       ?Snowflake
-	name     string
-	animated bool
-}
-
-pub fn (pe PartialEmoji) build() json2.Any {
-	mut r := {
-		'id':   if id := pe.id {
-			json2.Any(id.build())
-		} else {
-			json2.null
-		}
-		'name': pe.name
-	}
-	if pe.id != none {
-		r['animated'] = pe.animated
-	}
-	return r
+	id             ?Snowflake
+	name           ?string
+	roles          ?[]Snowflake
+	user           ?User
+	require_colons ?bool
+	managed        ?bool
+	animated       ?bool
+	available      ?bool
 }
 
 pub fn PartialEmoji.parse(j json2.Any) !PartialEmoji {
@@ -40,10 +30,37 @@ pub fn PartialEmoji.parse(j json2.Any) !PartialEmoji {
 					none
 				}
 				name: j['name']! as string
+				roles: if a := j['roles'] {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
+						return Snowflake.parse(k)!
+					})!
+				} else {
+					none
+				}
+				user: if o := j['user'] {
+					User.parse(o)!
+				} else {
+					none
+				}
+				require_colons: if b := j['require_colons'] {
+					b as bool
+				} else {
+					none
+				}
+				managed: if b := j['managed'] {
+					b as bool
+				} else {
+					none
+				}
 				animated: if b := j['animated'] {
 					b as bool
 				} else {
-					false
+					none
+				}
+				available: if b := j['available'] {
+					b as bool
+				} else {
+					none
 				}
 			}
 		}

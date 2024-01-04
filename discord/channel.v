@@ -215,17 +215,21 @@ pub fn PartialChannel.parse(j json2.Any) !PartialChannel {
 				typ: unsafe { ChannelType(j['type']!.int()) }
 				name: j['name']! as string
 				topic: if s := j['topic'] {
-					?string(s as string)
+					if s !is json2.Null {
+						s as string
+					} else {
+						none
+					}
 				} else {
 					none
 				}
 				permissions: if s := j['permissions'] {
-					?Permissions(Permissions.parse(s)!)
+					Permissions.parse(s)!
 				} else {
 					none
 				}
 				flags: if i := j['flags'] {
-					?ChannelFlags(unsafe { ChannelFlags(i.int()) })
+					unsafe { ChannelFlags(i.int()) }
 				} else {
 					none
 				}
@@ -320,7 +324,7 @@ pub fn ThreadMetadata.parse(j json2.Any) !ThreadMetadata {
 				}
 				create_timestamp: if s := j['create_timestamp'] {
 					if s !is json2.Null {
-						?time.Time(time.parse_iso8601(s as string)!)
+						time.parse_iso8601(s as string)!
 					} else {
 						none
 					}
@@ -354,19 +358,19 @@ pub fn ThreadMember.parse(j json2.Any) !ThreadMember {
 		map[string]json2.Any {
 			return ThreadMember{
 				id: if s := j['id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				user_id: if s := j['user_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				join_timestamp: time.parse_iso8601(j['join_timestamp']! as string)!
 				flags: j['flags']!.int()
 				member: if o := j['member'] {
-					?GuildMember(GuildMember.parse(o)!)
+					GuildMember.parse(o)!
 				} else {
 					none
 				}
@@ -454,12 +458,12 @@ pub fn DefaultReaction.parse(j json2.Any) !DefaultReaction {
 			emoji_name := j['emoji_name']!
 			return DefaultReaction{
 				emoji_id: if emoji_id !is json2.Null {
-					?Snowflake(Snowflake.parse(emoji_id)!)
+					Snowflake.parse(emoji_id)!
 				} else {
 					none
 				}
 				emoji_name: if emoji_name !is json2.Null {
-					?string(emoji_name as string)
+					emoji_name as string
 				} else {
 					none
 				}
@@ -577,25 +581,25 @@ pub fn Channel.parse(j json2.Any) !Channel {
 				id: Snowflake.parse(j['id']!)!
 				typ: unsafe { ChannelType(j['type']!.int()) }
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				position: if i := j['position'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				permission_overwrites: if a := j['permission_overwrites'] {
-					?[]PermissionOverwrite(maybe_map(a as []json2.Any, fn (k json2.Any) !PermissionOverwrite {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !PermissionOverwrite {
 						return PermissionOverwrite.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				name: if s := j['name'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -604,7 +608,7 @@ pub fn Channel.parse(j json2.Any) !Channel {
 				}
 				topic: if s := j['topic'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -612,13 +616,13 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				nsfw: if b := j['nsfw'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				last_message_id: if s := j['last_message_id'] {
 					if s !is json2.Null {
-						?Snowflake(Snowflake.parse(j)!)
+						Snowflake.parse(j)!
 					} else {
 						none
 					}
@@ -626,30 +630,30 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				bitrate: if i := j['bitrate'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				user_limit: if i := j['user_limit'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				rate_limit_per_user: if i := j['rate_limit_per_user'] {
-					?time.Duration(i.int() * time.second)
+					i.int() * time.second
 				} else {
 					none
 				}
 				recipients: if a := j['recipients'] {
-					?[]User(maybe_map(a as []json2.Any, fn (k json2.Any) !User {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !User {
 						return User.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				icon: if s := j['icon'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -657,23 +661,23 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				owner_id: if s := j['owner_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				application_id: if s := j['application_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				managed: if b := j['managed'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				parent_id: if s := j['parent_id'] {
 					if s !is json2.Null {
-						?Snowflake(Snowflake.parse(s)!)
+						Snowflake.parse(s)!
 					} else {
 						none
 					}
@@ -682,7 +686,7 @@ pub fn Channel.parse(j json2.Any) !Channel {
 				}
 				last_pin_timestamp: if s := j['last_pin_timestamp'] {
 					if s !is json2.Null {
-						?time.Time(time.parse_iso8601(s as string)!)
+						time.parse_iso8601(s as string)!
 					} else {
 						none
 					}
@@ -691,7 +695,7 @@ pub fn Channel.parse(j json2.Any) !Channel {
 				}
 				rtc_region: if s := j['rtc_region'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -699,67 +703,67 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				video_quality_mode: if i := j['video_quality_mode'] {
-					?VideoQualityMode(unsafe { VideoQualityMode(i.int()) })
+					unsafe { VideoQualityMode(i.int()) }
 				} else {
 					none
 				}
 				message_count: if i := j['message_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				member_count: if i := j['member_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				thread_metadata: if o := j['thread_metadata'] {
-					?ThreadMetadata(ThreadMetadata.parse(o)!)
+					ThreadMetadata.parse(o)!
 				} else {
 					none
 				}
 				member: if o := j['member'] {
-					?ThreadMember(ThreadMember.parse(o)!)
+					ThreadMember.parse(o)!
 				} else {
 					none
 				}
 				default_auto_archive_duration: if i := j['default_auto_archive_duration'] {
-					?time.Duration(i.int() * time.minute)
+					i.int() * time.minute
 				} else {
 					none
 				}
 				permissions: if s := j['permissions'] {
-					?Permissions(Permissions.parse(s)!)
+					Permissions.parse(s)!
 				} else {
 					none
 				}
 				flags: if i := j['flags'] {
-					?ChannelFlags(unsafe { ChannelFlags(i.int()) })
+					unsafe { ChannelFlags(i.int()) }
 				} else {
 					none
 				}
 				total_message_sent: if i := j['total_message_sent'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				available_tags: if a := j['available_tags'] {
-					?[]ForumTag(maybe_map(a as []json2.Any, fn (k json2.Any) !ForumTag {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !ForumTag {
 						return ForumTag.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				applied_tags: if a := j['applied_tags'] {
-					?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
 						return Snowflake.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				default_reaction_emoji: if o := j['default_reaction_emoji'] {
 					if o !is json2.Null {
-						?DefaultReaction(DefaultReaction.parse(o)!)
+						DefaultReaction.parse(o)!
 					} else {
 						none
 					}
@@ -767,13 +771,13 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					none
 				}
 				default_thread_rate_limit_per_user: if i := j['default_thread_rate_limit_per_user'] {
-					?time.Duration(i.int() * time.second)
+					i.int() * time.second
 				} else {
 					none
 				}
 				default_sort_order: if i := j['default_sort_order'] {
 					if i !is json2.Null {
-						?SortOrderType(unsafe { SortOrderType(i.int()) })
+						unsafe { SortOrderType(i.int()) }
 					} else {
 						none
 					}
