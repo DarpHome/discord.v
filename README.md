@@ -74,8 +74,8 @@ fn main() {
   - [ ] Audit Log
   - [x] Channel
   - [x] Emoji
-  - [ ] Guild
-  - [ ] Invite
+  - [x] Guild
+  - [x] Invite
   - [ ] User
   - [ ] Voice
   - [ ] Webhook
@@ -85,7 +85,7 @@ fn main() {
 
 ### Second milestone
 - [ ] Handle REST
-  - [x] Audit Log
+  - [ ] Audit Log
   - [x] Channel
   - [x] Emoji
   - [x] Guild
