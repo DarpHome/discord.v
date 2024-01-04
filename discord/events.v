@@ -642,6 +642,279 @@ pub fn GuildMemberUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildMemberUpd
 	}
 }
 
+pub struct GuildMembersChunkEvent {
+	BaseEvent
+pub:
+	// ID of the guild
+	guild_id Snowflake
+	// Set of guild members
+	members []GuildMember
+	// Chunk index in the expected chunks for this response (0 <= chunk_index < chunk_count)
+	chunk_index int
+	// Total number of expected chunks for this response
+	chunk_count int
+	// When passing an invalid ID to `REQUEST_GUILD_MEMBERS`, it will be returned here
+	not_found ?[]Snowflake
+	// When passing true to `REQUEST_GUILD_MEMBERS`, presences of the returned members will be here
+	presences ?[]Presence
+	// Nonce used in the Guild Members Request
+	nonce ?string
+}
+
+pub fn GuildMembersChunkEvent.parse(j json2.Any, base BaseEvent) !GuildMembersChunkEvent {
+	match j {
+		map[string]json2.Any {
+			return GuildMembersChunkEvent{
+				BaseEvent: base
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				members: maybe_map(j['members']! as []json2.Any, fn (k json2.Any) !GuildMember {
+					return GuildMember.parse(k)!
+				})!
+				chunk_index: j['chunk_index']!.int()
+				chunk_count: j['chunk_count']!.int()
+				not_found: if a := j['not_found'] {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
+						return Snowflake.parse(k)!
+					})!
+				} else {
+					none
+				}
+				presences: if a := j['presences'] {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !Presence {
+						return Presence.parse(k)!
+					})!
+				} else {
+					none
+				}
+				nonce: if s := j['nonce'] {
+					s as string
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected guild members chunk event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct GuildRoleCreateEvent {
+	BaseEvent
+pub:
+	guild_id Snowflake
+	role Role
+}
+
+pub fn GuildRoleCreateEvent.parse(j json2.Any, base BaseEvent) !GuildRoleCreateEvent {
+	match j {
+		map[string]json2.Any {
+			return GuildRoleCreateEvent{
+				BaseEvent: base
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				role: Role.parse(j['role']!)!
+			}
+		}
+		else {
+			return error('expected guild role create event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct GuildRoleUpdateEvent {
+	BaseEvent
+pub:
+	guild_id Snowflake
+	role Role
+}
+
+pub fn GuildRoleUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildRoleUpdateEvent {
+	match j {
+		map[string]json2.Any {
+			return GuildRoleUpdateEvent{
+				BaseEvent: base
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				role: Role.parse(j['role']!)!
+			}
+		}
+		else {
+			return error('expected guild role update event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct GuildRoleDeleteEvent {
+	BaseEvent
+pub:
+	guild_id Snowflake
+	role_id Snowflake
+}
+
+pub fn GuildRoleDeleteEvent.parse(j json2.Any, base BaseEvent) !GuildRoleDeleteEvent {
+	match j {
+		map[string]json2.Any {
+			return GuildRoleDeleteEvent{
+				BaseEvent: base
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				role_id: Snowflake.parse(j['role_id']!)!
+			}
+		}
+		else {
+			return error('expected guild role delete event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct GuildScheduledEventCreateEvent {
+	BaseEvent
+pub:
+	event GuildScheduledEvent
+}
+
+pub fn GuildScheduledEventCreateEvent.parse(j json2.Any, base BaseEvent) !GuildScheduledEventCreateEvent {
+	return GuildScheduledEventCreateEvent{
+		BaseEvent: base
+		event: GuildScheduledEvent.parse(j)!
+	}
+}
+
+pub struct GuildScheduledEventUpdateEvent {
+	BaseEvent
+pub:
+	event GuildScheduledEvent
+}
+
+pub fn GuildScheduledEventUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildScheduledEventUpdateEvent {
+	return GuildScheduledEventUpdateEvent{
+		BaseEvent: base
+		event: GuildScheduledEvent.parse(j)!
+	}
+}
+
+pub struct GuildScheduledEventDeleteEvent {
+	BaseEvent
+pub:
+	event GuildScheduledEvent
+}
+
+pub fn GuildScheduledEventDeleteEvent.parse(j json2.Any, base BaseEvent) !GuildScheduledEventDeleteEvent {
+	return GuildScheduledEventDeleteEvent{
+		BaseEvent: base
+		event: GuildScheduledEvent.parse(j)!
+	}
+}
+
+pub struct GuildScheduledEventUserAddEvent {
+	BaseEvent
+pub:
+	// ID of the guild scheduled event
+	guild_scheduled_event_id Snowflake
+	// ID of the user
+	user_id Snowflake
+	// ID of the guild
+	guild_id Snowflake
+}
+
+pub fn GuildScheduledEventUserAddEvent.parse(j json2.Any, base BaseEvent) !GuildScheduledEventUserAddEvent {
+	match j {
+		map[string]json2.Any {
+			return GuildScheduledEventUserAddEvent{
+				BaseEvent: base
+				guild_scheduled_event_id: Snowflake.parse(j['guild_scheduled_event_id']!)!
+				user_id: Snowflake.parse(j['user_id']!)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+			}
+		}
+		else {
+			return error('expected guild scheduled event user add event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct GuildScheduledEventUserRemoveEvent {
+	BaseEvent
+pub:
+	// ID of the guild scheduled event
+	guild_scheduled_event_id Snowflake
+	// ID of the user
+	user_id Snowflake
+	// ID of the guild
+	guild_id Snowflake
+}
+
+pub fn GuildScheduledEventUserRemoveEvent.parse(j json2.Any, base BaseEvent) !GuildScheduledEventUserRemoveEvent {
+	match j {
+		map[string]json2.Any {
+			return GuildScheduledEventUserRemoveEvent{
+				BaseEvent: base
+				guild_scheduled_event_id: Snowflake.parse(j['guild_scheduled_event_id']!)!
+				user_id: Snowflake.parse(j['user_id']!)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+			}
+		}
+		else {
+			return error('expected guild scheduled event user remove event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct IntegrationCreateEvent {
+	BaseEvent
+pub:
+	integration Integration2
+}
+
+pub fn IntegrationCreateEvent.parse(j json2.Any, base BaseEvent) !IntegrationCreateEvent {
+	return IntegrationCreateEvent{
+		BaseEvent: base
+		integration: Integration2.parse(j)!
+	}
+}
+
+pub struct IntegrationUpdateEvent {
+	BaseEvent
+pub:
+	integration Integration2
+}
+
+pub fn IntegrationUpdateEvent.parse(j json2.Any, base BaseEvent) !IntegrationUpdateEvent {
+	return IntegrationUpdateEvent{
+		BaseEvent: base
+		integration: Integration2.parse(j)!
+	}
+}
+
+pub struct IntegrationDeleteEvent {
+	BaseEvent
+pub:
+	// Integration ID
+	id Snowflake
+	// ID of the guild
+	guild_id Snowflake
+	// ID of the bot/OAuth2 application for this discord integration
+	application_id ?Snowflake
+}
+
+pub fn IntegrationDeleteEvent.parse(j json2.Any, base BaseEvent) !IntegrationDeleteEvent {
+	match j {
+		map[string]json2.Any {
+			return IntegrationDeleteEvent{
+				BaseEvent: base
+				id: Snowflake.parse(j['id']!)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				application_id: if s := j['application_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected integration delete event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 pub struct MessageCreateEvent {
 	BaseEvent
 pub:
@@ -754,6 +1027,18 @@ pub mut:
 	on_guild_member_add                       EventController[GuildMemberAddEvent]
 	on_guild_member_remove                    EventController[GuildMemberRemoveEvent]
 	on_guild_member_update                    EventController[GuildMemberUpdateEvent]
+	on_guild_members_chunk                    EventController[GuildMembersChunkEvent]
+	on_guild_role_create                      EventController[GuildRoleCreateEvent]
+	on_guild_role_update                      EventController[GuildRoleUpdateEvent]
+	on_guild_role_delete                      EventController[GuildRoleDeleteEvent]
+	on_guild_scheduled_event_create           EventController[GuildScheduledEventCreateEvent]
+	on_guild_scheduled_event_update           EventController[GuildScheduledEventUpdateEvent]
+	on_guild_scheduled_event_delete           EventController[GuildScheduledEventDeleteEvent]
+	on_guild_scheduled_event_user_add         EventController[GuildScheduledEventUserAddEvent]
+	on_guild_scheduled_event_user_remove      EventController[GuildScheduledEventUserRemoveEvent]
+	on_integration_create                     EventController[IntegrationCreateEvent]
+	on_integration_update                     EventController[IntegrationUpdateEvent]
+	on_integration_delete                     EventController[IntegrationDeleteEvent]
 	on_message_create                         EventController[MessageCreateEvent]
 	on_interaction_create                     EventController[InteractionCreateEvent]
 	on_typing_start                           EventController[TypingStartEvent]
@@ -940,6 +1225,78 @@ fn event_process_guild_member_update(mut gc GatewayClient, data json2.Any, optio
 	})!, options)
 }
 
+fn event_process_guild_members_chunk(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_members_chunk.emit(GuildMembersChunkEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_role_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_role_create.emit(GuildRoleCreateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_role_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_role_update.emit(GuildRoleUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_role_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_role_delete.emit(GuildRoleDeleteEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_scheduled_event_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_scheduled_event_create.emit(GuildScheduledEventCreateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_scheduled_event_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_scheduled_event_update.emit(GuildScheduledEventUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_scheduled_event_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_scheduled_event_delete.emit(GuildScheduledEventDeleteEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_scheduled_event_user_add(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_scheduled_event_user_add.emit(GuildScheduledEventUserAddEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_scheduled_event_user_remove(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_scheduled_event_user_remove.emit(GuildScheduledEventUserRemoveEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_integration_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_integration_create.emit(IntegrationCreateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_integration_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_integration_update.emit(IntegrationUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_integration_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_integration_delete.emit(IntegrationDeleteEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
 fn event_process_message_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_message_create.emit(MessageCreateEvent.parse(data, BaseEvent{
 		creator: gc
@@ -995,6 +1352,13 @@ const events_table = EventsTable({
 	'GUILD_MEMBER_ADD':                       event_process_guild_member_add
 	'GUILD_MEMBER_REMOVE':                    event_process_guild_member_remove
 	'GUILD_MEMBER_UPDATE':                    event_process_guild_member_update
+	'GUILD_MEMBERS_CHUNK':                    event_process_guild_members_chunk
+	'GUILD_ROLE_CREATE':                      event_process_guild_role_create
+	'GUILD_ROLE_UPDATE':                      event_process_guild_role_update
+	'GUILD_ROLE_DELETE':                      event_process_guild_role_delete
+	'GUILD_SCHEDULED_EVENT_CREATE':           event_process_guild_scheduled_event_create
+	'GUILD_SCHEDULED_EVENT_UPDATE':           event_process_guild_scheduled_event_update
+	'GUILD_SCHEDULED_EVENT_DELETE':           event_process_guild_scheduled_event_delete
 	'MESSAGE_CREATE':                         event_process_message_create
 	'INTERACTION_CREATE':                     event_process_interaction_create
 	'TYPING_START':                           event_process_typing_start

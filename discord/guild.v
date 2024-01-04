@@ -2102,6 +2102,27 @@ pub fn Integration.parse(j json2.Any) !Integration {
 	}
 }
 
+pub struct Integration2 {
+	Integration
+pub:
+	// ID of the guild
+	guild_id Snowflake
+}
+
+pub fn Integration2.parse(j json2.Any) !Integration2 {
+	match j {
+		map[string]json2.Any {
+			return Integration2{
+				Integration: Integration.parse(j)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+			}
+		}
+		else {
+			return error('expected integration 2 to be object, got ${j.type_name()}')
+		}
+	}
+}
+
 // Returns a list of [integration](#Integration) objects for the guild. Requires the `.manage_guild` permission.
 // > i This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
 pub fn (c Client) fetch_guild_integrations(guild_id Snowflake) ![]Integration {

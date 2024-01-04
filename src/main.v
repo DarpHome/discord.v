@@ -19,7 +19,7 @@ fn main() {
 				'test':           run_testbot
 				'interactions':   run_interactions
 				'concurrency':    run_concurrency
-				'slash_pingpong': run_slash_pingpong
+				'slash-pingpong': run_slash_pingpong
 				'add-role':       run_add_role
 				'remove-role':    run_remove_role
 			}
