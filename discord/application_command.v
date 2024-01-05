@@ -305,7 +305,7 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 					none
 				}
 				channel_types: if a := j['channel_types'] {
-					(a as []json2.Any).map(|i| unsafe { ChannelType(i as i64) })
+					(a as []json2.Any).map(|i| unsafe { ChannelType(i.int()) })
 				} else {
 					none
 				}
@@ -548,7 +548,7 @@ pub fn (params CreateApplicationCommandParams) build() json2.Any {
 		})
 	}
 	if options := params.options {
-		r['options'] = options.map(it.build())
+		r['options'] = options.map(|o| o.build())
 	}
 	if default_member_permissions := params.default_member_permissions {
 		r['default_member_permissions'] = u64(default_member_permissions).str()
@@ -619,7 +619,7 @@ pub fn (params EditApplicationCommandParams) build() json2.Any {
 		})
 	}
 	if options := params.options {
-		r['options'] = options.map(it.build())
+		r['options'] = options.map(|o| o.build())
 	}
 	if default_member_permissions := params.default_member_permissions {
 		if !is_sentinel(default_member_permissions) {
@@ -652,7 +652,7 @@ pub fn (c Client) delete_global_application_command(application_id Snowflake, co
 // Takes a list of application commands, overwriting the existing global command list for this application. Returns 200 and a list of application command objects. Commands that do not already exist will count toward daily application command create limits.
 pub fn (c Client) bulk_overwrite_global_application_commands(application_id Snowflake, commands []CreateApplicationCommandParams) ![]ApplicationCommand {
 	return maybe_map(json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/commands',
-		json: commands.map(it.build())
+		json: commands.map(|c| c.build())
 	)!.body)! as []json2.Any, fn (j json2.Any) !ApplicationCommand {
 		return ApplicationCommand.parse(j)!
 	})!
@@ -685,7 +685,7 @@ pub fn (c Client) delete_guild_application_command(application_id Snowflake, gui
 // Takes a list of application commands, overwriting the existing command list for this application for the targeted guild. Returns 200 and a list of application command objects.
 pub fn (c Client) bulk_overwrite_guild_application_commands(application_id Snowflake, guild_id Snowflake, commands []CreateApplicationCommandParams) ![]ApplicationCommand {
 	return maybe_map(json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/guilds/${urllib.path_escape(guild_id.build())}/commands',
-		json: commands.map(it.build())
+		json: commands.map(|c| c.build())
 	)!.body)! as []json2.Any, fn (j json2.Any) !ApplicationCommand {
 		return ApplicationCommand.parse(j)!
 	})!

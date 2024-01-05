@@ -761,7 +761,7 @@ pub fn ChannelSelect.internal_parse(j map[string]json2.Any) !ChannelSelect {
 	return ChannelSelect{
 		custom_id: j['custom_id']! as string
 		channel_types: if a := j['channel_types'] {
-			(a as []json2.Any).map(|i| unsafe { ChannelType(i as i64) })
+			(a as []json2.Any).map(|i| unsafe { ChannelType(i.int()) })
 		} else {
 			none
 		}
@@ -771,7 +771,9 @@ pub fn ChannelSelect.internal_parse(j map[string]json2.Any) !ChannelSelect {
 			none
 		}
 		default_values: if a := j['default_values'] {
-			(a as []json2.Any).map(DefaultValue.parse(it)!).filter(it.typ == .channel).map(|dv| dv.id)
+			maybe_map(a as []json2.Any, fn (k json2.Any) !DefaultValue {
+				return DefaultValue.parse(k)!
+			})!.filter(|v| v.typ == .channel).map(|v| v.id)
 		} else {
 			none
 		}

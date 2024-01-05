@@ -38,7 +38,9 @@ pub fn ReadyEvent.parse(j json2.Any, base BaseEvent) !ReadyEvent {
 			return ReadyEvent{
 				BaseEvent: base
 				user: User.parse(j['user']!)!
-				guilds: (j['guilds']! as []json2.Any).map(UnavailableGuild.parse(it)!)
+				guilds: maybe_map(j['guilds']! as []json2.Any, fn (k json2.Any) !UnavailableGuild {
+					return UnavailableGuild.parse(k)!
+				})!
 				session_id: j['session_id']! as string
 				resume_gateway_url: j['resume_gateway_url']! as string
 				application: PartialApplication.parse(j['application']!)!

@@ -176,7 +176,7 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 					data: data
 				})!
 				client.logger.debug('Spawning heart')
-				client.spawn_heart(message.data.as_map()['heartbeat_interval']! as i64)
+				client.spawn_heart(message.data.as_map()['heartbeat_interval']!.i64())
 			}
 			return
 		}

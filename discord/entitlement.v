@@ -43,7 +43,7 @@ pub fn Entitlement.parse(j json2.Any) !Entitlement {
 				} else {
 					none
 				}
-				typ: unsafe { EntitlementType(j['type']! as i64) }
+				typ: unsafe { EntitlementType(j['type']!.int()) }
 				deleted: j['deleted']! as bool
 				starts_at: if s := j['starts_at'] {
 					?time.Time(time.parse_iso8601(s as string)!)
@@ -93,7 +93,7 @@ pub fn (params ListEntitlementParams) build_values() urllib.Values {
 		query_params.set('user_id', user_id.build())
 	}
 	if sku_ids := params.sku_ids {
-		query_params.set('sku_ids', sku_ids.map(it.build()).join(','))
+		query_params.set('sku_ids', sku_ids.map(|s| s.build()).join(','))
 	}
 	if before := params.before {
 		query_params.set('before', before.build())
@@ -115,8 +115,9 @@ pub fn (params ListEntitlementParams) build_values() urllib.Values {
 
 // Returns all entitlements for a given app, active and expired.
 pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement {
-	r := json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${encode_query(params.build_values())}')!.body)!
-	return (r as []json2.Any).map(Entitlement.parse(it)!)
+	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${encode_query(params.build_values())}')!.body)! as []json2.Any, fn (k json2.Any) !Entitlement {
+		return Entitlement.parse(k)!
+	})!
 }
 
 pub enum OwnerType {
