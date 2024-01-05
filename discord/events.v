@@ -1127,16 +1127,169 @@ pub fn MessageDeleteBulkEvent.parse(j json2.Any, base BaseEvent) !MessageDeleteB
 	}
 }
 
-pub struct InteractionCreateEvent {
+pub struct MessageReactionAddEvent {
 	BaseEvent
 pub:
-	interaction Interaction
+	// ID of the user
+	user_id Snowflake
+	// ID of the channel
+	channel_id Snowflake
+	// ID of the message
+	message_id Snowflake
+	// ID of the guild
+	guild_id ?Snowflake
+	// Member who reacted if this happened in a guild
+	member ?GuildMember
+	// Emoji used to react
+	emoji PartialEmoji
+	// ID of the user who authored the message which was reacted to
+	message_author_id ?Snowflake
 }
 
-pub fn InteractionCreateEvent.parse(j json2.Any, base BaseEvent) !InteractionCreateEvent {
-	return InteractionCreateEvent{
+pub fn MessageReactionAddEvent.parse(j json2.Any, base BaseEvent) !MessageReactionAddEvent {
+	match j {
+		map[string]json2.Any {
+			return MessageReactionAddEvent{
+				BaseEvent: base
+				user_id: Snowflake.parse(j['user_id']!)!
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				message_id: Snowflake.parse(j['message_id']!)!
+				guild_id: if s := j['guild_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				member: if o := j['member'] {
+					GuildMember.parse(o)!
+				} else {
+					none
+				}
+				emoji: PartialEmoji.parse(j['emoji']!)!
+				message_author_id: if s := j['message_author_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message reaction add event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct MessageReactionRemoveEvent {
+	BaseEvent
+pub:
+	// ID of the user
+	user_id Snowflake
+	// ID of the channel
+	channel_id Snowflake
+	// ID of the message
+	message_id Snowflake
+	// ID of the guild
+	guild_id ?Snowflake
+	// Emoji used to react
+	emoji PartialEmoji
+}
+
+pub fn MessageReactionRemoveEvent.parse(j json2.Any, base BaseEvent) !MessageReactionRemoveEvent {
+	match j {
+		map[string]json2.Any {
+			return MessageReactionRemoveEvent{
+				BaseEvent: base
+				user_id: Snowflake.parse(j['user_id']!)!
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				message_id: Snowflake.parse(j['message_id']!)!
+				guild_id: if s := j['guild_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				emoji: PartialEmoji.parse(j['emoji']!)!
+			}
+		}
+		else {
+			return error('expected message reaction remove event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct MessageReactionRemoveAllEvent {
+	BaseEvent
+pub:
+	// ID of the channel
+	channel_id Snowflake
+	// ID of the message
+	message_id Snowflake
+	// ID of the guild
+	guild_id ?Snowflake
+}
+
+pub fn MessageReactionRemoveAllEvent.parse(j json2.Any, base BaseEvent) !MessageReactionRemoveAllEvent {
+	match j {
+		map[string]json2.Any {
+			return MessageReactionRemoveAllEvent{
+				BaseEvent: base
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				message_id: Snowflake.parse(j['message_id']!)!
+				guild_id: if s := j['guild_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected message reaction remove all event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct MessageReactionRemoveEmojiEvent {
+	BaseEvent
+pub:
+	// ID of the channel
+	channel_id Snowflake
+	// ID of the message
+	message_id Snowflake
+	// ID of the guild
+	guild_id ?Snowflake
+	// Emoji that was removed
+	emoji PartialEmoji
+}
+
+pub fn MessageReactionRemoveEmojiEvent.parse(j json2.Any, base BaseEvent) !MessageReactionRemoveEmojiEvent {
+	match j {
+		map[string]json2.Any {
+			return MessageReactionRemoveEmojiEvent{
+				BaseEvent: base
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				message_id: Snowflake.parse(j['message_id']!)!
+				guild_id: if s := j['guild_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				emoji: PartialEmoji.parse(j['emoji']!)!
+			}
+		}
+		else {
+			return error('expected message reaction remove emoji event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct PresenceUpdateEvent {
+	BaseEvent
+pub:
+	presence Presence
+}
+
+pub fn PresenceUpdateEvent.parse(j json2.Any, base BaseEvent) !PresenceUpdateEvent {
+	return PresenceUpdateEvent{
 		BaseEvent: base
-		interaction: Interaction.parse(j)!
+		presence: Presence.parse(j)!
 	}
 }
 
@@ -1181,16 +1334,137 @@ pub fn TypingStartEvent.parse(j json2.Any, base BaseEvent) !TypingStartEvent {
 	}
 }
 
-pub struct PresenceUpdateEvent {
+pub struct UserUpdateEvent {
 	BaseEvent
 pub:
-	presence Presence
+	user User
 }
 
-pub fn PresenceUpdateEvent.parse(j json2.Any, base BaseEvent) !PresenceUpdateEvent {
-	return PresenceUpdateEvent{
+pub fn UserUpdateEvent.parse(j json2.Any, base BaseEvent) !UserUpdateEvent {
+	return UserUpdateEvent{
 		BaseEvent: base
-		presence: Presence.parse(j)!
+		user: User.parse(j)!
+	}
+}
+
+pub struct VoiceStateUpdateEvent {
+	BaseEvent
+pub:
+	state VoiceState
+}
+
+pub fn VoiceStateUpdateEvent.parse(j json2.Any, base BaseEvent) !VoiceStateUpdateEvent {
+	return VoiceStateUpdateEvent{
+		BaseEvent: base
+		state: VoiceState.parse(j)!
+	}
+}
+
+pub struct VoiceServerUpdateEvent {
+	BaseEvent
+pub:
+	// Voice connection token
+	token string
+	// Guild this voice server update is for
+	guild_id Snowflake
+	// Voice server host
+	endpoint ?string
+}
+
+pub fn VoiceServerUpdateEvent.parse(j json2.Any, base BaseEvent) !VoiceServerUpdateEvent {
+	match j {
+		map[string]json2.Any {
+			endpoint := j['endpoint']!
+			return VoiceServerUpdateEvent{
+				BaseEvent: base
+				token: j['token']! as string
+				guild_id: Snowflake.parse(j['guild_id']!)!
+				endpoint: if endpoint !is json2.Null {
+					endpoint as string
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected voice server update event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct WebhooksUpdateEvent {
+	BaseEvent
+pub:
+	// ID of the channel
+	channel_id Snowflake
+	// ID of the guild
+	guild_id Snowflake
+}
+
+pub fn WebhooksUpdateEvent.parse(j json2.Any, base BaseEvent) !WebhooksUpdateEvent {
+	match j {
+		map[string]json2.Any {
+			return WebhooksUpdateEvent{
+				BaseEvent: base
+				channel_id: Snowflake.parse(j['channel_id']!)!
+				guild_id: Snowflake.parse(j['guild_id']!)!
+			}
+		}
+		else {
+			return error('expected webhooks update event to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct InteractionCreateEvent {
+	BaseEvent
+pub:
+	interaction Interaction
+}
+
+pub fn InteractionCreateEvent.parse(j json2.Any, base BaseEvent) !InteractionCreateEvent {
+	return InteractionCreateEvent{
+		BaseEvent: base
+		interaction: Interaction.parse(j)!
+	}
+}
+
+pub struct StageInstanceCreateEvent {
+	BaseEvent
+pub:
+	instance StageInstance
+}
+
+pub fn StageInstanceCreateEvent.parse(j json2.Any, base BaseEvent) !StageInstanceCreateEvent {
+	return StageInstanceCreateEvent{
+		BaseEvent: base
+		instance: StageInstance.parse(j)!
+	}
+}
+
+pub struct StageInstanceUpdateEvent {
+	BaseEvent
+pub:
+	instance StageInstance
+}
+
+pub fn StageInstanceUpdateEvent.parse(j json2.Any, base BaseEvent) !StageInstanceUpdateEvent {
+	return StageInstanceUpdateEvent{
+		BaseEvent: base
+		instance: StageInstance.parse(j)!
+	}
+}
+
+pub struct StageInstanceDeleteEvent {
+	BaseEvent
+pub:
+	instance StageInstance
+}
+
+pub fn StageInstanceDeleteEvent.parse(j json2.Any, base BaseEvent) !StageInstanceDeleteEvent {
+	return StageInstanceDeleteEvent{
+		BaseEvent: base
+		instance: StageInstance.parse(j)!
 	}
 }
 
@@ -1244,9 +1518,20 @@ pub mut:
 	on_message_update                         EventController[MessageUpdateEvent]
 	on_message_delete                         EventController[MessageDeleteEvent]
 	on_message_delete_bulk                    EventController[MessageDeleteBulkEvent]
-	on_interaction_create                     EventController[InteractionCreateEvent]
-	on_typing_start                           EventController[TypingStartEvent]
+	on_message_reaction_add                   EventController[MessageReactionAddEvent]
+	on_message_reaction_remove                EventController[MessageReactionRemoveEvent]
+	on_message_reaction_remove_all            EventController[MessageReactionRemoveAllEvent]
+	on_message_reaction_remove_emoji          EventController[MessageReactionRemoveEmojiEvent]
 	on_presence_update                        EventController[PresenceUpdateEvent]
+	on_typing_start                           EventController[TypingStartEvent]
+	on_user_update                            EventController[UserUpdateEvent]
+	on_voice_state_update                     EventController[VoiceStateUpdateEvent]
+	on_voice_server_update                    EventController[VoiceServerUpdateEvent]
+	on_webhooks_update                        EventController[WebhooksUpdateEvent]
+	on_interaction_create                     EventController[InteractionCreateEvent]
+	on_stage_instance_create                  EventController[StageInstanceCreateEvent]
+	on_stage_instance_update                  EventController[StageInstanceUpdateEvent]
+	on_stage_instance_delete                  EventController[StageInstanceDeleteEvent]
 }
 
 fn event_process_ready(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1542,8 +1827,34 @@ fn event_process_message_delete_bulk(mut gc GatewayClient, data json2.Any, optio
 	})!, options)
 }
 
-fn event_process_interaction_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_interaction_create.emit(InteractionCreateEvent.parse(data, BaseEvent{
+fn event_process_message_reaction_add(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_message_reaction_add.emit(MessageReactionAddEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_message_reaction_remove(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_message_reaction_remove.emit(MessageReactionRemoveEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_message_reaction_remove_all(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_message_reaction_remove_all.emit(MessageReactionRemoveAllEvent.parse(data,
+		BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_message_reaction_remove_emoji(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_message_reaction_remove_emoji.emit(MessageReactionRemoveEmojiEvent.parse(data,
+		BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_presence_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_presence_update.emit(PresenceUpdateEvent.parse(data, BaseEvent{
 		creator: gc
 	})!, options)
 }
@@ -1554,8 +1865,50 @@ fn event_process_typing_start(mut gc GatewayClient, data json2.Any, options Emit
 	})!, options)
 }
 
-fn event_process_presence_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_presence_update.emit(PresenceUpdateEvent.parse(data, BaseEvent{
+fn event_process_user_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_user_update.emit(UserUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_voice_state_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_voice_state_update.emit(VoiceStateUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_voice_server_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_voice_server_update.emit(VoiceServerUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_webhooks_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_webhooks_update.emit(WebhooksUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_interaction_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_interaction_create.emit(InteractionCreateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_stage_instance_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_stage_instance_create.emit(StageInstanceCreateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_stage_instance_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_stage_instance_update.emit(StageInstanceUpdateEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_stage_instance_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_stage_instance_delete.emit(StageInstanceDeleteEvent.parse(data, BaseEvent{
 		creator: gc
 	})!, options)
 }
@@ -1604,9 +1957,20 @@ const events_table = EventsTable({
 	'MESSAGE_UPDATE':                         event_process_message_update
 	'MESSAGE_DELETE':                         event_process_message_delete
 	'MESSAGE_DELETE_BULK':                    event_process_message_delete_bulk
-	'INTERACTION_CREATE':                     event_process_interaction_create
-	'TYPING_START':                           event_process_typing_start
+	'MESSAGE_REACTION_ADD':                   event_process_message_reaction_add
+	'MESSAGE_REACTION_REMOVE':                event_process_message_reaction_remove
+	'MESSAGE_REACTION_REMOVE_ALL':            event_process_message_reaction_remove_all
+	'MESSAGE_REACTION_REMOVE_EMOJI':          event_process_message_reaction_remove_emoji
 	'PRESENCE_UPDATE':                        event_process_presence_update
+	'TYPING_START':                           event_process_typing_start
+	'USER_UPDATE':                            event_process_user_update
+	'VOICE_STATE_UPDATE':                     event_process_voice_state_update
+	'VOICE_SERVER_UPDATE':                    event_process_voice_server_update
+	'WEBHOOKS_UPDATE':                        event_process_webhooks_update
+	'INTERACTION_CREATE':                     event_process_interaction_create
+	'STAGE_INSTANCE_CREATE':                  event_process_stage_instance_create
+	'STAGE_INSTANCE_UPDATE':                  event_process_stage_instance_update
+	'STAGE_INSTANCE_DELETE':                  event_process_stage_instance_delete
 })
 
 pub fn (mut c GatewayClient) process_dispatch(event DispatchEvent) !bool {
