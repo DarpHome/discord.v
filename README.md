@@ -76,9 +76,9 @@ fn main() {
   - [x] Emoji
   - [x] Guild
   - [x] Invite
-  - [ ] User
-  - [ ] Voice
-  - [ ] Webhook
+  - [x] User
+  - [x] Voice
+  - [x] Webhook
   - [x] Slash Command
 - [ ] Create examples (3/4)
 - [ ] Documentation
