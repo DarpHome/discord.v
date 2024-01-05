@@ -24,9 +24,12 @@ pub:
 mut:
 	logger log.Logger
 pub mut:
-	user_data voidptr
+	user_data map[string]voidptr
 }
 
+// Test 1
+// [!NOTE]
+// Test 2
 @[params]
 pub struct ClientConfig {
 pub:

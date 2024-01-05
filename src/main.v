@@ -11,6 +11,7 @@ fn main() {
 		exit(1)
 	}
 	dump(sizeof(discord.GatewayClient))
+	dump(sizeof(discord.Client))
 	match op {
 		'bot' {
 			table := {
