@@ -1,5 +1,7 @@
 module discord
 
+import net.http
+import net.urllib
 import x.json2
 
 pub enum StickerType {
@@ -36,13 +38,13 @@ pub fn Sticker.parse(j json2.Any) !Sticker {
 			return Sticker{
 				id: Snowflake.parse(j['id']!)!
 				pack_id: if s := j['pack_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				name: j['name']! as string
 				description: if description !is json2.Null {
-					?string(description as string)
+					description as string
 				} else {
 					none
 				}
@@ -50,29 +52,29 @@ pub fn Sticker.parse(j json2.Any) !Sticker {
 				typ: unsafe { StickerType(j['type']!.int()) }
 				format_type: unsafe { StickerFormatType(j['format_type']!.int()) }
 				available: if b := j['available'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				user: if o := j['user'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				sort_value: if i := j['sort_value'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected sticker to be object, got ${j.type_name()}')
+			return error('expected Sticker to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -98,7 +100,175 @@ pub fn StickerItem.parse(j json2.Any) !StickerItem {
 			}
 		}
 		else {
-			return error('expected sticker item to be object, got ${j.type_name()}')
+			return error('expected StickerItem to be object, got ${j.type_name()}')
 		}
 	}
+}
+
+// Represents a pack of standard stickers.
+pub struct StickerPack {
+pub:
+	// id of the sticker pack
+	id Snowflake
+	// the stickers in the pack
+	stickers []Sticker
+	// name of the sticker pack
+	name string
+	// id of the pack's SKU
+	sku_id Snowflake
+	// id of a sticker in the pack which is shown as the pack's icon
+	cover_sticker_id ?Snowflake
+	// description of the sticker pack
+	description string
+	// id of the sticker pack's banner image
+	banner_asset_id ?Snowflake
+}
+
+pub fn StickerPack.parse(j json2.Any) !StickerPack {
+	match j {
+		map[string]json2.Any {
+			return StickerPack{
+				id: Snowflake.parse(j['id']!)!
+				stickers: maybe_map(j['stickers']! as []json2.Any, fn (k json2.Any) !Sticker {
+					return Sticker.parse(k)!
+				})!
+				name: j['name']! as string
+				sku_id: Snowflake.parse(j['sku_id']!)!
+				cover_sticker_id: if s := j['cover_sticker_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				description: j['description']! as string
+				banner_asset_id: if s := j['banner_asset_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected StickerPack to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// Returns a [sticker](#Sticker) object for the given sticker ID.
+pub fn (c Client) fetch_sticker(sticker_id Snowflake) !Sticker {
+	return Sticker.parse(json2.raw_decode(c.request(.get, '/stickers/${urllib.path_escape(sticker_id.build())}')!.body)!)!
+}
+
+// Returns a list of available sticker packs.
+pub fn (c Client) list_sticker_packs() ![]StickerPack {
+	return maybe_map((json2.raw_decode(c.request(.get, '/sticker-packs')!.body)! as map[string]json2.Any)['sticker_packs']! as []json2.Any,
+		fn (k json2.Any) !StickerPack {
+		return StickerPack.parse(k)!
+	})!
+}
+
+// Returns an array of [sticker](#Sticker) objects for the given guild. Includes `user` fields if the bot has the `.create_guild_expressions` or `.manage_guild_expressions` permission.
+pub fn (c Client) list_guild_stickers(guild_id Snowflake) ![]Sticker {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/stickers')!.body)! as []json2.Any,
+		fn (k json2.Any) !Sticker {
+		return Sticker.parse(k)!
+	})!
+}
+
+// Returns a [sticker](#Sticker) object for the given guild and sticker IDs. Includes the `user` field if the bot has the `.create_guild_expressions` or `.manage_guild_expressions` permission.
+pub fn (c Client) fetch_guild_sticker(guild_id Snowflake, sticker_id Snowflake) !Sticker {
+	return Sticker.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/stickers/${urllib.path_escape(sticker_id.build())}')!.body)!)!
+}
+
+@[params]
+pub struct CreateGuildStickerParams {
+pub:
+	reason ?string
+	// name of the sticker (2-30 characters)
+	name string @[required]
+	// description of the sticker (empty or 2-100 characters)
+	description string
+	// autocomplete/suggestion tags for the sticker (max 200 characters)
+	tags string @[required]
+	// the sticker file to upload, must be a PNG, APNG, GIF, or Lottie JSON file, max 512 KiB
+	file Image @[required]
+}
+
+pub fn (params CreateGuildStickerParams) build() map[string][]http.FileData {
+	// pub fn multipart_form_body(files map[string][]http.FileData) (string, string) {
+	return {
+		'name':        [http.FileData{
+			data: params.name
+		}]
+		'description': [http.FileData{
+			data: params.description
+		}]
+		'tags':        [http.FileData{
+			data: params.tags
+		}]
+		'file':        [
+			http.FileData{
+				content_type: params.file.content_type()
+				data: params.file.data.bytestr()
+			},
+		]
+	}
+}
+
+// Create a new sticker for the guild. Requires the `.create_guild_expressions` permission. Returns the new [sticker](#Sticker) object on success. Fires a Guild Stickers Update Gateway event.
+// Every guilds has five free sticker slots by default, and each Boost level will grant access to more slots.
+// > i Lottie stickers can only be uploaded on guilds that have either the `VERIFIED` and/or the `PARTNERED` [guild feature](#GuildFeature).
+pub fn (c Client) create_guild_sticker(guild_id Snowflake, params CreateGuildStickerParams) !Sticker {
+	boundary, body := multipart_form_body(params.build())
+	return Sticker.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/stickers',
+		body: body
+		common_headers: {
+			.content_type: 'multipart/form-data; boundary="${boundary}"'
+		}
+		reason: params.reason
+	)!.body)!)!
+}
+
+@[params]
+pub struct EditGuildStickerParams {
+pub:
+	reason ?string
+	// name of the sticker (2-30 characters)
+	name ?string
+	// description of the sticker (2-100 characters)
+	description ?string = sentinel_string
+	// autocomplete/suggestion tags for the sticker (max 200 characters)
+	tags ?string
+}
+
+pub fn (params EditGuildStickerParams) build() json2.Any {
+	mut j := map[string]json2.Any{}
+	if name := params.name {
+		j['name'] = name
+	}
+	if description := params.description {
+		if !is_sentinel(description) {
+			j['description'] = description
+		}
+	} else {
+		j['description'] = json2.null
+	}
+	if tags := params.tags {
+		j['tags'] = tags
+	}
+	return j
+}
+
+// Modify the given sticker. For stickers created by the current user, requires either the `.create_guild_expressions` or `.manage_guild_expressions` permission. For other stickers, requires the `.manage_guild_expressions` permission. Returns the updated [sticker](#Sticker) object on success. Fires a Guild Stickers Update Gateway event.
+pub fn (c Client) edit_guild_sticker(guild_id Snowflake, sticker_id Snowflake, params EditGuildStickerParams) !Sticker {
+	return Sticker.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/stickers/${urllib.path_escape(sticker_id.build())}',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
+}
+
+// Delete the given sticker. For stickers created by the current user, requires either the `.create_guild_expressions` or `.manage_guild_expressions` permission. For other stickers, requires the `.manage_guild_expressions` permission. Returns 204 No Content on success. Fires a Guild Stickers Update Gateway event.
+pub fn (c Client) delete_guild_sticker(guild_id Snowflake, sticker_id Snowflake, params ReasonParam) ! {
+	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/stickers/${urllib.path_escape(sticker_id.build())}',
+		reason: params.reason
+	)!
 }
