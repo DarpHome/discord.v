@@ -33,7 +33,7 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 			''
 		}
 	} else {
-		'?'
+		''
 	}), if json := options.json {
 		json.json_str()
 	} else if body := options.body {
