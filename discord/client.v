@@ -27,9 +27,6 @@ pub mut:
 	user_data map[string]voidptr
 }
 
-// Test 1
-// [!NOTE]
-// Test 2
 @[params]
 pub struct ClientConfig {
 pub:

@@ -21,14 +21,6 @@ pub struct RequestOptions {
 	headers        map[string]string
 }
 
-fn encode_query_params(vs urllib.Values) string {
-	r := vs.encode()
-	if r == '' {
-		return ''
-	}
-	return '?${r}'
-}
-
 pub fn (c Client) request(method http.Method, route string, options RequestOptions) !http.Response {
 	if options.json != none && options.body != none {
 		return error('cannot have json and body')
