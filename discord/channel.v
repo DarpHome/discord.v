@@ -39,6 +39,11 @@ pub enum ChannelType {
 	guild_media         = 16
 }
 
+pub enum PermissionOverwriteType {
+	role
+	member
+}
+
 // See [permissions](#Permissions) for more information about the allow and deny fields.
 pub struct PermissionOverwrite {
 pub:
@@ -286,11 +291,6 @@ pub enum ForumLayoutType {
 	list_view
 	// Display posts as a collection of tiles
 	gallery_view
-}
-
-pub enum PermissionOverwriteType {
-	role
-	member
 }
 
 pub struct ThreadMetadata {

@@ -71,7 +71,7 @@ fn main() {
 - [x] Implement `multipart/form-data` for file sending
 - [x] Do usual `application/json` for sending without binary data
 - [x] Handle Gateway events
-  - [ ] Audit Log
+  - [x] Audit Log
   - [x] Channel
   - [x] Emoji
   - [x] Guild
@@ -85,22 +85,31 @@ fn main() {
 
 ### Second milestone
 - [ ] Handle REST
-  - [ ] Audit Log
-  - [x] Channel
-  - [x] Emoji
-  - [x] Guild
-  - [x] Invite
-  - [x] User
-  - [x] Voice
-  - [x] Webhook
-  - [x] Slash Command
-  - [ ] Observe rate limits
-- [x] Slash Commands
-- [x] Fancy log
+  - [x] Interactions
+    - [x] Application Commands
+    - [x] Message Components
+    - [x] Receiving and Responding
+  - [ ] Resources
+    - [x] Application
+    - [ ] Application Role Connection Metadata
+    - [x] Audit Log
+    - [x] Auto Moderation
+    - [x] Channel
+    - [x] Emoji
+    - [x] Guild
+    - [x] Guild Scheduled Event
+    - [ ] Guild Template
+    - [x] Invite
+    - [x] Stage Instance
+    - [x] Sticker
+    - [x] User
+    - [x] Voice
+    - [x] Webhook
+    - [ ] Observe rate limits
 - [ ] Command router
 - [ ] Think about tests
 
-### Third milestone (till V v0.3)
+### Third milestone (till V v0.5)
 - [ ] Build cache ontop map's (memcache, redis in future)
 
 ### The Main one

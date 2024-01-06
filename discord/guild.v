@@ -1992,7 +1992,7 @@ pub fn IntegrationApplication.parse(j json2.Any) !IntegrationApplication {
 			}
 		}
 		else {
-			return error('expected integration application to be object, got ${j.type_name()}')
+			return error('expected IntegrationApplication to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -2042,17 +2042,17 @@ pub fn Integration.parse(j json2.Any) !Integration {
 				typ: j['type']! as string
 				enabled: j['enabled']! as bool
 				syncing: if b := j['syncing'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				role_id: if s := j['role_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				enable_emoticons: if b := j['enable_emoticons'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
@@ -2062,33 +2062,33 @@ pub fn Integration.parse(j json2.Any) !Integration {
 					none
 				}
 				expire_grace_period: if i := j['expire_grace_period'] {
-					?time.Duration(i.int() * (time.hour * 24))
+					i.int() * (time.hour * 24)
 				} else {
 					none
 				}
 				user: if o := j['user'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				account: IntegrationAccount.parse(j['account']!)!
 				synced_at: if s := j['synced_at'] {
-					?time.Time(time.parse_iso8601(s as string)!)
+					time.parse_iso8601(s as string)!
 				} else {
 					none
 				}
 				subscriber_count: if i := j['subscriber_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				revoked: if b := j['revoked'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				application: if o := j['application'] {
-					?IntegrationApplication(IntegrationApplication.parse(o)!)
+					IntegrationApplication.parse(o)!
 				} else {
 					none
 				}
@@ -2100,7 +2100,128 @@ pub fn Integration.parse(j json2.Any) !Integration {
 			}
 		}
 		else {
-			return error('expected integration to be object, got ${j.type_name()}')
+			return error('expected Integration to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+
+pub struct PartialIntegration {
+pub:
+	// integration id
+	id Snowflake
+	// integration name
+	name ?string
+	// integration type (twitch, youtube, discord, or guild_subscription)
+	typ ?string
+	// is this integration enabled
+	enabled ?bool
+	// is this integration syncing
+	syncing ?bool
+	// id that this integration uses for "subscribers"
+	role_id ?Snowflake
+	// whether emoticons should be synced for this integration (twitch only currently)
+	enable_emoticons ?bool
+	// the behavior of expiring subscribers
+	expire_behavior ?IntegrationExpireBehavior
+	// the grace period (in days) before expiring subscribers
+	expire_grace_period ?time.Duration
+	// user for this integration
+	user ?User
+	// integration account information
+	account ?IntegrationAccount
+	// when this integration was last synced
+	synced_at ?time.Time
+	// how many subscribers this integration has
+	subscriber_count ?int
+	// has this integration been revoked
+	revoked ?bool
+	// The bot/OAuth2 application for discord integrations
+	application ?IntegrationApplication
+	// the scopes the application has been authorized for
+	scopes ?[]string
+}
+
+pub fn PartialIntegration.parse(j json2.Any) !PartialIntegration {
+	match j {
+		map[string]json2.Any {
+			return PartialIntegration{
+				id: Snowflake.parse(j['id']!)!
+				name: if s := j['name'] {
+					s as string
+				} else {
+					none
+				}
+				typ: if s := j['type'] {
+					s as string
+				} else {
+					none
+				}
+				enabled: if b := j['enabled'] {
+					b as bool
+				} else {
+					none
+				}
+				syncing: if b := j['syncing'] {
+					b as bool
+				} else {
+					none
+				}
+				role_id: if s := j['role_id'] {
+					Snowflake.parse(s)!
+				} else {
+					none
+				}
+				enable_emoticons: if b := j['enable_emoticons'] {
+					b as bool
+				} else {
+					none
+				}
+				expire_behavior: if i := j['expire_behavior'] {
+					unsafe { IntegrationExpireBehavior(i.int()) }
+				} else {
+					none
+				}
+				expire_grace_period: if i := j['expire_grace_period'] {
+					i.int() * (time.hour * 24)
+				} else {
+					none
+				}
+				user: if o := j['user'] {
+					User.parse(o)!
+				} else {
+					none
+				}
+				account: IntegrationAccount.parse(j['account']!)!
+				synced_at: if s := j['synced_at'] {
+					time.parse_iso8601(s as string)!
+				} else {
+					none
+				}
+				subscriber_count: if i := j['subscriber_count'] {
+					i.int()
+				} else {
+					none
+				}
+				revoked: if b := j['revoked'] {
+					b as bool
+				} else {
+					none
+				}
+				application: if o := j['application'] {
+					IntegrationApplication.parse(o)!
+				} else {
+					none
+				}
+				scopes: if a := j['scopes'] {
+					(a as []json2.Any).map(|s| s as string)
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected PartialIntegration to be object, got ${j.type_name()}')
 		}
 	}
 }

@@ -385,6 +385,20 @@ pub fn GuildDeleteEvent.parse(j json2.Any, base BaseEvent) !GuildDeleteEvent {
 	}
 }
 
+// Sent when a guild audit log entry is created. The inner payload is an [AuditLogEntry](#AuditLogEntry) object. This event is only sent to bots with the `.view_audit_log` permission.
+pub struct GuildAuditLogEntryCreateEvent {
+	BaseEvent
+pub:
+	entry AuditLogEntry
+}
+
+pub fn GuildAuditLogEntryCreateEvent.parse(j json2.Any, base BaseEvent) !GuildAuditLogEntryCreateEvent {
+	return GuildAuditLogEntryCreateEvent{
+		BaseEvent: base
+		entry: AuditLogEntry.parse(j)!
+	}
+}
+
 pub struct GuildBanAddEvent {
 	BaseEvent
 pub:
@@ -1492,6 +1506,7 @@ pub mut:
 	on_guild_create                           EventController[GuildCreateEvent]
 	on_guild_update                           EventController[GuildUpdateEvent]
 	on_guild_delete                           EventController[GuildDeleteEvent]
+	on_guild_audit_log_entry_create           EventController[GuildAuditLogEntryCreateEvent]
 	on_guild_ban_add                          EventController[GuildBanAddEvent]
 	on_guild_ban_remove                       EventController[GuildBanRemoveEvent]
 	on_guild_emojis_update                    EventController[GuildEmojisUpdateEvent]
@@ -1661,6 +1676,12 @@ fn event_process_guild_update(mut gc GatewayClient, data json2.Any, options Emit
 
 fn event_process_guild_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
 	gc.events.on_guild_delete.emit(GuildDeleteEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
+}
+
+fn event_process_guild_audit_log_entry_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_guild_audit_log_entry_create.emit(GuildAuditLogEntryCreateEvent.parse(data, BaseEvent{
 		creator: gc
 	})!, options)
 }
@@ -1936,6 +1957,7 @@ const events_table = EventsTable({
 	'GUILD_CREATE':                           event_process_guild_create
 	'GUILD_UPDATE':                           event_process_guild_update
 	'GUILD_DELETE':                           event_process_guild_delete
+	'AUDIT_LOG_ENTRY_CREATE':                 event_process_guild_audit_log_entry_create
 	'GUILD_BAN_ADD':                          event_process_guild_ban_add
 	'GUILD_BAN_REMOVE':                       event_process_guild_ban_remove
 	'GUILD_EMOJIS_UPDATE':                    event_process_guild_emojis_update
