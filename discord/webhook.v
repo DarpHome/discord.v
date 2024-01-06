@@ -324,17 +324,19 @@ pub fn (params ExecuteWebhookParams) build_query_values() urllib.Values {
 pub fn (c Client) execute_webhook(webhook_id Snowflake, webhook_token string, params ExecuteWebhookParams) !&Message {
 	response := if files := params.files {
 		body, boundary := build_multipart_with_files(files, params.build())
-		c.request(.post, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}${encode_query(params.build_query_values())}',
-			body: body
+		c.request(.post, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}',
+			query_params: params.build_query_values()
 			common_headers: {
 				.content_type: 'multipart/form-data; boundary="${boundary}"'
 			}
 			authenticate: false
+			body: body
 		)!
 	} else {
-		c.request(.post, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}${encode_query(params.build_query_values())}',
-			json: params.build()
+		c.request(.post, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}',
+			query_params: params.build_query_values()
 			authenticate: false
+			json: params.build()
 		)!
 	}
 	if response.status() != .no_content {
@@ -370,7 +372,8 @@ fn unwrap_optional_id(id ?Snowflake, default string) string {
 // Returns a previously-sent webhook message from the same token. Returns a [message](#Message) object on success.
 pub fn (c Client) fetch_webhook_message(webhook_id Snowflake, webhook_token string, message_id ?Snowflake, params FetchWebhookMessageParams) !Message {
 	return Message.parse(json2.raw_decode(c.request(.get, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${unwrap_optional_id(message_id,
-		'@original')}${encode_query(params.build_query_values())}',
+		'@original')}',
+		query_params: params.build_query_values()
 		authenticate: false
 	)!.body)!)!
 }
@@ -429,18 +432,20 @@ pub fn (c Client) edit_webhook_message(webhook_id Snowflake, webhook_token strin
 		body, boundary := build_multipart_with_files(files, params.build())
 
 		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${unwrap_optional_id(message_id,
-			'@original')}${encode_query(params.build_query_values())}',
-			body: body
+			'@original')}',
+			query_params: params.build_query_values()
+			authenticate: false
 			common_headers: {
 				.content_type: 'multipart/form-data; boundary="${boundary}"'
 			}
-			authenticate: false
+			body: body
 		)!.body
 	} else {
 		c.request(.patch, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${unwrap_optional_id(message_id,
-			'@original')}${encode_query(params.build_query_values())}',
-			json: params.build()
+			'@original')}',
+			query_params: params.build_query_values()
 			authenticate: false
+			json: params.build()
 		)!.body
 	})!)!
 }
@@ -463,7 +468,8 @@ pub fn (params DeleteWebhookMessageParams) build_query_values() urllib.Values {
 // Deletes a message that was created by the webhook. Returns a 204 No Content response on success.
 pub fn (c Client) delete_webhook_message(webhook_id Snowflake, webhook_token string, message_id ?Snowflake, params DeleteWebhookMessageParams) ! {
 	c.request(.delete, '/webhooks/${urllib.path_escape(webhook_id.build())}/${urllib.path_escape(webhook_token)}/messages/${unwrap_optional_id(message_id,
-		'@original')}${encode_query(params.build_query_values())}',
+		'@original')}',
+		query_params: params.build_query_values()
 		authenticate: false
 	)!
 }

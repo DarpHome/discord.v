@@ -17,14 +17,32 @@ pub struct RequestOptions {
 	json           ?json2.Any
 	body           ?string
 	common_headers map[http.CommonHeader]string
+	query_params   ?urllib.Values
 	headers        map[string]string
+}
+
+fn encode_query_params(vs urllib.Values) string {
+	r := vs.encode()
+	if r == '' {
+		return ''
+	}
+	return '?${r}'
 }
 
 pub fn (c Client) request(method http.Method, route string, options RequestOptions) !http.Response {
 	if options.json != none && options.body != none {
 		return error('cannot have json and body')
 	}
-	mut req := http.new_request(method, c.base_url.trim_right('/') + '/' + route, if json := options.json {
+	mut req := http.new_request(method, c.base_url.trim_right('/') + '/' + route.all_before('?') + (if query_params := options.query_params {
+		tmp := query_params.encode()
+		if tmp != '' {
+			'?${tmp}'
+		} else {
+			''
+		}
+	} else {
+		'?'
+	}), if json := options.json {
 		json.json_str()
 	} else if body := options.body {
 		body
@@ -122,14 +140,6 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 		}
 	}
 	return res
-}
-
-fn encode_query(vs urllib.Values) string {
-	r := vs.encode()
-	if r == '' {
-		return ''
-	}
-	return '?${r}'
 }
 
 pub fn multipart_form_body(files map[string][]http.FileData) (string, string) {

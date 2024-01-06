@@ -493,14 +493,19 @@ pub:
 	with_localizations ?bool
 }
 
-// Fetch all of the global commands for your application. Returns an array of application command objects.
-pub fn (c Client) fetch_global_application_commands(application_id Snowflake, params FetchGlobalApplicationCommandsParams) ![]ApplicationCommand {
+pub fn (params FetchGlobalApplicationCommandsParams) build_query_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if with_localizations := params.with_localizations {
 		query_params.set('with_localizations', with_localizations.str())
 	}
-	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/commands${encode_query(query_params)}')!.body)! as []json2.Any,
-		fn (j json2.Any) !ApplicationCommand {
+	return query_params
+}
+
+// Fetch all of the global commands for your application. Returns an array of application command objects.
+pub fn (c Client) fetch_global_application_commands(application_id Snowflake, params FetchGlobalApplicationCommandsParams) ![]ApplicationCommand {
+	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/commands',
+		query_params: params.build_query_values()
+	)!.body)! as []json2.Any, fn (j json2.Any) !ApplicationCommand {
 		return ApplicationCommand.parse(j)!
 	})!
 }

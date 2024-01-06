@@ -453,8 +453,9 @@ pub fn (params FetchMyGuildsParams) build_query_values() urllib.Values {
 }
 
 pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
-	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/guilds${encode_query(params.build_query_values())}')!.body)! as []json2.Any,
-		fn (j json2.Any) !PartialGuild {
+	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/guilds',
+		query_params: params.build_query_values()
+	)!.body)! as []json2.Any, fn (j json2.Any) !PartialGuild {
 		return PartialGuild.parse(j)!
 	})!
 }
@@ -1350,7 +1351,7 @@ pub:
 	after ?Snowflake
 }
 
-pub fn (params ListGuildMembersParams) build_values() urllib.Values {
+pub fn (params ListGuildMembersParams) build_query_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if limit := params.limit {
 		query_params.set('limit', limit.str())
@@ -1364,8 +1365,9 @@ pub fn (params ListGuildMembersParams) build_values() urllib.Values {
 // Returns a list of guild member objects that are members of the guild.
 // > ! This endpoint is restricted according to whether the `.guild_members` [Privileged Intent](#Intents) is enabled for your application.
 pub fn (c Client) fetch_guild_members(guild_id Snowflake, params ListGuildMembersParams) ![]GuildMember {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/members${encode_query(params.build_values())}')!.body)! as []json2.Any,
-		fn (j json2.Any) !GuildMember {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/members',
+		query_params: params.build_query_values()
+	)!.body)! as []json2.Any, fn (j json2.Any) !GuildMember {
 		return GuildMember.parse(j)!
 	})!
 }
@@ -1586,7 +1588,7 @@ pub:
 	after ?Snowflake
 }
 
-pub fn (params FetchGuildBansParams) build_values() urllib.Values {
+pub fn (params FetchGuildBansParams) build_query_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if limit := params.limit {
 		query_params.set('limit', limit.str())
@@ -1602,8 +1604,9 @@ pub fn (params FetchGuildBansParams) build_values() urllib.Values {
 
 // Returns a list of ban objects for the users banned from this guild. Requires the `.ban_members` permission.
 pub fn (c Client) fetch_guild_bans(guild_id Snowflake, params FetchGuildBansParams) ![]Ban {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/bans${encode_query(params.build_values())}')!.body)! as []json2.Any,
-		fn (j json2.Any) !Ban {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/bans',
+		query_params: params.build_query_values()
+	)!.body)! as []json2.Any, fn (j json2.Any) !Ban {
 		return Ban.parse(j)!
 	})!
 }

@@ -1360,7 +1360,9 @@ pub fn (params FetchThreadMemberParams) build_query_values() urllib.Values {
 // Returns a thread member object for the specified user if they are a member of the thread, returns a 404 response otherwise.
 // When with_member is set to `true`, the thread member object will include a `member` field containing a guild member object.
 pub fn (c Client) fetch_thread_member(channel_id Snowflake, user_id Snowflake, params FetchThreadMemberParams) !ThreadMember {
-	return ThreadMember.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members/${urllib.path_escape(user_id.build())}${encode_query(params.build_query_values())}')!.body)!)!
+	return ThreadMember.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members/${urllib.path_escape(user_id.build())}',
+		query_params: params.build_query_values()
+	)!.body)!)!
 }
 
 @[params]
@@ -1391,8 +1393,9 @@ pub fn (params ListThreadMembersParams) build_query_values() urllib.Values {
 // Returns array of thread members objects that are members of the thread.
 // When with_member is set to `true`, the results will be paginated and each thread member object will include a `member` field containing a guild member object.
 pub fn (c Client) list_thread_members(channel_id Snowflake, params FetchThreadMemberParams) ![]ThreadMember {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members${encode_query(params.build_query_values())}')!.body)! as []json2.Any,
-		fn (j json2.Any) !ThreadMember {
+	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/thread-members',
+		query_params: params.build_query_values()
+	)!.body)! as []json2.Any, fn (j json2.Any) !ThreadMember {
 		return ThreadMember.parse(j)!
 	})!
 }
@@ -1448,12 +1451,16 @@ pub fn ListThreadsResponse.parse(j json2.Any) !ListThreadsResponse {
 
 // Returns archived threads in the channel that are public. When called on a `.guild_text` channel, returns threads of type `.public_thread`. When called on a `.guild_announcement` channel returns threads of type `.announcement_thread`. Threads are ordered by `archive_timestamp`, in descending order. Requires the `.read_message_history` permission.
 pub fn (c Client) list_public_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
-	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/threads/archived/public${encode_query(params.build_query_values())}')!.body)!)!
+	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/threads/archived/public',
+		query_params: params.build_query_values()
+	)!.body)!)!
 }
 
 // Returns archived threads in the channel that are of type `.private_thread`. Threads are ordered by `archive_timestamp`, in descending order. Requires both the `.read_message_history` and `.manage_threads` permissions.
 pub fn (c Client) list_private_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
-	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/threads/archived/private${encode_query(params.build_query_values())}')!.body)!)!
+	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/threads/archived/private',
+		query_params: params.build_query_values()
+	)!.body)!)!
 }
 
 @[params]
@@ -1478,7 +1485,9 @@ pub fn (params ListJoinedPrivateArchivedThreadsParams) build_query_values() urll
 
 // Returns archived threads in the channel that are of type `.private_threads`, and the user has joined. Threads are ordered by their `id`, in descending order. Requires the `.read_message_history` permission.
 pub fn (c Client) list_joined_private_archived_threads(channel_id Snowflake, params ListArchivedThreadsParams) !ListThreadsResponse {
-	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/users/@me/threads/archived/private${encode_query(params.build_query_values())}')!.body)!)!
+	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.build())}/users/@me/threads/archived/private',
+		query_params: params.build_query_values()
+	)!.body)!)!
 }
 
 pub const sentinel_forum_tags = []ForumTag{}

@@ -152,6 +152,20 @@ pub:
 	guild_scheduled_event_id ?Snowflake
 }
 
+pub fn (params FetchInviteParams) build_query_values() urllib.Values {
+	mut query_params := urllib.new_values()
+	if with_counts := params.with_counts {
+		query_params.add('with_counts', with_counts.str())
+	}
+	if with_expiration := params.with_expiration {
+		query_params.add('with_expiration', with_expiration.str())
+	}
+	if guild_scheduled_event_id := params.guild_scheduled_event_id {
+		query_params.add('guild_scheduled_event_id', guild_scheduled_event_id.build())
+	}
+	return query_params
+}
+
 // Returns an invite object for the given code.
 pub fn (c Client) fetch_invite(code string, params FetchInviteParams) !Invite {
 	mut query_params := urllib.new_values()
@@ -164,7 +178,9 @@ pub fn (c Client) fetch_invite(code string, params FetchInviteParams) !Invite {
 	if guild_scheduled_event_id := params.guild_scheduled_event_id {
 		query_params.add('guild_scheduled_event_id', guild_scheduled_event_id.build())
 	}
-	return Invite.parse(c.request(.get, '/invites/${urllib.path_escape(code)}${encode_query(query_params)}')!.body)!
+	return Invite.parse(c.request(.get, '/invites/${urllib.path_escape(code)}',
+		query_params: params.build_query_values()
+	)!.body)!
 }
 
 // Delete an invite. Requires the `.manage_channels` permission on the channel this invite belongs to, or `.manage_guild` to remove any invite across the guild. Returns an [`Invite`](#Invite) object on success. Fires an Invite Delete Gateway event.

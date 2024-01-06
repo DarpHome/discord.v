@@ -87,7 +87,7 @@ pub:
 	exclude_ended ?bool
 }
 
-pub fn (params ListEntitlementParams) build_values() urllib.Values {
+pub fn (params ListEntitlementParams) build_query_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if user_id := params.user_id {
 		query_params.set('user_id', user_id.build())
@@ -115,8 +115,9 @@ pub fn (params ListEntitlementParams) build_values() urllib.Values {
 
 // Returns all entitlements for a given app, active and expired.
 pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement {
-	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements${encode_query(params.build_values())}')!.body)! as []json2.Any,
-		fn (k json2.Any) !Entitlement {
+	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/entitlements',
+		query_params: params.build_query_values()
+	)!.body)! as []json2.Any, fn (k json2.Any) !Entitlement {
 		return Entitlement.parse(k)!
 	})!
 }

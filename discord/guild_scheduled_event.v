@@ -166,7 +166,7 @@ pub:
 	with_user_count ?bool
 }
 
-pub fn (params FetchScheduledEventsParams) build_values() urllib.Values {
+pub fn (params FetchScheduledEventsParams) build_query_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if with_user_count := params.with_user_count {
 		query_params.set('with_user_count', with_user_count.str())
@@ -176,8 +176,9 @@ pub fn (params FetchScheduledEventsParams) build_values() urllib.Values {
 
 // Returns a list of [guild scheduled event](#GuildScheduledEvent) objects for the given guild.
 pub fn (c Client) list_scheduled_events_for_guild(guild_id Snowflake, params FetchScheduledEventsParams) ![]GuildScheduledEvent {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events${encode_query(params.build_values())}')!.body)! as []json2.Any,
-		fn (k json2.Any) !GuildScheduledEvent {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events',
+		query_params: params.build_query_values()
+	)!.body)! as []json2.Any, fn (k json2.Any) !GuildScheduledEvent {
 		return GuildScheduledEvent.parse(k)!
 	})!
 }
@@ -242,7 +243,9 @@ pub fn (c Client) create_guild_scheduled_event(guild_id Snowflake, params Create
 
 // Get a guild scheduled event. Returns a guild scheduled event object on success.
 pub fn (c Client) fetch_guild_scheduled_event(guild_id Snowflake, guild_scheduled_event_id Snowflake, params FetchScheduledEventsParams) !GuildScheduledEvent {
-	return GuildScheduledEvent.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/${urllib.path_escape(guild_scheduled_event_id.build())}${encode_query(params.build_values())}')!.body)!)!
+	return GuildScheduledEvent.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/${urllib.path_escape(guild_scheduled_event_id.build())}',
+		query_params: params.build_query_values()
+	)!.body)!)!
 }
 
 @[params]
@@ -384,7 +387,7 @@ pub:
 	after ?Snowflake
 }
 
-pub fn (params FetchGuildScheduledEventUsersParams) build_values() urllib.Values {
+pub fn (params FetchGuildScheduledEventUsersParams) build_query_values() urllib.Values {
 	mut query_params := urllib.new_values()
 	if limit := params.limit {
 		query_params.set('limit', limit.str())
@@ -403,8 +406,9 @@ pub fn (params FetchGuildScheduledEventUsersParams) build_values() urllib.Values
 
 // Get a list of guild scheduled event users subscribed to a guild scheduled event. Returns a list of [guild scheduled event user](#GuildScheduledEventUser) objects on success. Guild member data, if it exists, is included if the `with_member` parameter is set.
 pub fn (c Client) fetch_guild_scheduled_event_users(guild_id Snowflake, guild_scheduled_event_id Snowflake, params FetchGuildScheduledEventUsersParams) ![]GuildScheduledEventUser {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/users${encode_query(params.build_values())}')!.body)! as []json2.Any,
-		fn (k json2.Any) !GuildScheduledEventUser {
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/scheduled-events/users',
+		query_params: params.build_query_values()
+	)!.body)! as []json2.Any, fn (k json2.Any) !GuildScheduledEventUser {
 		return GuildScheduledEventUser.parse(k)!
 	})!
 }
