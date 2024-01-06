@@ -343,16 +343,19 @@ pub fn AuditLog.parse(j json2.Any) !AuditLog {
 	match j {
 		map[string]json2.Any {
 			return AuditLog{
-				application_commands: maybe_map(j['application_commands']! as []json2.Any, fn (k json2.Any) !ApplicationCommand {
+				application_commands: maybe_map(j['application_commands']! as []json2.Any,
+					fn (k json2.Any) !ApplicationCommand {
 					return ApplicationCommand.parse(k)!
 				})!
 				audit_log_entries: maybe_map(j['audit_log_entries']! as []json2.Any, fn (k json2.Any) !AuditLogEntry {
 					return AuditLogEntry.parse(k)!
 				})!
-				auto_moderation_rules: maybe_map(j['auto_moderation_rules']! as []json2.Any, fn (k json2.Any) !AutoModerationRule {
+				auto_moderation_rules: maybe_map(j['auto_moderation_rules']! as []json2.Any,
+					fn (k json2.Any) !AutoModerationRule {
 					return AutoModerationRule.parse(k)!
 				})!
-				guild_scheduled_events: maybe_map(j['guild_scheduled_events']! as []json2.Any, fn (k json2.Any) !GuildScheduledEvent {
+				guild_scheduled_events: maybe_map(j['guild_scheduled_events']! as []json2.Any,
+					fn (k json2.Any) !GuildScheduledEvent {
 					return GuildScheduledEvent.parse(k)!
 				})!
 				integrations: maybe_map(j['integrations']! as []json2.Any, fn (k json2.Any) !PartialIntegration {
@@ -414,5 +417,7 @@ pub fn (params FetchGuildAuditLogParams) build_query_values() urllib.Values {
 // Returns an [audit log](#AuditLog) object for the guild. Requires the `.view_audit_log` permission.
 // The returned list of audit log entries is ordered based on whether you use `before` or `after`. When using `before`, the list is ordered by the audit log entry ID descending (newer entries first). If `after` is used, the list is reversed and appears in ascending order (older entries first). Omitting both `before` and `after` defaults to `before` the current timestamp and will show the most recent entries in descending order by ID, the opposite can be achieved using `after: 0` (showing oldest entries).
 pub fn (c Client) fetch_guild_audit_log(guild_id Snowflake, params FetchGuildAuditLogParams) !AuditLog {
-	return AuditLog.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/audit-logs', query_params: params.build_query_values())!.body)!)!
+	return AuditLog.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/audit-logs',
+		query_params: params.build_query_values()
+	)!.body)!)!
 }

@@ -2105,7 +2105,6 @@ pub fn Integration.parse(j json2.Any) !Integration {
 	}
 }
 
-
 pub struct PartialIntegration {
 pub:
 	// integration id

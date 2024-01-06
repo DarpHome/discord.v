@@ -1681,7 +1681,8 @@ fn event_process_guild_delete(mut gc GatewayClient, data json2.Any, options Emit
 }
 
 fn event_process_guild_audit_log_entry_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_audit_log_entry_create.emit(GuildAuditLogEntryCreateEvent.parse(data, BaseEvent{
+	gc.events.on_guild_audit_log_entry_create.emit(GuildAuditLogEntryCreateEvent.parse(data,
+		BaseEvent{
 		creator: gc
 	})!, options)
 }
