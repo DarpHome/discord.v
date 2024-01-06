@@ -5,7 +5,7 @@ import strconv
 
 fn run_testbot(token string, _ []string) ! {
 	mut c := discord.bot(token,
-		intents: .message_content | .guild_messages | .guild_message_reactions | .direct_message_reactions | .guild_presences // | .guild_message_typing
+		intents: .message_content | .guild_messages | .guild_message_reactions | .direct_message_reactions // | .guild_message_typing
 		presence: discord.UpdatePresenceParams{
 			activities: [
 				discord.Activity{
@@ -130,6 +130,14 @@ fn run_testbot(token string, _ []string) ! {
 				event.creator.execute_webhook(1191507563443912755, '3G9KkD27pnBA3M2aybzKcCa9TtV5yci5XTb8gUA-DCEU8NZl9x6MxIchYjv1CiDZNNGs',
 					content: 'Hey'
 				)!
+			}
+			'bio' {
+				if event.message.author.id != 1073325901825187841 {
+					event.creator.create_message(event.message.channel_id, content: 'Ask my creator')!
+					return
+				}
+				event.creator.edit_my_application(description: args[1..].join(' '))!
+				event.creator.create_message(event.message.channel_id, content: 'Changed')!
 			}
 			else {}
 		}

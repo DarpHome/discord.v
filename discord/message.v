@@ -1509,7 +1509,9 @@ pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, par
 pub fn (c Client) delete_messages(channel_id Snowflake, message_ids []Snowflake, params ReasonParam) ! {
 	c.request(.post, '/channels/${urllib.path_escape(channel_id.build())}/messages/bulk-delete',
 		reason: params.reason
-		json: message_ids.map(|s| json2.Any(s.build()))
+		json: {
+			'messages': json2.Any(message_ids.map(|s| json2.Any(s.build())))
+		}
 	)!
 }
 
