@@ -23,6 +23,7 @@ fn main() {
 				'slash-pingpong': run_slash_pingpong
 				'add-role':       run_add_role
 				'remove-role':    run_remove_role
+				'message-logger': run_message_logger
 			}
 			arg1 := os.args[2] or {
 				eprintln('No example specified (may be ${table.keys().join(', ')})')

@@ -9,6 +9,7 @@ pub enum GatewayClientSettings {
 	ignore_unknown_events
 	dont_process
 	dont_cut_debug
+	dont_process_guild_events
 }
 
 @[heap]
@@ -31,6 +32,8 @@ mut:
 	read_timeout       ?time.Duration
 	write_timeout      ?time.Duration
 pub mut:
+	user   User
+	cache  Cache
 	events Events
 	ws     &websocket.Client = unsafe { nil }
 }

@@ -31,6 +31,16 @@ pub:
 	guild_id ?Snowflake
 }
 
+pub fn (e Entitlement) get_owner() ?Snowflake {
+	return if s := e.user_id {
+		s
+	} else if s := e.guild_id {
+		s
+	} else {
+		none
+	}
+}
+
 pub fn Entitlement.parse(j json2.Any) !Entitlement {
 	match j {
 		map[string]json2.Any {
@@ -39,24 +49,24 @@ pub fn Entitlement.parse(j json2.Any) !Entitlement {
 				sku_id: Snowflake.parse(j['sku_id']!)!
 				application_id: Snowflake.parse(j['application_id']!)!
 				user_id: if s := j['user_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				typ: unsafe { EntitlementType(j['type']!.int()) }
 				deleted: j['deleted']! as bool
 				starts_at: if s := j['starts_at'] {
-					?time.Time(time.parse_iso8601(s as string)!)
+					time.parse_iso8601(s as string)!
 				} else {
 					none
 				}
 				ends_at: if s := j['ends_at'] {
-					?time.Time(time.parse_iso8601(s as string)!)
+					time.parse_iso8601(s as string)!
 				} else {
 					none
 				}
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}

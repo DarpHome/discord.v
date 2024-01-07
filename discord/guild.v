@@ -544,181 +544,250 @@ pub:
 	safety_alerts_channel_id ?Snowflake
 }
 
+pub fn Guild.internal_parse(j map[string]json2.Any) !Guild {
+	icon := j['icon']!
+	splash := j['splash']!
+	discovery_splash := j['discovery_splash']!
+	afk_channel_id := j['afk_channel_id']!
+	application_id := j['application_id']!
+	system_channel_id := j['system_channel_id']!
+	rules_channel_id := j['rules_channel_id']!
+	vanity_url_code := j['vanity_url_code']!
+	description := j['description']!
+	banner := j['banner']!
+	public_updates_channel_id := j['public_updates_channel_id']!
+	safety_alerts_channel_id := j['safety_alerts_channel_id']!
+	return Guild{
+		id: Snowflake.parse(j['id']!)!
+		name: j['name']! as string
+		icon: if icon is string {
+			?string(icon)
+		} else {
+			none
+		}
+		icon_hash: if s := j['icon_hash'] {
+			if s !is json2.Null {
+				?string(s as string)
+			} else {
+				none
+			}
+		} else {
+			none
+		}
+		splash: if splash is string {
+			?string(splash)
+		} else {
+			none
+		}
+		discovery_splash: if discovery_splash is string {
+			?string(discovery_splash)
+		} else {
+			none
+		}
+		owner_id: Snowflake.parse(j['owner_id']!)!
+		afk_channel_id: if afk_channel_id !is json2.Null {
+			?Snowflake(Snowflake.parse(afk_channel_id)!)
+		} else {
+			none
+		}
+		afk_timeout: j['afk_timeout']!.int() * time.second
+		widget_enabled: if b := j['widget_enabled'] {
+			?bool(b as bool)
+		} else {
+			none
+		}
+		widget_channel_id: if s := j['widget_channel_id'] {
+			if s !is json2.Null {
+				Snowflake.parse(s)!
+			} else {
+				none
+			}
+		} else {
+			none
+		}
+		verification_level: unsafe { VerificationLevel(j['verification_level']!.int()) }
+		default_message_notifications: unsafe { MessageNotificationsLevel(j['default_message_notifications']!.int()) }
+		explicit_content_filter: unsafe { ExplicitContentFilterLevel(j['explicit_content_filter']!.int()) }
+		roles: maybe_map(j['roles']! as []json2.Any, fn (k json2.Any) !Role {
+			return Role.parse(k)!
+		})!
+		emojis: maybe_map(j['emojis']! as []json2.Any, fn (k json2.Any) !Emoji {
+			return Emoji.parse(k)!
+		})!
+		features: (j['features']! as []json2.Any).map(|s| GuildFeature(s as string))
+		mfa_level: unsafe { MFALevel(j['mfa_level']!.int()) }
+		application_id: if application_id !is json2.Null {
+			Snowflake.parse(application_id)!
+		} else {
+			none
+		}
+		system_channel_id: if system_channel_id !is json2.Null {
+			Snowflake.parse(system_channel_id)!
+		} else {
+			none
+		}
+		system_channel_flags: unsafe { SystemChannelFlags(j['system_channel_flags']!.int()) }
+		rules_channel_id: if rules_channel_id !is json2.Null {
+			Snowflake.parse(rules_channel_id)!
+		} else {
+			none
+		}
+		max_presences: if i := j['max_presences'] {
+			if i !is json2.Null {
+				i.int()
+			} else {
+				none
+			}
+		} else {
+			none
+		}
+		max_members: if i := j['max_members'] {
+			if i !is json2.Null {
+				i.int()
+			} else {
+				none
+			}
+		} else {
+			none
+		}
+		vanity_url_code: if vanity_url_code !is json2.Null {
+			vanity_url_code as string
+		} else {
+			none
+		}
+		description: if description !is json2.Null {
+			description as string
+		} else {
+			none
+		}
+		banner: if banner !is json2.Null {
+			banner as string
+		} else {
+			none
+		}
+		premium_tier: unsafe { PremiumTier(j['premium_tier']!.int()) }
+		premium_subscription_count: if i := j['premium_subscription_count'] {
+			i.int()
+		} else {
+			none
+		}
+		preferred_locale: j['preferred_locale']! as string
+		public_updates_channel_id: if public_updates_channel_id !is json2.Null {
+			Snowflake.parse(public_updates_channel_id)!
+		} else {
+			none
+		}
+		max_video_channel_users: if i := j['max_video_channel_users'] {
+			i.int()
+		} else {
+			none
+		}
+		max_stage_video_channel_users: if i := j['max_stage_video_channel_users'] {
+			i.int()
+		} else {
+			none
+		}
+		approximate_member_count: if i := j['approximate_member_count'] {
+			i.int()
+		} else {
+			none
+		}
+		approximate_presence_count: if i := j['approximate_presence_count'] {
+			i.int()
+		} else {
+			none
+		}
+		welcome_screen: if o := j['welcome_screen'] {
+			WelcomeScreen.parse(o)!
+		} else {
+			none
+		}
+		nsfw_level: unsafe { NSFWLevel(j['nsfw_level']!.int()) }
+		stickers: maybe_map((j['stickers'] or { []json2.Any{} }) as []json2.Any,
+			fn (k json2.Any) !Sticker {
+			return Sticker.parse(k)!
+		})!
+		premium_progress_bar_enabled: j['premium_progress_bar_enabled']! as bool
+		safety_alerts_channel_id: if safety_alerts_channel_id !is json2.Null {
+			Snowflake.parse(safety_alerts_channel_id)!
+		} else {
+			none
+		}
+	}
+}
+
 pub fn Guild.parse(j json2.Any) !Guild {
 	match j {
 		map[string]json2.Any {
-			icon := j['icon']!
-			splash := j['splash']!
-			discovery_splash := j['discovery_splash']!
-			afk_channel_id := j['afk_channel_id']!
-			application_id := j['application_id']!
-			system_channel_id := j['system_channel_id']!
-			rules_channel_id := j['rules_channel_id']!
-			vanity_url_code := j['vanity_url_code']!
-			description := j['description']!
-			banner := j['banner']!
-			public_updates_channel_id := j['public_updates_channel_id']!
-			safety_alerts_channel_id := j['safety_alerts_channel_id']!
-			return Guild{
-				id: Snowflake.parse(j['id']!)!
-				name: j['name']! as string
-				icon: if icon is string {
-					?string(icon)
-				} else {
-					none
-				}
-				icon_hash: if s := j['icon_hash'] {
-					if s !is json2.Null {
-						?string(s as string)
-					} else {
-						none
-					}
-				} else {
-					none
-				}
-				splash: if splash is string {
-					?string(splash)
-				} else {
-					none
-				}
-				discovery_splash: if discovery_splash is string {
-					?string(discovery_splash)
-				} else {
-					none
-				}
-				owner_id: Snowflake.parse(j['owner_id']!)!
-				afk_channel_id: if afk_channel_id !is json2.Null {
-					?Snowflake(Snowflake.parse(afk_channel_id)!)
-				} else {
-					none
-				}
-				afk_timeout: j['afk_timeout']!.int() * time.second
-				widget_enabled: if b := j['widget_enabled'] {
-					?bool(b as bool)
-				} else {
-					none
-				}
-				widget_channel_id: if s := j['widget_channel_id'] {
-					if s !is json2.Null {
-						Snowflake.parse(s)!
-					} else {
-						none
-					}
-				} else {
-					none
-				}
-				verification_level: unsafe { VerificationLevel(j['verification_level']!.int()) }
-				default_message_notifications: unsafe { MessageNotificationsLevel(j['default_message_notifications']!.int()) }
-				explicit_content_filter: unsafe { ExplicitContentFilterLevel(j['explicit_content_filter']!.int()) }
-				roles: maybe_map(j['roles']! as []json2.Any, fn (k json2.Any) !Role {
-					return Role.parse(k)!
-				})!
-				emojis: maybe_map(j['emojis']! as []json2.Any, fn (k json2.Any) !Emoji {
-					return Emoji.parse(k)!
-				})!
-				features: (j['features']! as []json2.Any).map(|s| GuildFeature(s as string))
-				mfa_level: unsafe { MFALevel(j['mfa_level']!.int()) }
-				application_id: if application_id !is json2.Null {
-					Snowflake.parse(application_id)!
-				} else {
-					none
-				}
-				system_channel_id: if system_channel_id !is json2.Null {
-					Snowflake.parse(system_channel_id)!
-				} else {
-					none
-				}
-				system_channel_flags: unsafe { SystemChannelFlags(j['system_channel_flags']!.int()) }
-				rules_channel_id: if rules_channel_id !is json2.Null {
-					Snowflake.parse(rules_channel_id)!
-				} else {
-					none
-				}
-				max_presences: if i := j['max_presences'] {
-					if i !is json2.Null {
-						i.int()
-					} else {
-						none
-					}
-				} else {
-					none
-				}
-				max_members: if i := j['max_members'] {
-					if i !is json2.Null {
-						i.int()
-					} else {
-						none
-					}
-				} else {
-					none
-				}
-				vanity_url_code: if vanity_url_code !is json2.Null {
-					vanity_url_code as string
-				} else {
-					none
-				}
-				description: if description !is json2.Null {
-					description as string
-				} else {
-					none
-				}
-				banner: if banner !is json2.Null {
-					banner as string
-				} else {
-					none
-				}
-				premium_tier: unsafe { PremiumTier(j['premium_tier']!.int()) }
-				premium_subscription_count: if i := j['premium_subscription_count'] {
-					i.int()
-				} else {
-					none
-				}
-				preferred_locale: j['preferred_locale']! as string
-				public_updates_channel_id: if public_updates_channel_id !is json2.Null {
-					Snowflake.parse(public_updates_channel_id)!
-				} else {
-					none
-				}
-				max_video_channel_users: if i := j['max_video_channel_users'] {
-					i.int()
-				} else {
-					none
-				}
-				max_stage_video_channel_users: if i := j['max_stage_video_channel_users'] {
-					i.int()
-				} else {
-					none
-				}
-				approximate_member_count: if i := j['approximate_member_count'] {
-					i.int()
-				} else {
-					none
-				}
-				approximate_presence_count: if i := j['approximate_presence_count'] {
-					i.int()
-				} else {
-					none
-				}
-				welcome_screen: if o := j['welcome_screen'] {
-					WelcomeScreen.parse(o)!
-				} else {
-					none
-				}
-				nsfw_level: unsafe { NSFWLevel(j['nsfw_level']!.int()) }
-				stickers: maybe_map((j['stickers'] or { []json2.Any{} }) as []json2.Any,
-					fn (k json2.Any) !Sticker {
-					return Sticker.parse(k)!
-				})!
-				premium_progress_bar_enabled: j['premium_progress_bar_enabled']! as bool
-				safety_alerts_channel_id: if safety_alerts_channel_id !is json2.Null {
-					Snowflake.parse(safety_alerts_channel_id)!
-				} else {
-					none
-				}
-			}
+			return Guild.internal_parse(j)!
 		}
 		else {
-			return error('expected guild to be object, got ${j.type_name()}')
+			return error('expected Guild to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct Guild2 {
+	Guild
+pub:
+	// When this guild was joined at
+	joined_at time.Time
+	// `true` if this is considered a large guild
+	large bool
+	// Total number of members in this guild
+	member_count int
+	// States of members currently in voice channels; lacks the `guild_id` key
+	voice_states []VoiceState
+	// Users in the guild
+	users []GuildMember
+	// Channels in the guild
+	channels []Channel
+	// All active threads in the guild that current user has permission to view
+	threads []Channel
+	// Presences of the members in the guild, will only include non-offline members if the size is greater than `large threshold`
+	presences []Presence
+	// Stage instances in the guild
+	stage_instances []StageInstance
+	// Scheduled events in the guild
+	guild_scheduled_events []GuildScheduledEvent
+}
+
+pub fn Guild2.internal_parse(j map[string]json2.Any) !Guild2 {
+	return Guild2{
+		Guild: Guild.internal_parse(j)!
+		large: j['large']! as bool
+		member_count: j['member_count']!.int()
+		voice_states: maybe_map(j['voice_states']! as []json2.Any, fn (k json2.Any) !VoiceState {
+			return VoiceState.parse(k)!
+		})!
+		users: maybe_map(j['users']! as []json2.Any, fn (k json2.Any) !GuildMember {
+			return GuildMember.parse(k)!
+		})!
+		channels: maybe_map(j['channels']! as []json2.Any, fn (k json2.Any) !Channel {
+			return Channel.parse(k)!
+		})!
+		threads: maybe_map(j['threads']! as []json2.Any, fn (k json2.Any) !Channel {
+			return Channel.parse(k)!
+		})!
+		presences: maybe_map(j['presences']! as []json2.Any, fn (k json2.Any) !Presence {
+			return Presence.parse(k)!
+		})!
+		stage_instances: maybe_map(j['stage_instances']! as []json2.Any, fn (k json2.Any) !StageInstance {
+			return StageInstance.parse(k)!
+		})!
+		guild_scheduled_events: maybe_map(j['guild_scheduled_events']! as []json2.Any, fn (k json2.Any) !GuildScheduledEvent {
+			return GuildScheduledEvent.parse(k)!
+		})!
+	}
+}
+
+pub fn Guild2.parse(j json2.Any) !Guild2 {
+	match j {
+		map[string]json2.Any {
+			return Guild2.internal_parse(j)!
+		}
+		else {
+			return error('expected Guild2 to be object, got ${j.type_name()}')
 		}
 	}
 }

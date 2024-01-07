@@ -349,13 +349,13 @@ pub fn EntitlementDeleteEvent.parse(j json2.Any, base BaseEvent) !EntitlementDel
 pub struct GuildCreateEvent {
 	BaseEvent
 pub:
-	guild Guild
+	guild Guild2
 }
 
 pub fn GuildCreateEvent.parse(j json2.Any, base BaseEvent) !GuildCreateEvent {
 	return GuildCreateEvent{
 		BaseEvent: base
-		guild: Guild.parse(j)!
+		guild: Guild2.parse(j)!
 	}
 }
 
@@ -1550,9 +1550,11 @@ pub mut:
 }
 
 fn event_process_ready(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_ready.emit(ReadyEvent.parse(data, BaseEvent{
+	event := ReadyEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.user = event.user
+	gc.events.on_ready.emit(event, options)
 }
 
 fn event_process_application_command_permissions_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1563,24 +1565,30 @@ fn event_process_application_command_permissions_update(mut gc GatewayClient, da
 }
 
 fn event_process_auto_moderation_rule_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_auto_moderation_rule_create.emit(AutoModerationRuleCreateEvent.parse(data,
+	event := AutoModerationRuleCreateEvent.parse(data,
 		BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_auto_moderation_rule_create.emit(event, options)
+	cache_add2(mut gc.cache.auto_moderation_rules, gc.cache.auto_moderation_rules_max_size1, gc.cache.auto_moderation_rules_max_size2, gc.cache.auto_moderation_rules_check, event.rule.guild_id, event.rule.id, event.rule)
 }
 
 fn event_process_auto_moderation_rule_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_auto_moderation_rule_update.emit(AutoModerationRuleUpdateEvent.parse(data,
+	event := AutoModerationRuleUpdateEvent.parse(data,
 		BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_auto_moderation_rule_update.emit(event, options)
+	cache_add2(mut gc.cache.auto_moderation_rules, gc.cache.auto_moderation_rules_max_size1, gc.cache.auto_moderation_rules_max_size2, gc.cache.auto_moderation_rules_check, event.rule.guild_id, event.rule.id, event.rule)
 }
 
 fn event_process_auto_moderation_rule_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_auto_moderation_rule_delete.emit(AutoModerationRuleDeleteEvent.parse(data,
+	event := AutoModerationRuleDeleteEvent.parse(data,
 		BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_auto_moderation_rule_delete.emit(event, options)
+	gc.cache.auto_moderation_rules[event.rule.guild_id] or { return }.delete(event.rule.id)
 }
 
 fn event_process_auto_moderation_action_execution(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1591,39 +1599,51 @@ fn event_process_auto_moderation_action_execution(mut gc GatewayClient, data jso
 }
 
 fn event_process_channel_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_channel_create.emit(ChannelCreateEvent.parse(data, BaseEvent{
+	event := ChannelCreateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_channel_create.emit(event, options)
+	cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check, event.channel.id, event.channel)
 }
 
 fn event_process_channel_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_channel_update.emit(ChannelUpdateEvent.parse(data, BaseEvent{
+	event := ChannelUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_channel_update.emit(event, options)
+	cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check, event.channel.id, event.channel)
 }
 
 fn event_process_channel_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_channel_delete.emit(ChannelDeleteEvent.parse(data, BaseEvent{
+	event := ChannelDeleteEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_channel_delete.emit(event, options)
+	gc.cache.channels.delete(event.channel.id)
 }
 
 fn event_process_thread_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_thread_create.emit(ThreadCreateEvent.parse(data, BaseEvent{
+	event := ThreadCreateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_thread_create.emit(event, options)
+	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2, gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id, event.thread)
 }
 
 fn event_process_thread_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_thread_update.emit(ThreadUpdateEvent.parse(data, BaseEvent{
+	event := ThreadUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_thread_update.emit(event, options)
+	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2, gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id, event.thread)
 }
 
 fn event_process_thread_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_thread_delete.emit(ThreadDeleteEvent.parse(data, BaseEvent{
+	event := ThreadDeleteEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_thread_delete.emit(event, options)
+	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2, gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id, event.thread)
 }
 
 fn event_process_thread_list_sync(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1645,39 +1665,106 @@ fn event_process_channel_pins_update(mut gc GatewayClient, data json2.Any, optio
 }
 
 fn event_process_entitlement_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_entitlement_create.emit(EntitlementCreateEvent.parse(data, BaseEvent{
+	event := EntitlementCreateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_entitlement_create.emit(event, options)
+	cache_add2(mut gc.cache.entitlements, gc.cache.entitlements_max_size1, gc.cache.entitlements_max_size2, gc.cache.entitlements_check, event.entitlement.get_owner() or { return }, event.entitlement.id, event.entitlement)
 }
 
 fn event_process_entitlement_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_entitlement_update.emit(EntitlementUpdateEvent.parse(data, BaseEvent{
+	event := EntitlementUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_entitlement_update.emit(event, options)
+	cache_add2(mut gc.cache.entitlements, gc.cache.entitlements_max_size1, gc.cache.entitlements_max_size2, gc.cache.entitlements_check, event.entitlement.get_owner() or { return }, event.entitlement.id, event.entitlement)
 }
 
 fn event_process_entitlement_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_entitlement_delete.emit(EntitlementDeleteEvent.parse(data, BaseEvent{
+	event := EntitlementDeleteEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_entitlement_delete.emit(event, options)
+	gc.cache.entitlements[event.entitlement.get_owner() or { return }].delete(event.entitlement.id)
 }
 
 fn event_process_guild_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_create.emit(GuildCreateEvent.parse(data, BaseEvent{
+	if gc.settings.has(.dont_process_guild_events) {
+		gc.events.on_guild_create.emit(GuildCreateEvent.parse(data, BaseEvent{
+			creator: gc
+		})!, options)
+		return
+	}
+	event := GuildCreateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_create.emit(event, options)
+	for role in event.guild.roles {
+		cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2, gc.cache.roles_check, event.guild.id, role.id, role)
+	}
+	for emoji in event.guild.emojis {
+		cache_add2(mut gc.cache.emojis, gc.cache.emojis_max_size1, gc.cache.emojis_max_size2, gc.cache.emojis_check, event.guild.id, emoji.id or { return }, emoji)
+	}
+	for sticker in event.guild.stickers {
+		cache_add2(mut gc.cache.stickers, gc.cache.stickers_max_size1, gc.cache.stickers_max_size2, gc.cache.stickers_check, event.guild.id, sticker.id, sticker)
+	}
+	for voice_state in event.guild.voice_states {
+		cache_add2(mut gc.cache.voice_states, gc.cache.voice_states_max_size1, gc.cache.voice_states_max_size2, gc.cache.voice_states_check, event.guild.id, voice_state.user_id, voice_state)
+	}
+	for member in event.guild.users {
+		cache_add2(mut gc.cache.members, gc.cache.members_max_size1, gc.cache.members_max_size2, gc.cache.members_check, event.guild.id, member.user or {
+			return
+		}.id, member)
+	}
+	for channel in event.guild.channels {
+		cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check, channel.id, channel)
+	}
+	for thread_ in event.guild.threads {
+		cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2, gc.cache.threads_check, event.guild.id, thread_.id, thread_)
+	}
+	for presence in event.guild.presences {
+		cache_add2(mut gc.cache.presences, gc.cache.presences_max_size1, gc.cache.presences_max_size2, gc.cache.presences_check, event.guild.id, presence.user.id, presence)
+	}
+	for stage_instance in event.guild.stage_instances {
+		cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2, gc.cache.stage_instances_check, stage_instance.guild_id, stage_instance.channel_id, stage_instance)
+	}
+	for guild_scheduled_event in event.guild.guild_scheduled_events {
+		cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1, gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check, event.guild.id, guild_scheduled_event.id, guild_scheduled_event)
+	}
+	cache_add1(mut gc.cache.guilds, gc.cache.guilds_max_size, gc.cache.guilds_check, event.guild.id, event.guild.Guild)
 }
 
 fn event_process_guild_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_update.emit(GuildUpdateEvent.parse(data, BaseEvent{
+	event := GuildUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_update.emit(event, options)
+	for role in event.guild.roles {
+		cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2, gc.cache.roles_check, event.guild.id, role.id, role)
+	}
+	for emoji in event.guild.emojis {
+		cache_add2(mut gc.cache.emojis, gc.cache.emojis_max_size1, gc.cache.emojis_max_size2, gc.cache.emojis_check, event.guild.id, emoji.id or { return }, emoji)
+	}
+	for sticker in event.guild.stickers {
+		cache_add2(mut gc.cache.stickers, gc.cache.stickers_max_size1, gc.cache.stickers_max_size2, gc.cache.stickers_check, event.guild.id, sticker.id, sticker)
+	}
+	cache_add1(mut gc.cache.guilds, gc.cache.guilds_max_size, gc.cache.guilds_check, event.guild.id, event.guild)
 }
 
 fn event_process_guild_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_delete.emit(GuildDeleteEvent.parse(data, BaseEvent{
+	event := GuildDeleteEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_delete.emit(event, options)
+	gc.cache.roles.delete(event.guild.id)
+	gc.cache.emojis.delete(event.guild.id)
+	gc.cache.stickers.delete(event.guild.id)
+	gc.cache.voice_states.delete(event.guild.id)
+	gc.cache.members.delete(event.guild.id)
+	gc.cache.threads.delete(event.guild.id)
+	gc.cache.presences.delete(event.guild.id)
+	gc.cache.guild_scheduled_events.delete(event.guild.id)
+	gc.cache.guilds.delete(event.guild.id)
 }
 
 fn event_process_guild_audit_log_entry_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1743,42 +1830,54 @@ fn event_process_guild_members_chunk(mut gc GatewayClient, data json2.Any, optio
 }
 
 fn event_process_guild_role_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_role_create.emit(GuildRoleCreateEvent.parse(data, BaseEvent{
+	event := GuildRoleCreateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_role_create.emit(event, options)
+	cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2, gc.cache.roles_check, event.guild_id, event.role.id, event.role)
 }
 
 fn event_process_guild_role_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_role_update.emit(GuildRoleUpdateEvent.parse(data, BaseEvent{
+	event := GuildRoleUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_role_update.emit(event, options)
+	cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2, gc.cache.roles_check, event.guild_id, event.role.id, event.role)
 }
 
 fn event_process_guild_role_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_role_delete.emit(GuildRoleDeleteEvent.parse(data, BaseEvent{
+	event := GuildRoleDeleteEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_role_delete.emit(event, options)
+	gc.cache.roles[event.guild_id] or { return }.delete(event.role_id)
 }
 
 fn event_process_guild_scheduled_event_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_scheduled_event_create.emit(GuildScheduledEventCreateEvent.parse(data,
+	event := GuildScheduledEventCreateEvent.parse(data,
 		BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_scheduled_event_create.emit(event, options)
+	cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1, gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check, event.event.guild_id, event.event.id, event.event)
 }
 
 fn event_process_guild_scheduled_event_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_scheduled_event_update.emit(GuildScheduledEventUpdateEvent.parse(data,
+	event := GuildScheduledEventUpdateEvent.parse(data,
 		BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_scheduled_event_update.emit(event, options)
+	cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1, gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check, event.event.guild_id, event.event.id, event.event)
 }
 
 fn event_process_guild_scheduled_event_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_scheduled_event_delete.emit(GuildScheduledEventDeleteEvent.parse(data,
+	event := GuildScheduledEventDeleteEvent.parse(data,
 		BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_scheduled_event_delete.emit(event, options)
+	gc.cache.guild_scheduled_events[event.event.guild_id] or { return }.delete(event.event.id)
 }
 
 fn event_process_guild_scheduled_event_user_add(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1826,27 +1925,35 @@ fn event_process_invite_delete(mut gc GatewayClient, data json2.Any, options Emi
 }
 
 fn event_process_message_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_message_create.emit(MessageCreateEvent.parse(data, BaseEvent{
+	event := MessageCreateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_message_create.emit(event, options)
+	cache_add2(mut gc.cache.messages, gc.cache.messages_max_size1, gc.cache.messages_max_size2, gc.cache.messages_check, event.message.channel_id, event.message.id, event.message.Message)
 }
 
 fn event_process_message_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_message_update.emit(MessageUpdateEvent.parse(data, BaseEvent{
+	event := MessageUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_message_update.emit(event, options)
+	cache_add2(mut gc.cache.messages, gc.cache.messages_max_size1, gc.cache.messages_max_size2, gc.cache.messages_check, event.message.channel_id, event.message.id, event.message.Message)
 }
 
 fn event_process_message_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_message_delete.emit(MessageDeleteEvent.parse(data, BaseEvent{
+	event := MessageDeleteEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_message_delete.emit(event, options)
+	gc.cache.messages[event.channel_id] or { return }.delete(event.id)
 }
 
 fn event_process_message_delete_bulk(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_message_delete_bulk.emit(MessageDeleteBulkEvent.parse(data, BaseEvent{
+	event := MessageDeleteBulkEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_message_delete_bulk.emit(event, options)
+	bulk_delete_in_map(mut gc.cache.messages[event.channel_id] or { return }, event.ids)
 }
 
 fn event_process_message_reaction_add(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1876,9 +1983,11 @@ fn event_process_message_reaction_remove_emoji(mut gc GatewayClient, data json2.
 }
 
 fn event_process_presence_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_presence_update.emit(PresenceUpdateEvent.parse(data, BaseEvent{
+	event := PresenceUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_presence_update.emit(event, options)
+	cache_add2(mut gc.cache.presences, gc.cache.presences_max_size1, gc.cache.presences_max_size2, gc.cache.presences_check, event.presence.guild_id, event.presence.user.id, event.presence)
 }
 
 fn event_process_typing_start(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1888,15 +1997,22 @@ fn event_process_typing_start(mut gc GatewayClient, data json2.Any, options Emit
 }
 
 fn event_process_user_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_user_update.emit(UserUpdateEvent.parse(data, BaseEvent{
+	event := UserUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_user_update.emit(event, options)
+	if event.user.id == gc.user.id {
+		gc.user = event.user
+	}
+	cache_add1(mut gc.cache.users, gc.cache.users_max_size, gc.cache.users_check, event.user.id, event.user)
 }
 
 fn event_process_voice_state_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_voice_state_update.emit(VoiceStateUpdateEvent.parse(data, BaseEvent{
+	event := VoiceStateUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_voice_state_update.emit(event, options)
+	cache_add2(mut gc.cache.voice_states, gc.cache.voice_states_max_size1, gc.cache.voice_states_max_size2, gc.cache.voice_states_check, event.state.guild_id or { return }, event.state.user_id, event.state)
 }
 
 fn event_process_voice_server_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1918,21 +2034,27 @@ fn event_process_interaction_create(mut gc GatewayClient, data json2.Any, option
 }
 
 fn event_process_stage_instance_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_stage_instance_create.emit(StageInstanceCreateEvent.parse(data, BaseEvent{
+	event := StageInstanceCreateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_stage_instance_create.emit(event, options)
+	cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2, gc.cache.stage_instances_check, event.instance.guild_id, event.instance.id, event.instance)
 }
 
 fn event_process_stage_instance_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_stage_instance_update.emit(StageInstanceUpdateEvent.parse(data, BaseEvent{
+	event := StageInstanceUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_stage_instance_update.emit(event, options)
+	cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2, gc.cache.stage_instances_check, event.instance.guild_id, event.instance.id, event.instance)
 }
 
 fn event_process_stage_instance_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_stage_instance_delete.emit(StageInstanceDeleteEvent.parse(data, BaseEvent{
+	event := StageInstanceDeleteEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_stage_instance_delete.emit(event, options)
+	gc.cache.stage_instances[event.instance.guild_id] or { return }.delete(event.instance.id)
 }
 
 type EventsTable = map[string]fn (mut GatewayClient, json2.Any, EmitOptions) !

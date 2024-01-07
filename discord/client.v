@@ -30,8 +30,8 @@ pub mut:
 @[params]
 pub struct ClientConfig {
 pub:
-	user_agent string = discord.default_user_agent
 	debug      bool
+	user_agent string = discord.default_user_agent
 }
 
 fn (config ClientConfig) get_level() log.Level {
@@ -46,11 +46,12 @@ fn (config ClientConfig) get_level() log.Level {
 pub struct BotConfig {
 	ClientConfig
 pub:
+	cache         Cache
+	intents       Intents
 	presence      ?UpdatePresenceParams
 	properties    Properties
-	intents       Intents
-	settings      GatewayClientSettings
 	read_timeout  ?time.Duration
+	settings      GatewayClientSettings
 	write_timeout ?time.Duration
 }
 
@@ -60,6 +61,7 @@ pub:
 pub fn bot(token string, config BotConfig) GatewayClient {
 	return GatewayClient{
 		token: 'Bot ${token}'
+		cache: config.cache
 		intents: int(config.intents)
 		presence: config.presence
 		properties: config.properties
@@ -67,9 +69,9 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 			level: config.get_level()
 			output_label: 'discord.v'
 		}
+		read_timeout: config.read_timeout
 		settings: config.settings
 		user_agent: config.user_agent
-		read_timeout: config.read_timeout
 		write_timeout: config.write_timeout
 	}
 }

@@ -70,7 +70,7 @@ pub fn ComponentEmoji.parse(j json2.Any) !ComponentEmoji {
 			}
 		}
 		else {
-			return error('expected component emoji to be object, got ${j.type_name()}')
+			return error('expected ComponentEmoji to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -106,7 +106,7 @@ pub fn ActionRow.parse(j json2.Any) !ActionRow {
 			return ActionRow.internal_parse(j)!
 		}
 		else {
-			return error('expected action row to be object, got ${j.type_name()}')
+			return error('expected ActionRow to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -250,7 +250,7 @@ pub fn Button.parse(j json2.Any) !Button {
 			return Button.internal_parse(j)!
 		}
 		else {
-			return error('expected button to be object, got ${j.type_name()}')
+			return error('expected Button to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -310,7 +310,7 @@ pub fn SelectOption.parse(j json2.Any) !SelectOption {
 			}
 		}
 		else {
-			return error('expected select option to be object, got ${j.type_name()}')
+			return error('expected SelectOption to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -389,7 +389,7 @@ pub fn StringSelect.parse(j json2.Any) !StringSelect {
 			return StringSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected string select to be object, got ${j.type_name()}')
+			return error('expected StringSelect to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -442,7 +442,7 @@ pub fn DefaultValue.parse(j json2.Any) !DefaultValue {
 			}
 		}
 		else {
-			return error('expected default value to be object, got ${j.type_name()}')
+			return error('expected DefaultValue to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -530,7 +530,7 @@ pub fn UserSelect.parse(j json2.Any) !UserSelect {
 			return UserSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected user select to be object, got ${j.type_name()}')
+			return error('expected UserSelect to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -618,7 +618,7 @@ pub fn RoleSelect.parse(j json2.Any) !RoleSelect {
 			return RoleSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected role select to be object, got ${j.type_name()}')
+			return error('expected RoleSelect to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -703,7 +703,7 @@ pub fn MentionableSelect.parse(j json2.Any) !MentionableSelect {
 			return MentionableSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected mentionable select to be object, got ${j.type_name()}')
+			return error('expected MentionableSelect to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -801,7 +801,7 @@ pub fn ChannelSelect.parse(j json2.Any) !ChannelSelect {
 			return ChannelSelect.internal_parse(j)!
 		}
 		else {
-			return error('expected channel select to be object, got ${j.type_name()}')
+			return error('expected ChannelSelect to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -904,7 +904,7 @@ pub fn TextInput.parse(j json2.Any) !TextInput {
 			return TextInput.internal_parse(j)!
 		}
 		else {
-			return error('expected text input to be object, got ${j.type_name()}')
+			return error('expected TextInput to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -941,7 +941,7 @@ pub fn Component.parse(j json2.Any) !Component {
 			}
 		}
 		else {
-			return error('expected component to be object, got ${j.type_name()}')
+			return error('expected Component to be object, got ${j.type_name()}')
 		}
 	}
 }
