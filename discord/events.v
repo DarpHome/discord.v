@@ -1565,26 +1565,27 @@ fn event_process_application_command_permissions_update(mut gc GatewayClient, da
 }
 
 fn event_process_auto_moderation_rule_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	event := AutoModerationRuleCreateEvent.parse(data,
-		BaseEvent{
+	event := AutoModerationRuleCreateEvent.parse(data, BaseEvent{
 		creator: gc
 	})!
 	gc.events.on_auto_moderation_rule_create.emit(event, options)
-	cache_add2(mut gc.cache.auto_moderation_rules, gc.cache.auto_moderation_rules_max_size1, gc.cache.auto_moderation_rules_max_size2, gc.cache.auto_moderation_rules_check, event.rule.guild_id, event.rule.id, event.rule)
+	cache_add2(mut gc.cache.auto_moderation_rules, gc.cache.auto_moderation_rules_max_size1,
+		gc.cache.auto_moderation_rules_max_size2, gc.cache.auto_moderation_rules_check,
+		event.rule.guild_id, event.rule.id, event.rule)
 }
 
 fn event_process_auto_moderation_rule_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	event := AutoModerationRuleUpdateEvent.parse(data,
-		BaseEvent{
+	event := AutoModerationRuleUpdateEvent.parse(data, BaseEvent{
 		creator: gc
 	})!
 	gc.events.on_auto_moderation_rule_update.emit(event, options)
-	cache_add2(mut gc.cache.auto_moderation_rules, gc.cache.auto_moderation_rules_max_size1, gc.cache.auto_moderation_rules_max_size2, gc.cache.auto_moderation_rules_check, event.rule.guild_id, event.rule.id, event.rule)
+	cache_add2(mut gc.cache.auto_moderation_rules, gc.cache.auto_moderation_rules_max_size1,
+		gc.cache.auto_moderation_rules_max_size2, gc.cache.auto_moderation_rules_check,
+		event.rule.guild_id, event.rule.id, event.rule)
 }
 
 fn event_process_auto_moderation_rule_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	event := AutoModerationRuleDeleteEvent.parse(data,
-		BaseEvent{
+	event := AutoModerationRuleDeleteEvent.parse(data, BaseEvent{
 		creator: gc
 	})!
 	gc.events.on_auto_moderation_rule_delete.emit(event, options)
@@ -1603,7 +1604,8 @@ fn event_process_channel_create(mut gc GatewayClient, data json2.Any, options Em
 		creator: gc
 	})!
 	gc.events.on_channel_create.emit(event, options)
-	cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check, event.channel.id, event.channel)
+	cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check,
+		event.channel.id, event.channel)
 }
 
 fn event_process_channel_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1611,7 +1613,8 @@ fn event_process_channel_update(mut gc GatewayClient, data json2.Any, options Em
 		creator: gc
 	})!
 	gc.events.on_channel_update.emit(event, options)
-	cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check, event.channel.id, event.channel)
+	cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check,
+		event.channel.id, event.channel)
 }
 
 fn event_process_channel_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1627,7 +1630,9 @@ fn event_process_thread_create(mut gc GatewayClient, data json2.Any, options Emi
 		creator: gc
 	})!
 	gc.events.on_thread_create.emit(event, options)
-	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2, gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id, event.thread)
+	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2,
+		gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id,
+		event.thread)
 }
 
 fn event_process_thread_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1635,7 +1640,9 @@ fn event_process_thread_update(mut gc GatewayClient, data json2.Any, options Emi
 		creator: gc
 	})!
 	gc.events.on_thread_update.emit(event, options)
-	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2, gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id, event.thread)
+	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2,
+		gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id,
+		event.thread)
 }
 
 fn event_process_thread_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1643,7 +1650,9 @@ fn event_process_thread_delete(mut gc GatewayClient, data json2.Any, options Emi
 		creator: gc
 	})!
 	gc.events.on_thread_delete.emit(event, options)
-	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2, gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id, event.thread)
+	cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2,
+		gc.cache.threads_check, event.thread.guild_id or { return }, event.thread.id,
+		event.thread)
 }
 
 fn event_process_thread_list_sync(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1669,7 +1678,9 @@ fn event_process_entitlement_create(mut gc GatewayClient, data json2.Any, option
 		creator: gc
 	})!
 	gc.events.on_entitlement_create.emit(event, options)
-	cache_add2(mut gc.cache.entitlements, gc.cache.entitlements_max_size1, gc.cache.entitlements_max_size2, gc.cache.entitlements_check, event.entitlement.get_owner() or { return }, event.entitlement.id, event.entitlement)
+	cache_add2(mut gc.cache.entitlements, gc.cache.entitlements_max_size1, gc.cache.entitlements_max_size2,
+		gc.cache.entitlements_check, event.entitlement.get_owner() or { return }, event.entitlement.id,
+		event.entitlement)
 }
 
 fn event_process_entitlement_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1677,7 +1688,9 @@ fn event_process_entitlement_update(mut gc GatewayClient, data json2.Any, option
 		creator: gc
 	})!
 	gc.events.on_entitlement_update.emit(event, options)
-	cache_add2(mut gc.cache.entitlements, gc.cache.entitlements_max_size1, gc.cache.entitlements_max_size2, gc.cache.entitlements_check, event.entitlement.get_owner() or { return }, event.entitlement.id, event.entitlement)
+	cache_add2(mut gc.cache.entitlements, gc.cache.entitlements_max_size1, gc.cache.entitlements_max_size2,
+		gc.cache.entitlements_check, event.entitlement.get_owner() or { return }, event.entitlement.id,
+		event.entitlement)
 }
 
 fn event_process_entitlement_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1700,38 +1713,49 @@ fn event_process_guild_create(mut gc GatewayClient, data json2.Any, options Emit
 	})!
 	gc.events.on_guild_create.emit(event, options)
 	for role in event.guild.roles {
-		cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2, gc.cache.roles_check, event.guild.id, role.id, role)
+		cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2,
+			gc.cache.roles_check, event.guild.id, role.id, role)
 	}
 	for emoji in event.guild.emojis {
-		cache_add2(mut gc.cache.emojis, gc.cache.emojis_max_size1, gc.cache.emojis_max_size2, gc.cache.emojis_check, event.guild.id, emoji.id or { return }, emoji)
+		cache_add2(mut gc.cache.emojis, gc.cache.emojis_max_size1, gc.cache.emojis_max_size2,
+			gc.cache.emojis_check, event.guild.id, emoji.id or { return }, emoji)
 	}
 	for sticker in event.guild.stickers {
-		cache_add2(mut gc.cache.stickers, gc.cache.stickers_max_size1, gc.cache.stickers_max_size2, gc.cache.stickers_check, event.guild.id, sticker.id, sticker)
+		cache_add2(mut gc.cache.stickers, gc.cache.stickers_max_size1, gc.cache.stickers_max_size2,
+			gc.cache.stickers_check, event.guild.id, sticker.id, sticker)
 	}
 	for voice_state in event.guild.voice_states {
-		cache_add2(mut gc.cache.voice_states, gc.cache.voice_states_max_size1, gc.cache.voice_states_max_size2, gc.cache.voice_states_check, event.guild.id, voice_state.user_id, voice_state)
+		cache_add2(mut gc.cache.voice_states, gc.cache.voice_states_max_size1, gc.cache.voice_states_max_size2,
+			gc.cache.voice_states_check, event.guild.id, voice_state.user_id, voice_state)
 	}
 	for member in event.guild.users {
-		cache_add2(mut gc.cache.members, gc.cache.members_max_size1, gc.cache.members_max_size2, gc.cache.members_check, event.guild.id, member.user or {
-			return
-		}.id, member)
+		cache_add2(mut gc.cache.members, gc.cache.members_max_size1, gc.cache.members_max_size2,
+			gc.cache.members_check, event.guild.id, member.user or { return }.id, member)
 	}
 	for channel in event.guild.channels {
-		cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check, channel.id, channel)
+		cache_add1(mut gc.cache.channels, gc.cache.channels_max_size, gc.cache.channels_check,
+			channel.id, channel)
 	}
 	for thread_ in event.guild.threads {
-		cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2, gc.cache.threads_check, event.guild.id, thread_.id, thread_)
+		cache_add2(mut gc.cache.threads, gc.cache.threads_max_size1, gc.cache.threads_max_size2,
+			gc.cache.threads_check, event.guild.id, thread_.id, thread_)
 	}
 	for presence in event.guild.presences {
-		cache_add2(mut gc.cache.presences, gc.cache.presences_max_size1, gc.cache.presences_max_size2, gc.cache.presences_check, event.guild.id, presence.user.id, presence)
+		cache_add2(mut gc.cache.presences, gc.cache.presences_max_size1, gc.cache.presences_max_size2,
+			gc.cache.presences_check, event.guild.id, presence.user.id, presence)
 	}
 	for stage_instance in event.guild.stage_instances {
-		cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2, gc.cache.stage_instances_check, stage_instance.guild_id, stage_instance.channel_id, stage_instance)
+		cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2,
+			gc.cache.stage_instances_check, stage_instance.guild_id, stage_instance.channel_id,
+			stage_instance)
 	}
 	for guild_scheduled_event in event.guild.guild_scheduled_events {
-		cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1, gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check, event.guild.id, guild_scheduled_event.id, guild_scheduled_event)
+		cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1,
+			gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check,
+			event.guild.id, guild_scheduled_event.id, guild_scheduled_event)
 	}
-	cache_add1(mut gc.cache.guilds, gc.cache.guilds_max_size, gc.cache.guilds_check, event.guild.id, event.guild.Guild)
+	cache_add1(mut gc.cache.guilds, gc.cache.guilds_max_size, gc.cache.guilds_check, event.guild.id,
+		event.guild.Guild)
 }
 
 fn event_process_guild_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1740,15 +1764,19 @@ fn event_process_guild_update(mut gc GatewayClient, data json2.Any, options Emit
 	})!
 	gc.events.on_guild_update.emit(event, options)
 	for role in event.guild.roles {
-		cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2, gc.cache.roles_check, event.guild.id, role.id, role)
+		cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2,
+			gc.cache.roles_check, event.guild.id, role.id, role)
 	}
 	for emoji in event.guild.emojis {
-		cache_add2(mut gc.cache.emojis, gc.cache.emojis_max_size1, gc.cache.emojis_max_size2, gc.cache.emojis_check, event.guild.id, emoji.id or { return }, emoji)
+		cache_add2(mut gc.cache.emojis, gc.cache.emojis_max_size1, gc.cache.emojis_max_size2,
+			gc.cache.emojis_check, event.guild.id, emoji.id or { return }, emoji)
 	}
 	for sticker in event.guild.stickers {
-		cache_add2(mut gc.cache.stickers, gc.cache.stickers_max_size1, gc.cache.stickers_max_size2, gc.cache.stickers_check, event.guild.id, sticker.id, sticker)
+		cache_add2(mut gc.cache.stickers, gc.cache.stickers_max_size1, gc.cache.stickers_max_size2,
+			gc.cache.stickers_check, event.guild.id, sticker.id, sticker)
 	}
-	cache_add1(mut gc.cache.guilds, gc.cache.guilds_max_size, gc.cache.guilds_check, event.guild.id, event.guild)
+	cache_add1(mut gc.cache.guilds, gc.cache.guilds_max_size, gc.cache.guilds_check, event.guild.id,
+		event.guild)
 }
 
 fn event_process_guild_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1834,7 +1862,8 @@ fn event_process_guild_role_create(mut gc GatewayClient, data json2.Any, options
 		creator: gc
 	})!
 	gc.events.on_guild_role_create.emit(event, options)
-	cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2, gc.cache.roles_check, event.guild_id, event.role.id, event.role)
+	cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2,
+		gc.cache.roles_check, event.guild_id, event.role.id, event.role)
 }
 
 fn event_process_guild_role_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1842,7 +1871,8 @@ fn event_process_guild_role_update(mut gc GatewayClient, data json2.Any, options
 		creator: gc
 	})!
 	gc.events.on_guild_role_update.emit(event, options)
-	cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2, gc.cache.roles_check, event.guild_id, event.role.id, event.role)
+	cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2,
+		gc.cache.roles_check, event.guild_id, event.role.id, event.role)
 }
 
 fn event_process_guild_role_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1854,26 +1884,27 @@ fn event_process_guild_role_delete(mut gc GatewayClient, data json2.Any, options
 }
 
 fn event_process_guild_scheduled_event_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	event := GuildScheduledEventCreateEvent.parse(data,
-		BaseEvent{
+	event := GuildScheduledEventCreateEvent.parse(data, BaseEvent{
 		creator: gc
 	})!
 	gc.events.on_guild_scheduled_event_create.emit(event, options)
-	cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1, gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check, event.event.guild_id, event.event.id, event.event)
+	cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1,
+		gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check,
+		event.event.guild_id, event.event.id, event.event)
 }
 
 fn event_process_guild_scheduled_event_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	event := GuildScheduledEventUpdateEvent.parse(data,
-		BaseEvent{
+	event := GuildScheduledEventUpdateEvent.parse(data, BaseEvent{
 		creator: gc
 	})!
 	gc.events.on_guild_scheduled_event_update.emit(event, options)
-	cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1, gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check, event.event.guild_id, event.event.id, event.event)
+	cache_add2(mut gc.cache.guild_scheduled_events, gc.cache.guild_scheduled_events_max_size1,
+		gc.cache.guild_scheduled_events_max_size2, gc.cache.guild_scheduled_events_check,
+		event.event.guild_id, event.event.id, event.event)
 }
 
 fn event_process_guild_scheduled_event_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	event := GuildScheduledEventDeleteEvent.parse(data,
-		BaseEvent{
+	event := GuildScheduledEventDeleteEvent.parse(data, BaseEvent{
 		creator: gc
 	})!
 	gc.events.on_guild_scheduled_event_delete.emit(event, options)
@@ -1929,7 +1960,8 @@ fn event_process_message_create(mut gc GatewayClient, data json2.Any, options Em
 		creator: gc
 	})!
 	gc.events.on_message_create.emit(event, options)
-	cache_add2(mut gc.cache.messages, gc.cache.messages_max_size1, gc.cache.messages_max_size2, gc.cache.messages_check, event.message.channel_id, event.message.id, event.message.Message)
+	cache_add2(mut gc.cache.messages, gc.cache.messages_max_size1, gc.cache.messages_max_size2,
+		gc.cache.messages_check, event.message.channel_id, event.message.id, event.message.Message)
 }
 
 fn event_process_message_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1937,7 +1969,8 @@ fn event_process_message_update(mut gc GatewayClient, data json2.Any, options Em
 		creator: gc
 	})!
 	gc.events.on_message_update.emit(event, options)
-	cache_add2(mut gc.cache.messages, gc.cache.messages_max_size1, gc.cache.messages_max_size2, gc.cache.messages_check, event.message.channel_id, event.message.id, event.message.Message)
+	cache_add2(mut gc.cache.messages, gc.cache.messages_max_size1, gc.cache.messages_max_size2,
+		gc.cache.messages_check, event.message.channel_id, event.message.id, event.message.Message)
 }
 
 fn event_process_message_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1987,7 +2020,8 @@ fn event_process_presence_update(mut gc GatewayClient, data json2.Any, options E
 		creator: gc
 	})!
 	gc.events.on_presence_update.emit(event, options)
-	cache_add2(mut gc.cache.presences, gc.cache.presences_max_size1, gc.cache.presences_max_size2, gc.cache.presences_check, event.presence.guild_id, event.presence.user.id, event.presence)
+	cache_add2(mut gc.cache.presences, gc.cache.presences_max_size1, gc.cache.presences_max_size2,
+		gc.cache.presences_check, event.presence.guild_id, event.presence.user.id, event.presence)
 }
 
 fn event_process_typing_start(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -2004,7 +2038,8 @@ fn event_process_user_update(mut gc GatewayClient, data json2.Any, options EmitO
 	if event.user.id == gc.user.id {
 		gc.user = event.user
 	}
-	cache_add1(mut gc.cache.users, gc.cache.users_max_size, gc.cache.users_check, event.user.id, event.user)
+	cache_add1(mut gc.cache.users, gc.cache.users_max_size, gc.cache.users_check, event.user.id,
+		event.user)
 }
 
 fn event_process_voice_state_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -2012,7 +2047,9 @@ fn event_process_voice_state_update(mut gc GatewayClient, data json2.Any, option
 		creator: gc
 	})!
 	gc.events.on_voice_state_update.emit(event, options)
-	cache_add2(mut gc.cache.voice_states, gc.cache.voice_states_max_size1, gc.cache.voice_states_max_size2, gc.cache.voice_states_check, event.state.guild_id or { return }, event.state.user_id, event.state)
+	cache_add2(mut gc.cache.voice_states, gc.cache.voice_states_max_size1, gc.cache.voice_states_max_size2,
+		gc.cache.voice_states_check, event.state.guild_id or { return }, event.state.user_id,
+		event.state)
 }
 
 fn event_process_voice_server_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -2038,7 +2075,8 @@ fn event_process_stage_instance_create(mut gc GatewayClient, data json2.Any, opt
 		creator: gc
 	})!
 	gc.events.on_stage_instance_create.emit(event, options)
-	cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2, gc.cache.stage_instances_check, event.instance.guild_id, event.instance.id, event.instance)
+	cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2,
+		gc.cache.stage_instances_check, event.instance.guild_id, event.instance.id, event.instance)
 }
 
 fn event_process_stage_instance_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -2046,7 +2084,8 @@ fn event_process_stage_instance_update(mut gc GatewayClient, data json2.Any, opt
 		creator: gc
 	})!
 	gc.events.on_stage_instance_update.emit(event, options)
-	cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2, gc.cache.stage_instances_check, event.instance.guild_id, event.instance.id, event.instance)
+	cache_add2(mut gc.cache.stage_instances, gc.cache.stage_instances_max_size1, gc.cache.stage_instances_max_size2,
+		gc.cache.stage_instances_check, event.instance.guild_id, event.instance.id, event.instance)
 }
 
 fn event_process_stage_instance_delete(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {

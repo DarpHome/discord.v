@@ -14,7 +14,9 @@ fn run_message_logger(token string, _ []string) ! {
 		println('Logged as ${event.user.username}! Bot has ${event.guilds.len} guilds')
 	})
 	c.events.on_message_delete.listen(fn (event discord.MessageDeleteEvent) ! {
-		message := event.creator.cache.messages[event.channel_id] or { return }[event.id] or { return }
+		message := event.creator.cache.messages[event.channel_id] or { return }[event.id] or {
+			return
+		}
 		println('Message deleted, with content: ${message.content}')
 	})
 	c.launch()!

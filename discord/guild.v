@@ -703,8 +703,7 @@ pub fn Guild.internal_parse(j map[string]json2.Any) !Guild {
 			none
 		}
 		nsfw_level: unsafe { NSFWLevel(j['nsfw_level']!.int()) }
-		stickers: maybe_map((j['stickers'] or { []json2.Any{} }) as []json2.Any,
-			fn (k json2.Any) !Sticker {
+		stickers: maybe_map((j['stickers'] or { []json2.Any{} }) as []json2.Any, fn (k json2.Any) !Sticker {
 			return Sticker.parse(k)!
 		})!
 		premium_progress_bar_enabled: j['premium_progress_bar_enabled']! as bool
@@ -775,7 +774,8 @@ pub fn Guild2.internal_parse(j map[string]json2.Any) !Guild2 {
 		stage_instances: maybe_map(j['stage_instances']! as []json2.Any, fn (k json2.Any) !StageInstance {
 			return StageInstance.parse(k)!
 		})!
-		guild_scheduled_events: maybe_map(j['guild_scheduled_events']! as []json2.Any, fn (k json2.Any) !GuildScheduledEvent {
+		guild_scheduled_events: maybe_map(j['guild_scheduled_events']! as []json2.Any,
+			fn (k json2.Any) !GuildScheduledEvent {
 			return GuildScheduledEvent.parse(k)!
 		})!
 	}
