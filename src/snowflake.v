@@ -1,5 +1,6 @@
 module discord
 
+import toml
 import time
 import x.json2
 
@@ -37,6 +38,14 @@ pub fn Snowflake.parse(j json2.Any) !Snowflake {
 
 pub fn (mut s Snowflake) from_json(f json2.Any) {
 	s = Snowflake.parse(s) or { return }
+}
+
+pub fn (mut s Snowflake) from_toml(t toml.Any) {
+	s = match t {
+		string { Snowflake(t.u64()) }
+		i8, i16, int, i64, u8, u16, u32, u64 { Snowflake(u64(t)) }
+		else { return }
+	}
 }
 
 pub fn (s Snowflake) str() string {
