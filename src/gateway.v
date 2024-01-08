@@ -316,6 +316,7 @@ pub fn (mut c GatewayClient) run() ! {
 			eprintln('iteration: ${reconnect}')
 		}
 		if reconnect {
+			c.ws.close(1000, 'reconnect') or {}
 			c.resume_gateway_url = ''
 			c.ws.connect() or {
 				$if trace ? {
