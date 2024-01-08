@@ -345,7 +345,7 @@ pub fn (mut c GatewayClient) run() ! {
 			$if trace ? {
 				eprintln('listen failed: ${err}; with code ${err.code()}; message: ${err.msg()}')
 			}
-			if [4, -29184].contains(err.code()) || !err.msg().contains('SSL') {
+			if ![4, -29184].contains(err.code()) || !err.msg().contains('SSL') {
 				$if trace ? {
 					eprintln('returned error')
 				}
