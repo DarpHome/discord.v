@@ -1,18 +1,75 @@
-module main
+module discord
 
-import discord
-import net.unix
+import encoding.binary
+import io
+import x.json2
 
-fn run_rpc() ! {
-	println('asd')
+pub struct RPC {
+mut:
+	conn io.ReaderWriter
+}
 
-	// tbh idk how to implement RPC
-	mut rpc := discord.new_rpc(unix.connect_stream(r'\\?\pipe\discord-ipc-0') or {
-		eprintln('failed to open RPC')
-		return err
-	}) or {
-		eprintln('failed to create rpc')
-		return err
+pub struct RPCPacket {
+pub:
+	op   int
+	data []u8
+}
+
+pub fn (mut rpc RPC) send(op int, data []u8) ! {
+	mut buf := []u8{len: 8 + data.len}
+	binary.little_endian_put_u32_at(mut buf, u32(op), 0)
+	binary.little_endian_put_u32_at(mut buf, u32(data.len), 4)
+	copy(mut buf[8..], data)
+	rpc.conn.write(buf)!
+}
+
+pub fn (mut rpc RPC) recv() !RPCPacket {
+	mut buf := []u8{len: 8}
+	rpc.conn.read(mut buf)!
+	op := binary.little_endian_u32_at(buf, 0)
+	len := binary.little_endian_u32_at(buf, 4)
+	mut data := []u8{len: int(len)}
+	rpc.conn.read(mut data)!
+	dump(data.bytestr())
+	return RPCPacket{
+		op: op
+		data: data
 	}
-	rpc.handshake(1133061734630957207)!
+}
+
+pub fn (rpc RPC) get_connection() io.ReaderWriter {
+	return rpc.conn
+}
+
+pub fn (mut rpc RPC) send_json(op int, j json2.Any) ! {
+	rpc.send(op, j.json_str().bytes())!
+}
+
+pub struct RPCJSONPacket {
+pub:
+	op   int
+	data json2.Any
+}
+
+pub fn (mut rpc RPC) recv_json() !RPCJSONPacket {
+	packet := rpc.recv()!
+	return RPCJSONPacket{
+		op: packet.op
+		data: json2.raw_decode(packet.data.bytestr())!
+	}
+}
+
+pub fn new_rpc(file io.ReaderWriter) !RPC {
+	return RPC{
+		conn: file
+	}
+}
+
+pub fn (mut rpc RPC) handshake(client_id Snowflake) ! {
+	rpc.send_json(0, {
+		'v':         json2.Any(1)
+		'client_id': client_id.build()
+	})!
+	packet := rpc.recv_json()!
+	dump(packet)
 }
