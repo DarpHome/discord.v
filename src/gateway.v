@@ -317,12 +317,15 @@ pub fn (mut c GatewayClient) init() ! {
 pub fn (mut c GatewayClient) run() ! {
 	c.close_code = none
 	mut reconnect := true
+	mut connected := false
 	for {
 		$if trace ? {
 			eprintln('iteration: ${reconnect}')
 		}
 		if reconnect {
-			c.ws.close(1000, 'reconnect') or {}
+			if connected {
+				c.ws.close(1000, 'reconnect') or {}
+			}
 			c.resume_gateway_url = ''
 			c.ws.connect() or {
 				$if trace ? {
