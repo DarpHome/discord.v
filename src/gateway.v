@@ -376,35 +376,58 @@ pub fn (c Client) fetch_gateway_url() !string {
 	}
 }
 
-@[params]
-pub struct UpdatePresenceParams {
-pub:
-	// Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
-	since ?time.Time
-	// User's activities
-	activities []Activity
-	// User's new status
-	status Status = .online
-	// Whether or not the client is afk
-	afk bool
-}
+pub type ArrayOrSnowflake = Snowflake | []Snowflake
 
-pub fn (params UpdatePresenceParams) build() json2.Any {
-	return {
-		'since':      if since := params.since {
-			json2.Any(since.unix_time_milli())
-		} else {
-			json2.null
-		}
-		'activities': params.activities.map(|a| a.build())
-		'status':     params.status.build()
-		'afk':        params.afk
+pub fn (aos ArrayOrSnowflake) build() json2.Any {
+	return match aos {
+		Snowflake { json2.Any(aos.build()) }
+		[]Snowflake { json2.Any(aos.map(|s| json2.Any(s.build()))) }
 	}
 }
 
-pub fn (mut gc GatewayClient) update_presence(params UpdatePresenceParams) ! {
+// Used to request all members for a guild or a list of guilds. When initially connecting, if you don't have the GUILD_PRESENCES Gateway Intent, or if the guild is over 75k members, it will only send members who are in voice, plus the member for you (the connecting user). Otherwise, if a guild has over large_threshold members (value in the Gateway Identify), it will only send members who are online, have a role, have a nickname, or are in a voice channel, and if it has under large_threshold members, it will send all members. If a client wishes to receive additional members, they need to explicitly request them via this operation. The server will send Guild Members Chunk events in response with up to 1000 members per chunk until all members that match the request have been sent.
+@[params]
+pub struct RequestGuildMembersParams {
+pub:
+	// ID of the guild to get members for
+	guild_id Snowflake @[required]
+	// string that username starts with, or an empty string to return all members
+	query ?string
+	// maximum number of members to send matching the `query`; a limit of `0` can be used with an empty string `query` to return all members
+	limit ?int
+	// used to specify if we want the presences of the matched members
+	presences ?bool
+	// used to specify which users you wish to fetch
+	user_ids ?ArrayOrSnowflake
+	// nonce to identify the [Guild Members Chunk](#GuildMembersChunkEvent) response
+	nonce ?string
+}
+
+pub fn (params RequestGuildMembersParams) build() json2.Any {
+	mut j := {
+		'guild_id': json2.Any(params.guild_id)
+	}
+	if query := params.query {
+		j['query'] = query
+	}
+	if limit := params.limit {
+		j['limit'] = limit
+	}
+	if presences := params.presences {
+		j['presences'] = presences
+	}
+	if user_ids := params.user_ids {
+		j['user_ids'] = user_ids.build()
+	}
+	if nonce := params.nonce {
+		j['nonce'] = nonce
+	}
+	return j
+}
+
+pub fn (mut gc GatewayClient) request_guild_members(params RequestGuildMembersParams) ! {
 	gc.send(WSMessage{
-		opcode: .update_presence
+		opcode: .request_guild_members
 		data: params.build()
 	})!
 }
@@ -438,6 +461,39 @@ pub fn (params VoiceStateUpdateParams) build() json2.Any {
 pub fn (mut gc GatewayClient) update_voice_state(params VoiceStateUpdateParams) ! {
 	gc.send(WSMessage{
 		opcode: .voice_state_update
+		data: params.build()
+	})!
+}
+
+@[params]
+pub struct UpdatePresenceParams {
+pub:
+	// Unix time (in milliseconds) of when the client went idle, or null if the client is not idle
+	since ?time.Time
+	// User's activities
+	activities []Activity
+	// User's new status
+	status Status = .online
+	// Whether or not the client is afk
+	afk bool
+}
+
+pub fn (params UpdatePresenceParams) build() json2.Any {
+	return {
+		'since':      if since := params.since {
+			json2.Any(since.unix_time_milli())
+		} else {
+			json2.null
+		}
+		'activities': params.activities.map(|a| a.build())
+		'status':     params.status.build()
+		'afk':        params.afk
+	}
+}
+
+pub fn (mut gc GatewayClient) update_presence(params UpdatePresenceParams) ! {
+	gc.send(WSMessage{
+		opcode: .update_presence
 		data: params.build()
 	})!
 }
