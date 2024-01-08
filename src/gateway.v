@@ -310,10 +310,24 @@ pub fn (mut c GatewayClient) init() ! {
 
 pub fn (mut c GatewayClient) run() ! {
 	c.close_code = none
+	mut reconnect := true
 	for {
-		c.resume_gateway_url = ''
-		c.ws.connect()!
-		c.ws.listen()! // blocks
+		if reconnect {
+			c.resume_gateway_url = ''
+			c.ws.connect()!
+		} else {
+			reconnect = true
+		}
+		// blocks:
+
+		c.ws.listen() or {
+			if err.code() != 4 {
+				return err
+			}
+			// EINTR, should retry
+			reconnect = false
+			continue
+		}
 		close_code := c.close_code or { 0 }
 		cc := discord.gateway_close_code_table[close_code] or {
 			GatewayCloseCode{
