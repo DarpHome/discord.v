@@ -333,7 +333,6 @@ pub fn (mut c GatewayClient) run() ! {
 				}
 				return err
 			}
-			// c.hello()!
 			connected = true
 		} else {
 			reconnect = true
@@ -355,6 +354,7 @@ pub fn (mut c GatewayClient) run() ! {
 			// EINTR/SSL, should retry
 			time.sleep(5 * time.second)
 			reconnect = true
+			c.ready = false
 			continue
 		}
 		$if trace ? {
