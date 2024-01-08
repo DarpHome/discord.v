@@ -321,7 +321,7 @@ pub fn (mut c GatewayClient) run() ! {
 		// blocks:
 
 		c.ws.listen() or {
-			if err.code() != 4 {
+			if err.code() != 4 || err.msg() != 'Could not read using SSL' {
 				return err
 			}
 			// EINTR, should retry
