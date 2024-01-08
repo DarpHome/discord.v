@@ -349,7 +349,7 @@ pub fn (mut c GatewayClient) run() ! {
 				return err
 			}
 			// EINTR/SSL, should retry
-			reconnect = false
+			reconnect = true
 			continue
 		}
 		$if trace ? {
