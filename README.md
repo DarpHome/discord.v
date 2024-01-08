@@ -84,33 +84,32 @@ fn main() {
 - [ ] Documentation
 
 ### Second milestone
-- [ ] Handle REST
+- [x] Handle REST
   - [x] Interactions
     - [x] Application Commands
     - [x] Message Components
     - [x] Receiving and Responding
-  - [ ] Resources
+  - [x] Resources
     - [x] Application
-    - [ ] Application Role Connection Metadata
+    - [x] Application Role Connection Metadata
     - [x] Audit Log
     - [x] Auto Moderation
     - [x] Channel
     - [x] Emoji
     - [x] Guild
     - [x] Guild Scheduled Event
-    - [ ] Guild Template
+    - [x] Guild Template
     - [x] Invite
     - [x] Stage Instance
     - [x] Sticker
     - [x] User
     - [x] Voice
     - [x] Webhook
-    - [ ] Observe rate limits
 - [ ] Command router
 - [ ] Think about tests
 
 ### Third milestone (till V v0.5)
-- [ ] Build cache ontop map's (memcache, redis in future)
+- [x] Build cache ontop map's (memcache, redis in future)
 
 ### The Main one
-- [ ] Make a cool library
+- [x] Make a cool library

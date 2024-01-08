@@ -72,7 +72,7 @@ pub fn AvatarDecorationData.parse(j json2.Any) !AvatarDecorationData {
 			}
 		}
 		else {
-			return error('expected avatar decoration data to be object, got ${j.type_name()}')
+			return error('expected AvatarDecorationData to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -213,7 +213,7 @@ pub fn User.parse(j json2.Any) !User {
 			}
 		}
 		else {
-			return error('expected user to be object, got ${j.type_name()}')
+			return error('expected User to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -444,7 +444,156 @@ pub fn PartialUser.parse(j json2.Any) !PartialUser {
 			}
 		}
 		else {
-			return error('expected partial user to be object, got ${j.type_name()}')
+			return error('expected PartialUser to be object, got ${j.type_name()}')
 		}
 	}
+}
+
+pub type ConnectionService = string
+
+pub enum Visibility {
+	// invisible to everyone except the user themselves
+	none_
+	// visible to everyone
+	everyone
+}
+
+// The connection object that the user has attached.
+pub struct Connection {
+pub:
+	// id of the connection account
+	id string
+	// the username of the connection account
+	name string
+	// the service of this connection
+	typ ConnectionService
+	// whether the connection is revoked
+	revoked ?bool
+	// an array of partial [server integrations](#PartialIntegration)
+	integrations ?[]PartialIntegration
+	// whether the connection is verified
+	verified bool
+	// whether friend sync is enabled for this connection
+	friend_sync bool
+	// whether activities related to this connection will be shown in presence updates
+	show_activity bool
+	// whether this connection has a corresponding third party OAuth2 token
+	two_way_link bool
+	// visibility of this connection
+	visibility Visibility
+}
+
+pub fn Connection.parse(j json2.Any) !Connection {
+	match j {
+		map[string]json2.Any {
+			return Connection{
+				id: j['id']! as string
+				name: j['name']! as string
+				typ: ConnectionService(j['type']! as string)
+				revoked: if b := j['revoked'] {
+					b as bool
+				} else {
+					none
+				}
+				integrations: if a := j['integrations'] {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !PartialIntegration {
+						return PartialIntegration.parse(k)!
+					})!
+				} else {
+					none
+				}
+				verified: j['verified']! as bool
+				friend_sync: j['friend_sync']! as bool
+				show_activity: j['show_activity']! as bool
+				two_way_link: j['two_way_link']! as bool
+				visibility: unsafe { Visibility(j['visibility']!.int()) }
+			}
+		}
+		else {
+			return error('expected Connection to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// Returns a list of [connection](#Connection) objects. Requires the `connections` OAuth2 scope.
+pub fn (c Client) fetch_my_connections() ![]Connection {
+	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/connections')!.body)! as []json2.Any, fn (j json2.Any) !Connection {
+		return Connection.parse(j)!
+	})!
+}
+
+pub struct ApplicationRoleConnection {
+pub:
+	// the vanity name of the platform a bot has connected (max 50 characters)
+	platform_name ?string
+	// the username on the platform a bot has connected (max 100 characters)
+	platform_username ?string
+	// object mapping [application role connection metadata](#ApplicationRoleConnectionMetadata) keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
+	metadata map[string]string
+}
+
+pub fn ApplicationRoleConnection.parse(j json2.Any) !ApplicationRoleConnection {
+	match j {
+		map[string]json2.Any {
+			platform_name := j['platform_name']!
+			platform_username := j['platform_username']!
+			return ApplicationRoleConnection{
+				platform_name: if platform_name !is json2.Null {
+					platform_name as string
+				} else {
+					none
+				}
+				platform_username: if platform_username !is json2.Null {
+					platform_username as string
+				} else {
+					none
+				}
+				metadata: maps.to_map[string, json2.Any, string, string](j['metadata']! as map[string]json2.Any,
+					fn (k string, v json2.Any) (string, string) {
+						return k, v as string
+				})
+			}
+		}
+		else {
+			return error('expected ApplicationRoleConnection to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+// Returns the [application role connection](#ApplicationRoleConnection) for the user. Requires an OAuth2 access token with `role_connections.write` scope for the application specified in the path.
+pub fn (c Client) fetch_my_application_role_connection(application_id Snowflake) !ApplicationRoleConnection {
+	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.get, '/users/@me/applications/${urllib.path_escape(application_id.build())}/role-connection')!.body)!)!
+}
+
+@[params]
+pub struct UpdateMyApplicationRoleConnectionParams {
+pub mut:
+	// the vanity name of the platform a bot has connected (max 50 characters)
+	platform_name ?string
+	// the username on the platform a bot has connected (max 100 characters)
+	platform_username ?string
+	// object mapping [application role connection metadata](#ApplicationRoleConnectionMetadata) keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
+	metadata ?map[string]string
+}
+
+pub fn (params UpdateMyApplicationRoleConnectionParams) build() json2.Any {
+	mut j := map[string]json2.Any{}
+	if platform_name := params.platform_name {
+		j['platform_name'] = platform_name
+	}
+	if platform_username := params.platform_username {
+		j['platform_username'] = platform_username
+	}
+	if metadata := params.metadata {
+		j['metadata'] = maps.to_map[string, string, string, json2.Any](metadata,
+			fn (k string, v string) (string, json2.Any) {
+				return k, v
+		})
+	}
+	return j
+}
+
+// Updates and returns the [application role connection](#ApplicationRoleConnection) for the user. Requires an OAuth2 access token with `role_connections.write` scope for the application specified in the path.
+pub fn (c Client) update_my_application_role_connection(application_id Snowflake, params UpdateMyApplicationRoleConnectionParams) !ApplicationRoleConnection {
+	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.put, '/users/@me/applications/${urllib.path_escape(application_id.build())}/role-connection', json: params.build())!.body)!)!
 }

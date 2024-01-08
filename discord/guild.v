@@ -298,7 +298,7 @@ pub fn WelcomeScreen.parse(j json2.Any) !WelcomeScreen {
 pub struct PartialGuild {
 pub:
 	// guild id
-	id ?Snowflake
+	id Snowflake
 	// guild name (2-100 characters, excluding trailing and leading whitespace)
 	name string
 	// icon hash
@@ -336,7 +336,7 @@ pub fn PartialGuild.parse(j json2.Any) !PartialGuild {
 				id: if s := j['id'] {
 					Snowflake.parse(s)!
 				} else {
-					none
+					0
 				}
 				name: j['name']! as string
 				icon: if s := j['icon'] {

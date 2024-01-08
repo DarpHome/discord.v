@@ -1702,16 +1702,22 @@ fn event_process_entitlement_delete(mut gc GatewayClient, data json2.Any, option
 }
 
 fn event_process_guild_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	if gc.settings.has(.dont_process_guild_events) {
-		gc.events.on_guild_create.emit(GuildCreateEvent.parse(data, BaseEvent{
-			creator: gc
-		})!, options)
-		return
+	d := data as map[string]json2.Any
+	if b := d['unavailable'] {
+		// TODO: handle unavailable
+		if b !is json2.Null {
+			if b as bool {
+				return
+			}
+		}
 	}
 	event := GuildCreateEvent.parse(data, BaseEvent{
 		creator: gc
 	})!
 	gc.events.on_guild_create.emit(event, options)
+	if gc.settings.has(.dont_process_guild_events) {
+		return
+	}
 	for role in event.guild.roles {
 		cache_add2(mut gc.cache.roles, gc.cache.roles_max_size1, gc.cache.roles_max_size2,
 			gc.cache.roles_check, event.guild.id, role.id, role)

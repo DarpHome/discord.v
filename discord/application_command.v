@@ -13,105 +13,7 @@ pub enum ApplicationCommandType {
 	message
 }
 
-pub type Locale = string
-
-// Indonesian (Bahasa Indonesia)
-pub const locale_id = Locale('id')
-
-// Danish (Dansk)
-pub const locale_da = Locale('da')
-
-// German (Deutsch)
-pub const locale_de = Locale('de')
-
-// English, UK (English, UK)
-pub const locale_en_gb = Locale('en-GB')
-
-// English, US (English, US)
-pub const locale_en_us = Locale('en-US')
-
-// Spanish (Español)
-pub const locale_es_es = Locale('es-ES')
-
-// Spanish, LATAM (Español, LATAM)
-pub const locale_es_419 = Locale('es-419')
-
-// French (Français)
-pub const locale_fr = Locale('fr')
-
-// Croatian (Hrvatski)
-pub const locale_hr = Locale('hr')
-
-// Italian (Italiano)
-pub const locale_it = Locale('it')
-
-// Lithuanian (Lietuviškai)
-pub const locale_lt = Locale('lt')
-
-// Hungarian (Magyar)
-pub const locale_hu = Locale('hu')
-
-// Dutch (Nederlands)
-pub const locale_nl = Locale('nl')
-
-// Norweigan (Norsk)
-pub const locale_no = Locale('no')
-
-// Polish (Polski)
-pub const locale_pl = Locale('pl')
-
-// Portuguese, Brazilian (Português do Brasil)
-pub const locale_pt_br = Locale('pt-BR')
-
-// Romanian, Romania (Română)
-pub const locale_ro = Locale('ro')
-
-// Finnish (Suomi)
-pub const locale_fi = Locale('fi')
-
-// Swedish (Svenska)
-pub const locale_sv_se = Locale('sv-SE')
-
-// Vietnamese (Tiếng Việt)
-pub const locale_vi = Locale('vi')
-
-// Turkish (Türkçe)
-pub const locale_tr = Locale('tr')
-
-// Czech (Čeština)
-pub const locale_cs = Locale('cs')
-
-// Greek (Ελληνικά)
-pub const locale_el = Locale('el')
-
-// Bulgarian (български)
-pub const locale_bg = Locale('bg')
-
-// Russian (Pусский)
-pub const locale_ru = Locale('ru')
-
-// Ukrainian (Українська)
-pub const locale_uk = Locale('uk')
-
-// Hindi (हिन्दी)
-pub const locale_hi = Locale('hi')
-
-// Thai (ไทย)
-pub const locale_th = Locale('th')
-
-// Chinese, China (中文)
-pub const locale_zh_cn = Locale('zh-CN')
-
-// Japanese (日本語)
-pub const locale_ja = Locale('ja')
-
-// Chinese, Taiwan (繁體中文)
-pub const locale_zh_tw = Locale('zh-TW')
-
-// Korean (한국어)
-pub const locale_ko = Locale('ko')
-
-pub type LocaleMapping = map[Locale]string
+// pub type LocaleMapping = map[Locale]string
 
 pub enum ApplicationCommandOptionType {
 	sub_command       = 1
@@ -138,7 +40,7 @@ pub:
 	// 1-100 character choice name
 	name string @[required]
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?LocaleMapping
+	name_localizations ?map[Locale]string
 	// Value for the choice, up to 100 characters if string
 	value ApplicationCommandOptionChoiceValue @[required]
 }
@@ -150,12 +52,7 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 			return ApplicationCommandOptionChoice{
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
-					?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
-						fn (k string, v json2.Any) (Locale, string) {
-						return k, v as string
-					}))
-					// as map[Locale]string
-					// i was trying to fix
+					parse_locales(m as map[string]json2.Any)
 				} else {
 					none
 				}
@@ -170,13 +67,13 @@ pub fn ApplicationCommandOptionChoice.parse(j json2.Any) !ApplicationCommandOpti
 						ApplicationCommandOptionChoiceValue(f64(value))
 					}
 					else {
-						return error('expected application command option choice value to be string/i64/f64, got ${value.type_name()}')
+						return error('expected ApplicationCommandOptionChoiceValue to be string/i64/f64, got ${value.type_name()}')
 					}
 				}
 			}
 		}
 		else {
-			return error('expected application command option choice to be object, got ${j.type_name()}')
+			return error('expected ApplicationCommandOptionChoice to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -190,10 +87,7 @@ pub fn (acoc ApplicationCommandOptionChoice) build() json2.Any {
 		}
 	}
 	if name_localizations := acoc.name_localizations {
-		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations,
-			fn (k Locale, v string) (string, json2.Any) {
-			return k, v
-		})
+		r['name_localizations'] = build_locales(name_localizations)
 	}
 	return r
 }
@@ -209,7 +103,7 @@ pub fn Number.parse(j json2.Any) !Number {
 			return Number(f64(j))
 		}
 		else {
-			return error('expected number to be int/f64, got ${j.type_name()}')
+			return error('expected Number to be int/f64, got ${j.type_name()}')
 		}
 	}
 }
@@ -229,11 +123,11 @@ pub:
 	// 1-32 character name
 	name string @[required]
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?LocaleMapping
+	name_localizations ?map[Locale]string
 	// 1-100 character description
 	description string @[required]
 	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
-	description_localizations ?LocaleMapping
+	description_localizations ?map[Locale]string
 	// If the parameter is required or optional--default `false`
 	required ?bool
 	// Choices for `.string`, `.integer`, and `.number` types for the user to pick from, max 25
@@ -262,10 +156,7 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
 					if m !is json2.Null {
-						?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
-							fn (k string, v json2.Any) (Locale, string) {
-							return k, v as string
-						}))
+						parse_locales(m as map[string]json2.Any)
 					} else {
 						none
 					}
@@ -275,10 +166,10 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 				description: j['description']! as string
 				description_localizations: if m := j['description_localizations'] {
 					if m !is json2.Null {
-						?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
+						maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
 							fn (k string, v json2.Any) (Locale, string) {
 							return k, v as string
-						}))
+						})
 					} else {
 						none
 					}
@@ -337,7 +228,7 @@ pub fn ApplicationCommandOption.parse(j json2.Any) !ApplicationCommandOption {
 			}
 		}
 		else {
-			return error('expected application command option to be object, got ${j.type_name()}')
+			return error('expected ApplicationCommandOption to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -349,16 +240,10 @@ pub fn (aco ApplicationCommandOption) build() json2.Any {
 		'description': aco.description
 	}
 	if name_localizations := aco.name_localizations {
-		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations,
-			fn (k Locale, v string) (string, json2.Any) {
-			return k, v
-		})
+		r['name_localizations'] = build_locales(name_localizations)
 	}
 	if description_localizations := aco.description_localizations {
-		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations,
-			fn (k Locale, v string) (string, json2.Any) {
-			return k, v
-		})
+		r['description_localizations'] = build_locales(description_localizations)
 	}
 	if required := aco.required {
 		r['required'] = required
@@ -403,11 +288,11 @@ pub:
 	// Name of command, 1-32 characters
 	name string
 	// Localization dictionary for `name` field. Values follow the same restrictions as `name`
-	name_localizations ?LocaleMapping
+	name_localizations ?map[Locale]string
 	// Description for `.chat_input` commands, 1-100 characters. Empty string for `.user` and `.message` commands
 	description string
 	// Localization dictionary for `description` field. Values follow the same restrictions as `description`
-	description_localizations ?LocaleMapping
+	description_localizations ?map[Locale]string
 	// Parameters for the command, max of 25
 	options ?[]ApplicationCommandOption
 	// Set of permissions represented as a bit set
@@ -427,17 +312,14 @@ pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 				typ: unsafe { ApplicationCommandType(j['type']!.int()) }
 				application_id: Snowflake.parse(j['application_id']!)!
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				name: j['name']! as string
 				name_localizations: if m := j['name_localizations'] {
 					if m !is json2.Null {
-						?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
-							fn (k string, v json2.Any) (Locale, string) {
-							return k, v as string
-						}))
+						parse_locales(m as map[string]json2.Any)
 					} else {
 						none
 					}
@@ -447,10 +329,7 @@ pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 				description: j['description']! as string
 				description_localizations: if m := j['description_localizations'] {
 					if m !is json2.Null {
-						?LocaleMapping(maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
-							fn (k string, v json2.Any) (Locale, string) {
-							return k, v as string
-						}))
+						parse_locales(m as map[string]json2.Any)
 					} else {
 						none
 					}
@@ -458,31 +337,31 @@ pub fn ApplicationCommand.parse(j json2.Any) !ApplicationCommand {
 					none
 				}
 				options: if a := j['options'] {
-					?[]ApplicationCommandOption(maybe_map(a as []json2.Any, fn (k json2.Any) !ApplicationCommandOption {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !ApplicationCommandOption {
 						return ApplicationCommandOption.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				default_member_permissions: if default_member_permissions !is json2.Null {
-					?Permissions(Permissions.parse(default_member_permissions)!)
+					Permissions.parse(default_member_permissions)!
 				} else {
 					none
 				}
 				dm_permission: if b := j['dm_permission'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				nsfw: if b := j['nsfw'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected application command to be object, got ${j.type_name()}')
+			return error('expected ApplicationCommand to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -516,11 +395,11 @@ pub:
 	// Name of command, 1-32 characters
 	name string
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?LocaleMapping
+	name_localizations ?map[Locale]string
 	// 1-100 character description for `.chat_input` commands
 	description ?string
 	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
-	description_localizations ?LocaleMapping
+	description_localizations ?map[Locale]string
 	// the parameters for the command
 	options ?[]ApplicationCommandOption
 	// Set of permissions represented as a bit set
@@ -538,19 +417,13 @@ pub fn (params CreateApplicationCommandParams) build() json2.Any {
 		'name': json2.Any(params.name)
 	}
 	if name_localizations := params.name_localizations {
-		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations,
-			fn (k Locale, v string) (string, json2.Any) {
-			return k, v
-		})
+		r['name_localizations'] = build_locales(name_localizations)
 	}
 	if description := params.description {
 		r['description'] = description
 	}
 	if description_localizations := params.description_localizations {
-		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations,
-			fn (k Locale, v string) (string, json2.Any) {
-			return k, v
-		})
+		r['description_localizations'] = build_locales(description_localizations)
 	}
 	if options := params.options {
 		r['options'] = options.map(|o| o.build())
@@ -588,11 +461,11 @@ pub:
 	// Name of command, 1-32 characters
 	name ?string
 	// Localization dictionary for the `name` field. Values follow the same restrictions as `name`
-	name_localizations ?LocaleMapping
+	name_localizations ?map[Locale]string
 	// 1-100 character description
 	description ?string
 	// Localization dictionary for the `description` field. Values follow the same restrictions as `description`
-	description_localizations ?LocaleMapping
+	description_localizations ?map[Locale]string
 	// the parameters for the command
 	options ?[]ApplicationCommandOption
 	// Set of permissions represented as a bit set
@@ -609,19 +482,13 @@ pub fn (params EditApplicationCommandParams) build() json2.Any {
 		r['name'] = name
 	}
 	if name_localizations := params.name_localizations {
-		r['name_localizations'] = maps.to_map[Locale, string, string, json2.Any](name_localizations,
-			fn (k Locale, v string) (string, json2.Any) {
-			return k, v
-		})
+		r['name_localizations'] = build_locales(name_localizations)
 	}
 	if description := params.description {
 		r['description'] = description
 	}
 	if description_localizations := params.description_localizations {
-		r['description_localizations'] = maps.to_map[Locale, string, string, json2.Any](description_localizations,
-			fn (k Locale, v string) (string, json2.Any) {
-			return k, v
-		})
+		r['description_localizations'] = build_locales(description_localizations)
 	}
 	if options := params.options {
 		r['options'] = options.map(|o| o.build())
@@ -731,7 +598,7 @@ pub fn ApplicationCommandPermission.parse(j json2.Any) !ApplicationCommandPermis
 			}
 		}
 		else {
-			return error('expected application command permission to be object ${j.type_name()}')
+			return error('expected ApplicationCommandPermission to be object ${j.type_name()}')
 		}
 	}
 }
@@ -761,7 +628,7 @@ pub fn GuildApplicationCommandPermissions.parse(j json2.Any) !GuildApplicationCo
 			}
 		}
 		else {
-			return error('expected guild application command permissions to be object ${j.type_name()}')
+			return error('expected GuildApplicationCommandPermissions to be object ${j.type_name()}')
 		}
 	}
 }
