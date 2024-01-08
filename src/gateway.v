@@ -333,6 +333,7 @@ pub fn (mut c GatewayClient) run() ! {
 				}
 				return err
 			}
+			connected = true
 		} else {
 			reconnect = true
 		}
