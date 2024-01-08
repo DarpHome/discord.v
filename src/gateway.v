@@ -126,6 +126,44 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 	}(mut c, interval * time.millisecond)
 }
 
+fn (mut gc GatewayClient) hello() ! {
+	if client.session_id != '' {
+		client.logger.info('Sending RESUME')
+		client.send(WSMessage{
+			opcode: .resume
+			data: json2.Any({
+				'token':      json2.Any(client.token)
+				'session_id': client.session_id
+				'seq':        if seq := client.sequence {
+					int(seq)
+				} else {
+					json2.null
+				}
+			})
+		})!
+		client.logger.info('Sent RESUME')
+	} else {
+		props := client.properties
+		client.logger.info('Sending IDENTIFY')
+		mut data := {
+			'token':      json2.Any(client.token)
+			'intents':    client.intents
+			'properties': json2.Any({
+				'os':      json2.Any(props.os)
+				'browser': props.browser
+				'device':  props.device
+			})
+		}
+		if presence := client.presence {
+			data['presence'] = presence.build()
+		}
+		client.send(WSMessage{
+			opcode: .identify
+			data: data
+		})!
+	}
+}
+
 fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 	// did Microsoft updated vschannel, so TYPING_START does not kill bot?
 	/* $if windows && !no_vschannel ? {
@@ -144,40 +182,8 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 				return error('First message was not HELLO')
 			}
 			client.ready = true
-			if client.session_id != '' {
-				client.logger.info('Sending RESUME')
-				client.send(WSMessage{
-					opcode: .resume
-					data: json2.Any({
-						'token':      json2.Any(client.token)
-						'session_id': client.session_id
-						'seq':        if seq := client.sequence {
-							int(seq)
-						} else {
-							json2.null
-						}
-					})
-				})!
-				client.logger.info('Sent RESUME')
-			} else {
-				props := client.properties
-				client.logger.info('Sending IDENTIFY')
-				mut data := {
-					'token':      json2.Any(client.token)
-					'intents':    client.intents
-					'properties': json2.Any({
-						'os':      json2.Any(props.os)
-						'browser': props.browser
-						'device':  props.device
-					})
-				}
-				if presence := client.presence {
-					data['presence'] = presence.build()
-				}
-				client.send(WSMessage{
-					opcode: .identify
-					data: data
-				})!
+			client.hello()!
+			if client.session_id == '' {
 				client.logger.debug('Spawning heart')
 				client.spawn_heart(message.data.as_map()['heartbeat_interval']!.i64())
 			}
@@ -344,6 +350,12 @@ pub fn (mut c GatewayClient) run() ! {
 		}
 		$if trace ? {
 			eprintln('listen returned')
+		}
+		if !reconnect {
+			c.hello() or {
+				reconnect = true
+				continue
+			}
 		}
 		close_code := c.close_code or { 0 }
 		if close_code == 0 {
