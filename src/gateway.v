@@ -312,21 +312,37 @@ pub fn (mut c GatewayClient) run() ! {
 	c.close_code = none
 	mut reconnect := true
 	for {
+		$if trace ? {
+			eprintln('iteration: ${reconnect}')
+		}
 		if reconnect {
 			c.resume_gateway_url = ''
-			c.ws.connect()!
+			c.ws.connect() or {
+				$if trace ? {
+					eprintln('c.ws.connect() failed: ${err}; with code ${err.code()}')
+				}
+				return err
+			}
 		} else {
 			reconnect = true
 		}
+		$if trace ? {
+			eprintln('calling listen')
+		}
 		// blocks:
-
 		c.ws.listen() or {
+			$if trace ? {
+				eprintln('listen failed: ${err}; with code ${err.code()}')
+			}
 			if err.code() != 4 || !err.msg().contains('SSL') {
 				return err
 			}
 			// EINTR/SSL, should retry
 			reconnect = false
 			continue
+		}
+		$if trace ? {
+			eprintln('listen returned')
 		}
 		close_code := c.close_code or { 0 }
 		cc := discord.gateway_close_code_table[close_code] or {
