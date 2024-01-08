@@ -127,37 +127,37 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 }
 
 fn (mut gc GatewayClient) hello() ! {
-	if client.session_id != '' {
-		client.logger.info('Sending RESUME')
-		client.send(WSMessage{
+	if gc.session_id != '' {
+		gc.logger.info('Sending RESUME')
+		gc.send(WSMessage{
 			opcode: .resume
 			data: json2.Any({
-				'token':      json2.Any(client.token)
-				'session_id': client.session_id
-				'seq':        if seq := client.sequence {
+				'token':      json2.Any(gc.token)
+				'session_id': gc.session_id
+				'seq':        if seq := gc.sequence {
 					int(seq)
 				} else {
 					json2.null
 				}
 			})
 		})!
-		client.logger.info('Sent RESUME')
+		gc.logger.info('Sent RESUME')
 	} else {
-		props := client.properties
-		client.logger.info('Sending IDENTIFY')
+		props := gc.properties
+		gc.logger.info('Sending IDENTIFY')
 		mut data := {
-			'token':      json2.Any(client.token)
-			'intents':    client.intents
+			'token':      json2.Any(gc.token)
+			'intents':    gc.intents
 			'properties': json2.Any({
 				'os':      json2.Any(props.os)
 				'browser': props.browser
 				'device':  props.device
 			})
 		}
-		if presence := client.presence {
+		if presence := gc.presence {
 			data['presence'] = presence.build()
 		}
-		client.send(WSMessage{
+		gc.send(WSMessage{
 			opcode: .identify
 			data: data
 		})!
