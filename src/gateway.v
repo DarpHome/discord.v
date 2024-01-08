@@ -345,8 +345,10 @@ pub fn (mut c GatewayClient) run() ! {
 			$if trace ? {
 				eprintln('listen failed: ${err}; with code ${err.code()}; message: ${err.msg()}')
 			}
-			if dump(err.code()) !in [4, -29184] || dump(!err.msg().contains('SSL')) {
-				eprintln('returned error')
+			if [4, -29184].contains(err.code()) || !err.msg().contains('SSL') {
+				$if trace ? {
+					eprintln('returned error')
+				}
 				return err
 			}
 			// EINTR/SSL, should retry
