@@ -345,6 +345,10 @@ pub fn (mut c GatewayClient) run() ! {
 			eprintln('listen returned')
 		}
 		close_code := c.close_code or { 0 }
+		if close_code == 0 {
+			reconnect = true
+			continue
+		}
 		cc := discord.gateway_close_code_table[close_code] or {
 			GatewayCloseCode{
 				message: 'Unknown websocket close code ${close_code}'
