@@ -169,15 +169,13 @@ pub const locale_zh_tw = Locale('zh-TW')
 pub const locale_ko = Locale('ko')
 
 fn build_locales(m map[Locale]string) map[string]json2.Any {
-	return maps.to_map[Locale, string, string, json2.Any](m,
-		fn (k Locale, v string) (string, json2.Any) {
+	return maps.to_map[Locale, string, string, json2.Any](m, fn (k Locale, v string) (string, json2.Any) {
 		return k, v
 	})
 }
 
 fn parse_locales(m map[string]json2.Any) map[Locale]string {
-	return maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any,
-		fn (k string, v json2.Any) (Locale, string) {
+	return maps.to_map[string, json2.Any, Locale, string](m as map[string]json2.Any, fn (k string, v json2.Any) (Locale, string) {
 		return k, v as string
 	})
 }

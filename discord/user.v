@@ -517,7 +517,8 @@ pub fn Connection.parse(j json2.Any) !Connection {
 
 // Returns a list of [connection](#Connection) objects. Requires the `connections` OAuth2 scope.
 pub fn (c Client) fetch_my_connections() ![]Connection {
-	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/connections')!.body)! as []json2.Any, fn (j json2.Any) !Connection {
+	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/connections')!.body)! as []json2.Any,
+		fn (j json2.Any) !Connection {
 		return Connection.parse(j)!
 	})!
 }
@@ -550,7 +551,7 @@ pub fn ApplicationRoleConnection.parse(j json2.Any) !ApplicationRoleConnection {
 				}
 				metadata: maps.to_map[string, json2.Any, string, string](j['metadata']! as map[string]json2.Any,
 					fn (k string, v json2.Any) (string, string) {
-						return k, v as string
+					return k, v as string
 				})
 			}
 		}
@@ -585,9 +586,8 @@ pub fn (params UpdateMyApplicationRoleConnectionParams) build() json2.Any {
 		j['platform_username'] = platform_username
 	}
 	if metadata := params.metadata {
-		j['metadata'] = maps.to_map[string, string, string, json2.Any](metadata,
-			fn (k string, v string) (string, json2.Any) {
-				return k, v
+		j['metadata'] = maps.to_map[string, string, string, json2.Any](metadata, fn (k string, v string) (string, json2.Any) {
+			return k, v
 		})
 	}
 	return j
@@ -595,5 +595,7 @@ pub fn (params UpdateMyApplicationRoleConnectionParams) build() json2.Any {
 
 // Updates and returns the [application role connection](#ApplicationRoleConnection) for the user. Requires an OAuth2 access token with `role_connections.write` scope for the application specified in the path.
 pub fn (c Client) update_my_application_role_connection(application_id Snowflake, params UpdateMyApplicationRoleConnectionParams) !ApplicationRoleConnection {
-	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.put, '/users/@me/applications/${urllib.path_escape(application_id.build())}/role-connection', json: params.build())!.body)!)!
+	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.put, '/users/@me/applications/${urllib.path_escape(application_id.build())}/role-connection',
+		json: params.build()
+	)!.body)!)!
 }

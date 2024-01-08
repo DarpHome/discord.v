@@ -5,7 +5,7 @@ import x.json2
 
 pub enum ApplicationRoleConnectionMetadataType {
 	// the metadata value (`integer`) is less than or equal to the guild's configured value (`integer`)
-	integer_less_than_or_equal = 1
+	integer_less_than_or_equal     = 1
 	// the metadata value (`integer`) is greater than or equal to the guild's configured value (`integer`)
 	integer_greater_than_or_equal
 	// the metadata value (`integer`) is equal to the guild's configured value (`integer`)
@@ -66,14 +66,16 @@ pub fn ApplicationRoleConnectionMetadata.parse(j json2.Any) !ApplicationRoleConn
 
 // Returns a list of [application role connection metadata](#ApplicationRoleConnectionMetadata) objects for the given application.
 pub fn (c Client) fetch_application_role_connection_metadata_records(application_id Snowflake) ![]ApplicationRoleConnectionMetadata {
-	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/role-connections/metadata')!.body)! as []json2.Any, fn (j json2.Any) !ApplicationRoleConnectionMetadata {
+	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/role-connections/metadata')!.body)! as []json2.Any,
+		fn (j json2.Any) !ApplicationRoleConnectionMetadata {
 		return ApplicationRoleConnectionMetadata.parse(j)!
 	})!
 }
 
 // Updates and returns a [application role connection metadata](#ApplicationRoleConnectionMetadata) objects for the given application.
 pub fn (c Client) update_application_role_connection_metadata_records(application_id Snowflake) ![]ApplicationRoleConnectionMetadata {
-	return maybe_map(json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/role-connections/metadata')!.body)! as []json2.Any, fn (j json2.Any) !ApplicationRoleConnectionMetadata {
+	return maybe_map(json2.raw_decode(c.request(.put, '/applications/${urllib.path_escape(application_id.build())}/role-connections/metadata')!.body)! as []json2.Any,
+		fn (j json2.Any) !ApplicationRoleConnectionMetadata {
 		return ApplicationRoleConnectionMetadata.parse(j)!
 	})!
 }
