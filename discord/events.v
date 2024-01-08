@@ -171,7 +171,7 @@ pub fn AutoModerationActionExecutionEvent.parse(j json2.Any, base BaseEvent) !Au
 			}
 		}
 		else {
-			return error('expected auto moderation action execution event to be object, got ${j.type_name()}')
+			return error('expected AutoModerationActionExecutionEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -250,7 +250,7 @@ pub fn ThreadListSyncEvent.parse(j json2.Any, base BaseEvent) !ThreadListSyncEve
 			}
 		}
 		else {
-			return error('expected thread list sync event to be object, got ${j.type_name()}')
+			return error('expected ThreadListSyncEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -302,7 +302,7 @@ pub fn ChannelPinsUpdateEvent.parse(j json2.Any, base BaseEvent) !ChannelPinsUpd
 			}
 		}
 		else {
-			return error('expected channel pins update event to be object, got ${j.type_name()}')
+			return error('expected ChannelPinsUpdateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -418,7 +418,7 @@ pub fn GuildBanAddEvent.parse(j json2.Any, base BaseEvent) !GuildBanAddEvent {
 			}
 		}
 		else {
-			return error('expected guild ban add event to be object, got ${j.type_name()}')
+			return error('expected GuildBanAddEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -442,7 +442,7 @@ pub fn GuildBanRemoveEvent.parse(j json2.Any, base BaseEvent) !GuildBanRemoveEve
 			}
 		}
 		else {
-			return error('expected guild ban remove event to be object, got ${j.type_name()}')
+			return error('expected GuildBanRemoveEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -468,7 +468,7 @@ pub fn GuildEmojisUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildEmojisUpd
 			}
 		}
 		else {
-			return error('expected guild emojis update event to be object, got ${j.type_name()}')
+			return error('expected GuildEmojisUpdateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -494,7 +494,7 @@ pub fn GuildStickersUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildSticker
 			}
 		}
 		else {
-			return error('expected guild emojis update event to be object, got ${j.type_name()}')
+			return error('expected GuildStickersUpdateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -515,7 +515,7 @@ pub fn GuildIntegrationsUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildInt
 			}
 		}
 		else {
-			return error('expected guild integrations update event to be object, got ${j.type_name()}')
+			return error('expected GuildIntegrationsUpdateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -552,7 +552,7 @@ pub fn GuildMemberRemoveEvent.parse(j json2.Any, base BaseEvent) !GuildMemberRem
 			}
 		}
 		else {
-			return error('expected guild member remove event to be object, got ${j.type_name()}')
+			return error('expected GuildMemberRemoveEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -651,7 +651,7 @@ pub fn GuildMemberUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildMemberUpd
 			}
 		}
 		else {
-			return error('expected guild member update event to be object, got ${j.type_name()}')
+			return error('expected GuildMemberUpdateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -708,7 +708,7 @@ pub fn GuildMembersChunkEvent.parse(j json2.Any, base BaseEvent) !GuildMembersCh
 			}
 		}
 		else {
-			return error('expected guild members chunk event to be object, got ${j.type_name()}')
+			return error('expected GuildMembersChunkEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -730,7 +730,7 @@ pub fn GuildRoleCreateEvent.parse(j json2.Any, base BaseEvent) !GuildRoleCreateE
 			}
 		}
 		else {
-			return error('expected guild role create event to be object, got ${j.type_name()}')
+			return error('expected GuildRoleCreateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -752,7 +752,7 @@ pub fn GuildRoleUpdateEvent.parse(j json2.Any, base BaseEvent) !GuildRoleUpdateE
 			}
 		}
 		else {
-			return error('expected guild role update event to be object, got ${j.type_name()}')
+			return error('expected GuildRoleUpdateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -774,7 +774,7 @@ pub fn GuildRoleDeleteEvent.parse(j json2.Any, base BaseEvent) !GuildRoleDeleteE
 			}
 		}
 		else {
-			return error('expected guild role delete event to be object, got ${j.type_name()}')
+			return error('expected GuildRoleDeleteEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -840,7 +840,7 @@ pub fn GuildScheduledEventUserAddEvent.parse(j json2.Any, base BaseEvent) !Guild
 			}
 		}
 		else {
-			return error('expected guild scheduled event user add event to be object, got ${j.type_name()}')
+			return error('expected GuildScheduledEventUserAddEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -867,7 +867,7 @@ pub fn GuildScheduledEventUserRemoveEvent.parse(j json2.Any, base BaseEvent) !Gu
 			}
 		}
 		else {
-			return error('expected guild scheduled event user remove event to be object, got ${j.type_name()}')
+			return error('expected GuildScheduledEventUserRemoveEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -924,7 +924,7 @@ pub fn IntegrationDeleteEvent.parse(j json2.Any, base BaseEvent) !IntegrationDel
 			}
 		}
 		else {
-			return error('expected integration delete event to be object, got ${j.type_name()}')
+			return error('expected IntegrationDeleteEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -997,7 +997,7 @@ pub fn InviteCreateEvent.parse(j json2.Any, base BaseEvent) !InviteCreateEvent {
 			}
 		}
 		else {
-			return error('expected invite create event to be object, got ${j.type_name()}')
+			return error('expected InviteCreateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1136,7 +1136,7 @@ pub fn MessageDeleteBulkEvent.parse(j json2.Any, base BaseEvent) !MessageDeleteB
 			}
 		}
 		else {
-			return error('expected message delete bulk event to be object, got ${j.type_name()}')
+			return error('expected MessageDeleteBulkEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1187,7 +1187,7 @@ pub fn MessageReactionAddEvent.parse(j json2.Any, base BaseEvent) !MessageReacti
 			}
 		}
 		else {
-			return error('expected message reaction add event to be object, got ${j.type_name()}')
+			return error('expected MessageReactionAddEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1224,7 +1224,7 @@ pub fn MessageReactionRemoveEvent.parse(j json2.Any, base BaseEvent) !MessageRea
 			}
 		}
 		else {
-			return error('expected message reaction remove event to be object, got ${j.type_name()}')
+			return error('expected MessageReactionRemoveEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1255,7 +1255,7 @@ pub fn MessageReactionRemoveAllEvent.parse(j json2.Any, base BaseEvent) !Message
 			}
 		}
 		else {
-			return error('expected message reaction remove all event to be object, got ${j.type_name()}')
+			return error('expected MessageReactionRemoveAllEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1289,7 +1289,7 @@ pub fn MessageReactionRemoveEmojiEvent.parse(j json2.Any, base BaseEvent) !Messa
 			}
 		}
 		else {
-			return error('expected message reaction remove emoji event to be object, got ${j.type_name()}')
+			return error('expected MessageReactionRemoveEmojiEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1343,7 +1343,7 @@ pub fn TypingStartEvent.parse(j json2.Any, base BaseEvent) !TypingStartEvent {
 			}
 		}
 		else {
-			return error('expected typing start event to be object, got ${j.type_name()}')
+			return error('expected TypingStartEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1401,7 +1401,7 @@ pub fn VoiceServerUpdateEvent.parse(j json2.Any, base BaseEvent) !VoiceServerUpd
 			}
 		}
 		else {
-			return error('expected voice server update event to be object, got ${j.type_name()}')
+			return error('expected VoiceServerUpdateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1425,7 +1425,7 @@ pub fn WebhooksUpdateEvent.parse(j json2.Any, base BaseEvent) !WebhooksUpdateEve
 			}
 		}
 		else {
-			return error('expected webhooks update event to be object, got ${j.type_name()}')
+			return error('expected WebhooksUpdateEvent to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -1698,7 +1698,7 @@ fn event_process_entitlement_delete(mut gc GatewayClient, data json2.Any, option
 		creator: gc
 	})!
 	gc.events.on_entitlement_delete.emit(event, options)
-	gc.cache.entitlements[event.entitlement.get_owner() or { return }].delete(event.entitlement.id)
+	gc.cache.entitlements[event.entitlement.get_owner() or { return }] or { return }.delete(event.entitlement.id)
 }
 
 fn event_process_guild_create(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1821,9 +1821,10 @@ fn event_process_guild_ban_remove(mut gc GatewayClient, data json2.Any, options 
 }
 
 fn event_process_guild_emojis_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_emojis_update.emit(GuildEmojisUpdateEvent.parse(data, BaseEvent{
+	event := GuildEmojisUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_emojis_update.emit(event, options)
 }
 
 fn event_process_guild_stickers_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -1840,21 +1841,57 @@ fn event_process_guild_integrations_update(mut gc GatewayClient, data json2.Any,
 }
 
 fn event_process_guild_member_add(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_member_add.emit(GuildMemberAddEvent.parse(data, BaseEvent{
+	event := GuildMemberAddEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_member_add.emit(event, options)
+	cache_add2(mut gc.cache.members, gc.cache.members_max_size1, gc.cache.members_max_size2,
+		gc.cache.members_check, event.member.guild_id, event.member.user or { return }.id,
+		event.member.GuildMember)
 }
 
 fn event_process_guild_member_remove(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_member_remove.emit(GuildMemberRemoveEvent.parse(data, BaseEvent{
+	event := GuildMemberRemoveEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_member_remove.emit(event, options)
+	gc.cache.members[event.guild_id] or { return }.delete(event.user.id)
 }
 
 fn event_process_guild_member_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_member_update.emit(GuildMemberUpdateEvent.parse(data, BaseEvent{
+	event := GuildMemberUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_member_update.emit(event, options)
+	mut member := gc.cache.members[event.guild_id] or { return }[event.user.id]
+	member.roles = event.roles
+	if nick := event.nick {
+		member.nick = if nick.is_present() {
+			nick.value()
+		} else {
+			none
+		}
+	}
+	if premium_since := event.premium_since {
+		member.premium_since = if premium_since.is_present() {
+			premium_since.value()
+		} else {
+			none
+		}
+	}
+	if deaf := event.deaf {
+		member.deaf = deaf
+	}
+	if mute := event.mute {
+		member.mute = mute
+	}
+	if communication_disabled_until := event.communication_disabled_until {
+		member.communication_disabled_until = if communication_disabled_until.is_present() {
+			communication_disabled_until.value()
+		} else {
+			none
+		}
+	}
 }
 
 fn event_process_guild_members_chunk(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {

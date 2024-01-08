@@ -804,8 +804,9 @@ pub enum GuildMemberFlags {
 	started_onboarding
 }
 
+@[noinit]
 pub struct GuildMember {
-pub:
+pub mut:
 	// the user this guild member represents
 	user ?User
 	// this user's guild nickname
@@ -837,13 +838,13 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 		map[string]json2.Any {
 			return GuildMember{
 				user: if o := j['user'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				nick: if s := j['nick'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -852,7 +853,7 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 				}
 				avatar: if s := j['avatar'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -865,7 +866,7 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 				joined_at: time.parse_iso8601(j['joined_at']! as string)!
 				premium_since: if s := j['premium_since'] {
 					if s !is json2.Null {
-						?time.Time(time.parse_iso8601(s as string)!)
+						time.parse_iso8601(s as string)!
 					} else {
 						none
 					}
@@ -876,18 +877,18 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 				mute: j['mute']! as bool
 				flags: unsafe { GuildMemberFlags(j['flags']!.int()) }
 				pending: if b := j['pending'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				permissions: if s := j['permissions'] {
-					?Permissions(Permissions.parse(s)!)
+					Permissions.parse(s)!
 				} else {
 					none
 				}
 				communication_disabled_until: if s := j['communication_disabled_until'] {
 					if s !is json2.Null {
-						?time.Time(time.parse_iso8601(s as string)!)
+						time.parse_iso8601(s as string)!
 					} else {
 						none
 					}
@@ -897,7 +898,7 @@ pub fn GuildMember.parse(j json2.Any) !GuildMember {
 			}
 		}
 		else {
-			return error('expected guild member to be object, got ${j.type_name()}')
+			return error('expected GuildMember to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -918,7 +919,7 @@ pub fn GuildMember2.parse(j json2.Any) !GuildMember2 {
 			}
 		}
 		else {
-			return error('expected guild member 2 to be object, got ${j.type_name()}')
+			return error('expected GuildMember2 to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -944,13 +945,13 @@ pub fn PartialGuildMember.parse(j json2.Any) !PartialGuildMember {
 		map[string]json2.Any {
 			return PartialGuildMember{
 				user: if o := j['user'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				nick: if s := j['nick'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -959,7 +960,7 @@ pub fn PartialGuildMember.parse(j json2.Any) !PartialGuildMember {
 				}
 				avatar: if s := j['avatar'] {
 					if s !is json2.Null {
-						?string(s as string)
+						s as string
 					} else {
 						none
 					}
@@ -967,20 +968,20 @@ pub fn PartialGuildMember.parse(j json2.Any) !PartialGuildMember {
 					none
 				}
 				roles: if a := j['roles'] {
-					?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
 						return Snowflake.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				joined_at: if s := j['joined_at'] {
-					?time.Time(time.parse_iso8601(s as string)!)
+					time.parse_iso8601(s as string)!
 				} else {
 					none
 				}
 				premium_since: if s := j['premium_since'] {
 					if s !is json2.Null {
-						?time.Time(time.parse_iso8601(s as string)!)
+						time.parse_iso8601(s as string)!
 					} else {
 						none
 					}
@@ -988,33 +989,33 @@ pub fn PartialGuildMember.parse(j json2.Any) !PartialGuildMember {
 					none
 				}
 				deaf: if b := j['deaf'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				mute: if b := j['mute'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				flags: if i := j['flags'] {
-					?GuildMemberFlags(unsafe { GuildMemberFlags(i.int()) })
+					unsafe { GuildMemberFlags(i.int()) }
 				} else {
 					none
 				}
 				pending: if b := j['pending'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				permissions: if s := j['permissions'] {
-					?Permissions(Permissions.parse(s)!)
+					Permissions.parse(s)!
 				} else {
 					none
 				}
 				communication_disabled_until: if s := j['communication_disabled_until'] {
 					if s !is json2.Null {
-						?time.Time(time.parse_iso8601(s as string)!)
+						time.parse_iso8601(s as string)!
 					} else {
 						none
 					}
@@ -1024,7 +1025,7 @@ pub fn PartialGuildMember.parse(j json2.Any) !PartialGuildMember {
 			}
 		}
 		else {
-			return error('expected partial guild member to be object, got ${j.type_name()}')
+			return error('expected PartialGuildMember to be object, got ${j.type_name()}')
 		}
 	}
 }
