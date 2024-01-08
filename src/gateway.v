@@ -354,6 +354,7 @@ pub fn (mut c GatewayClient) run() ! {
 			// EINTR/SSL, should retry
 			time.sleep(5 * time.second)
 			reconnect = true
+			connected = false
 			c.ready = false
 			continue
 		}
