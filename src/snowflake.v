@@ -34,3 +34,15 @@ pub fn Snowflake.parse(j json2.Any) !Snowflake {
 		else { return error('expected snowflake to be string, got ${j.type_name()}') }
 	}
 }
+
+pub fn (mut s Snowflake) from_json(f json2.Any) {
+	s = Snowflake.parse(s) or { return }
+}
+
+pub fn (s Snowflake) str() string {
+	return u64(s).str()
+}
+
+pub fn (s Snowflake) json_str() string {
+	return json2.Any(s.str()).json_str()
+}
