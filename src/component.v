@@ -410,7 +410,7 @@ pub:
 
 pub fn (dv DefaultValue) build() json2.Any {
 	return {
-		'id':   json2.Any(dv.id.build())
+		'id':   dv.id.build()
 		'type': match dv.typ {
 			.user { 'user' }
 			.role { 'role' }
@@ -475,7 +475,7 @@ pub fn (us UserSelect) build() json2.Any {
 	}
 	if default_values := us.default_values {
 		r['default_values'] = default_values.map(|dv| json2.Any({
-			'id':   json2.Any(dv.build())
+			'id':   dv.build()
 			'type': 'user'
 		}))
 	}
@@ -563,7 +563,7 @@ pub fn (rs RoleSelect) build() json2.Any {
 	}
 	if default_values := rs.default_values {
 		r['default_values'] = default_values.map(|dv| json2.Any({
-			'id':   json2.Any(dv.build())
+			'id':   dv.build()
 			'type': 'role'
 		}))
 	}
@@ -741,7 +741,7 @@ pub fn (cs ChannelSelect) build() json2.Any {
 	}
 	if default_values := cs.default_values {
 		r['default_values'] = default_values.map(|dv| json2.Any({
-			'id':   json2.Any(dv.build())
+			'id':   dv.build()
 			'type': 'channel'
 		}))
 	}

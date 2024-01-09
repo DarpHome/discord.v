@@ -47,7 +47,7 @@ pub fn ReadyEvent.parse(j json2.Any, base BaseEvent) !ReadyEvent {
 			}
 		}
 		else {
-			return error('expected ready event to be object, got ${j.type_name()}')
+			return error('expected ReadyEvent to be object, got ${j.type_name()}')
 		}
 	}
 }

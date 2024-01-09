@@ -125,7 +125,7 @@ pub fn PartialApplication.parse(j json2.Any) !PartialApplication {
 			}
 		}
 		else {
-			return error('expected partial application to be object, got ${j.type_name()}')
+			return error('expected PartialApplication to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -164,7 +164,7 @@ pub fn TeamMember.parse(j json2.Any) !TeamMember {
 			}
 		}
 		else {
-			return error('expected team member to be object, got ${j.type_name()}')
+			return error('expected TeamMember to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -202,7 +202,7 @@ pub fn Team.parse(j json2.Any) !Team {
 			}
 		}
 		else {
-			return error('expected team member to be object, got ${j.type_name()}')
+			return error('expected Team to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -224,7 +224,7 @@ pub fn InstallParams.parse(j json2.Any) !InstallParams {
 			}
 		}
 		else {
-			return error('expected install params to be object, got ${j.type_name()}')
+			return error('expected InstallParams to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -415,7 +415,7 @@ pub fn Application.parse(j json2.Any) !Application {
 			}
 		}
 		else {
-			return error('expected application to be object, got ${j.type_name()}')
+			return error('expected Application to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -427,7 +427,7 @@ pub fn (c Client) fetch_my_application() !Application {
 
 @[params]
 pub struct EditApplicationParams {
-pub:
+pub mut:
 	// Default custom authorization URL for the app, if enabled
 	custom_install_url ?string
 	// Description of the app

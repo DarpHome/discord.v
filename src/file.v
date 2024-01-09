@@ -90,12 +90,12 @@ pub fn Attachment.parse(j json2.Any) !Attachment {
 				id: Snowflake.parse(j['id']!)!
 				filename: j['filename']! as string
 				description: if s := j['description'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				content_type: if s := j['content_type'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
@@ -104,7 +104,7 @@ pub fn Attachment.parse(j json2.Any) !Attachment {
 				proxy_url: j['proxy_url']! as string
 				height: if i := j['height'] {
 					if i !is json2.Null {
-						?int(i.int())
+						i.int()
 					} else {
 						none
 					}
@@ -113,7 +113,7 @@ pub fn Attachment.parse(j json2.Any) !Attachment {
 				}
 				width: if i := j['width'] {
 					if i !is json2.Null {
-						?int(i.int())
+						i.int()
 					} else {
 						none
 					}
@@ -126,24 +126,24 @@ pub fn Attachment.parse(j json2.Any) !Attachment {
 					none
 				}
 				duration_secs: if f := j['duration_secs'] {
-					?time.Duration(i64(f.f64() * f64(time.second)))
+					i64(f.f64() * f64(time.second))
 				} else {
 					none
 				}
 				waveform: if s := j['waveform'] {
-					?[]u8(base64.decode(s as string))
+					base64.decode(s as string)
 				} else {
 					none
 				}
 				flags: if i := j['flags'] {
-					?AttachmentFlags(unsafe { AttachmentFlags(i.int()) })
+					unsafe { AttachmentFlags(i.int()) }
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected attachment to be object, got ${j.type_name()}')
+			return error('expected Attachment to be object, got ${j.type_name()}')
 		}
 	}
 }

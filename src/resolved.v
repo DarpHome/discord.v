@@ -47,9 +47,9 @@ pub fn Resolved.parse(j json2.Any) !Resolved {
 					none
 				}
 				/* channels: if m := j['channels'] {
-					maybe_map_map[string, json2.Any, Snowflake, PartialChannel](m as map[string]json2.Any, fn (k string, v json2.Any) !(Snowflake, PartialChannel) {
-						nk := Snowflake(k.u64())
-						return nk, PartialChannel.parse(v)!
+					maybe_map_map[string, json2.Any, Snowflake, PartialChannel](m as map[string]json2.Any,
+						fn (k string, v json2.Any) !(Snowflake, PartialChannel) {
+						return Snowflake(k.u64()), PartialChannel.parse(v)!
 					})!
 				} else {
 					none
@@ -73,7 +73,7 @@ pub fn Resolved.parse(j json2.Any) !Resolved {
 			}
 		}
 		else {
-			return error('expected resolved to be object, got ${j.type_name()}')
+			return error('expected Resolved to be object, got ${j.type_name()}')
 		}
 	}
 }

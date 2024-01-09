@@ -39,38 +39,38 @@ pub fn Interaction.parse(j json2.Any) !Interaction {
 				application_id: Snowflake.parse(j['application_id']!)!
 				typ: unsafe { InteractionType(j['type']!.int()) }
 				data: if o := j['data'] {
-					?json2.Any(o)
+					o
 				} else {
 					none
 				}
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				channel: if o := j['channel'] {
-					?PartialChannel(PartialChannel.parse(o)!)
+					PartialChannel.parse(o)!
 				} else {
 					none
 				}
 				channel_id: if s := j['channel_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				member: if o := j['member'] {
-					?GuildMember(GuildMember.parse(o)!)
+					GuildMember.parse(o)!
 				} else {
 					none
 				}
 				user: if o := j['user'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				token: j['token']! as string
 				app_permissions: if s := j['app_permissions'] {
-					?Permissions(Permissions.parse(s)!)
+					Permissions.parse(s)!
 				} else {
 					none
 				}
@@ -90,7 +90,7 @@ pub fn Interaction.parse(j json2.Any) !Interaction {
 			}
 		}
 		else {
-			return error('expected interaction to be object, got ${j.type_name()}')
+			return error('expected Interaction to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -119,7 +119,7 @@ pub fn ApplicationCommandInteractionDataOptionValue.parse(j json2.Any) !Applicat
 			return j
 		}
 		else {
-			return error('expected application command interaction data option value to be string/int/f64/bool, got ${j.type_name()}')
+			return error('expected ApplicationCommandInteractionDataOptionValue to be string/int/f64/bool, got ${j.type_name()}')
 		}
 	}
 }
@@ -189,27 +189,26 @@ pub fn ApplicationCommandInteractionDataOption.parse(j json2.Any) !ApplicationCo
 				name: j['name']! as string
 				typ: unsafe { ApplicationCommandOptionType(j['type']!.int()) }
 				value: if v := j['value'] {
-					?ApplicationCommandInteractionDataOptionValue(ApplicationCommandInteractionDataOptionValue.parse(v)!)
+					ApplicationCommandInteractionDataOptionValue.parse(v)!
 				} else {
 					none
 				}
 				options: if a := j['options'] {
-					?[]ApplicationCommandInteractionDataOption(maybe_map(a as []json2.Any,
-						fn (k json2.Any) !ApplicationCommandInteractionDataOption {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !ApplicationCommandInteractionDataOption {
 						return ApplicationCommandInteractionDataOption.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				focused: if b := j['focused'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected application command interaction data option to be object, got ${j.type_name()}')
+			return error('expected ApplicationCommandInteractionDataOption to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -240,32 +239,31 @@ pub fn ApplicationCommandData.parse(j json2.Any) !ApplicationCommandData {
 				name: j['name']! as string
 				typ: unsafe { ApplicationCommandType(j['type']!.int()) }
 				resolved: if o := j['resolved'] {
-					?Resolved(Resolved.parse(o)!)
+					Resolved.parse(o)!
 				} else {
 					none
 				}
 				options: if a := j['options'] {
-					?[]ApplicationCommandInteractionDataOption(maybe_map(a as []json2.Any,
-						fn (k json2.Any) !ApplicationCommandInteractionDataOption {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !ApplicationCommandInteractionDataOption {
 						return ApplicationCommandInteractionDataOption.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				target_id: if s := j['target_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected application command data to be object, got ${j.type_name()}')
+			return error('expected ApplicationCommandData to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -282,7 +280,7 @@ pub fn (acd ApplicationCommandData) get(option string) ?ApplicationCommandIntera
 }
 
 pub fn (i Interaction) get_application_command_data() !ApplicationCommandData {
-	return ApplicationCommandData.parse(i.data or { return error('no data') })!
+	return ApplicationCommandData.parse(i.data or { panic('no data') })!
 }
 
 pub struct MessageComponentData {
@@ -304,19 +302,19 @@ pub fn MessageComponentData.parse(j json2.Any) !MessageComponentData {
 				custom_id: j['custom_id']! as string
 				component_type: unsafe { ComponentType(j['component_type']!.int()) }
 				values: if a := j['values'] {
-					?[]string((a as []json2.Any).map(|s| s as string))
+					(a as []json2.Any).map(|s| s as string)
 				} else {
 					none
 				}
 				resolved: if o := j['resolved'] {
-					?Resolved(Resolved.parse(o)!)
+					Resolved.parse(o)!
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected message component data to be object, got ${j.type_name()}')
+			return error('expected MessageComponentData to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -344,7 +342,7 @@ pub fn ModalSubmitData.parse(j json2.Any) !ModalSubmitData {
 			}
 		}
 		else {
-			return error('expected modal submit data to be object, got ${j.type_name()}')
+			return error('expected ModalSubmitData to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -437,9 +435,9 @@ pub fn (mrd MessageResponseData) build() json2.Any {
 }
 
 pub struct AutocompleteResponseData {
-pub:
+pub mut:
 	// autocomplete choices (max of 25 choices)
-	choices []ApplicationCommandOptionChoice
+	choices []ApplicationCommandOptionChoice @[required]
 }
 
 pub fn (_ AutocompleteResponseData) is_interaction_response_data() {}
@@ -457,11 +455,11 @@ pub fn (ard AutocompleteResponseData) build() json2.Any {
 pub struct ModalResponseData {
 pub:
 	// a developer-defined identifier for the modal, max 100 characters
-	custom_id string
+	custom_id string @[required]
 	// the title of the popup modal, max 45 characters
-	title string
+	title string @[required]
 	// between 1 and 5 (inclusive) components that make up the modal
-	components []Component
+	components []Component @[required]
 }
 
 pub fn (_ ModalResponseData) is_interaction_response_data() {}
@@ -591,11 +589,10 @@ pub fn (mir ModalInteractionResponse) build() json2.Any {
 
 // Create a response to an Interaction from the gateway. Body is an [interaction response](#IInteractionResponse). Returns 204 No Content.
 // This endpoint also supports file attachments similar to the webhook endpoints. Refer to Uploading Files for details on uploading files and multipart/form-data requests.
-
 pub fn (c Client) create_interaction_response(interaction_id Snowflake, interaction_token string, response IInteractionResponse) ! {
 	if files := response.get_files() {
 		body, boundary := build_multipart_with_files(files, response.build())
-		c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
+		c.request(.post, '/interactions/${urllib.path_escape(interaction_id.str())}/${urllib.path_escape(interaction_token)}/callback',
 			body: body
 			common_headers: {
 				.content_type: 'multipart/form-data; boundary="${boundary}"'
@@ -603,7 +600,7 @@ pub fn (c Client) create_interaction_response(interaction_id Snowflake, interact
 			authenticate: false
 		)!
 	} else {
-		c.request(.post, '/interactions/${urllib.path_escape(interaction_id.build())}/${urllib.path_escape(interaction_token)}/callback',
+		c.request(.post, '/interactions/${urllib.path_escape(interaction_id.str())}/${urllib.path_escape(interaction_token)}/callback',
 			json: response.build()
 			authenticate: false
 		)!

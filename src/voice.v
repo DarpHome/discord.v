@@ -76,7 +76,7 @@ pub fn VoiceState.parse(j json2.Any) !VoiceState {
 			}
 		}
 		else {
-			return error('expected voice state to be object, got ${j.type_name()}')
+			return error('expected VoiceState to be object, got ${j.type_name()}')
 		}
 	}
 }

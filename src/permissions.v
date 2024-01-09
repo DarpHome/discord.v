@@ -120,6 +120,6 @@ pub fn Permissions.all_except(permissions Permissions) Permissions {
 pub fn Permissions.parse(j json2.Any) !Permissions {
 	match j {
 		string { return unsafe { Permissions(j.u64()) } }
-		else { return error('expected permissions to be string, got ${j.type_name()}') }
+		else { return error('expected Permissions to be string, got ${j.type_name()}') }
 	}
 }

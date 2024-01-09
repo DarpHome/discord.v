@@ -55,13 +55,13 @@ pub fn Sku.parse(j json2.Any) !Sku {
 			}
 		}
 		else {
-			return error('expected sku to be object, got ${j.type_name()}')
+			return error('expected Sku to be object, got ${j.type_name()}')
 		}
 	}
 }
 
 pub fn (c Client) list_skus(application_id Snowflake) ![]Sku {
-	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.build())}/skus')!.body)! as []json2.Any,
+	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.str())}/skus')!.body)! as []json2.Any,
 		fn (j json2.Any) !Sku {
 		return Sku.parse(j)!
 	})!

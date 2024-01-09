@@ -43,7 +43,7 @@ pub fn ActivityTimestamps.parse(j json2.Any) !ActivityTimestamps {
 			}
 		}
 		else {
-			return error('expected activity timestamps to be object, got ${j.type_name()}')
+			return error('expected ActivityTimestamps to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -79,7 +79,7 @@ pub fn ActivityParty.parse(j json2.Any) !ActivityParty {
 			}
 		}
 		else {
-			return error('expected activity party to be object, got ${j.type_name()}')
+			return error('expected ActivityParty to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -123,7 +123,7 @@ pub fn ActivityAssets.parse(j json2.Any) !ActivityAssets {
 			}
 		}
 		else {
-			return error('expected activity assets to be object, got ${j.type_name()}')
+			return error('expected ActivityAssets to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -160,7 +160,7 @@ pub fn ActivitySecrets.parse(j json2.Any) !ActivitySecrets {
 			}
 		}
 		else {
-			return error('expected activity secrets to be object, got ${j.type_name()}')
+			return error('expected ActivitySecrets to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -195,7 +195,7 @@ pub fn ActivityButton.parse(j json2.Any) !ActivityButton {
 			}
 		}
 		else {
-			return error('expected activity button to be object, got ${j.type_name()}')
+			return error('expected ActivityButton to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -228,7 +228,7 @@ pub fn ActivityEmoji.parse(j json2.Any) !ActivityEmoji {
 			}
 		}
 		else {
-			return error('expected activity emoji to be object, got ${j.type_name()}')
+			return error('expected ActivityEmoji to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -355,7 +355,7 @@ pub fn Activity.parse(j json2.Any) !Activity {
 			}
 		}
 		else {
-			return error('expected activity to be object, got ${j.type_name()}')
+			return error('expected Activity to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -420,7 +420,7 @@ pub fn Status.parse(j json2.Any) !Status {
 			}
 		}
 		else {
-			return error('expected status to be string, got ${j.type_name()}')
+			return error('expected Status to be string, got ${j.type_name()}')
 		}
 	}
 }
@@ -467,7 +467,7 @@ pub fn ClientStatus.parse(j json2.Any) !ClientStatus {
 			}
 		}
 		else {
-			return error('expected client status to be object, got ${j.type_name()}')
+			return error('expected ClientStatus to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -500,7 +500,7 @@ pub fn Presence.parse(j json2.Any) !Presence {
 			}
 		}
 		else {
-			return error('expected presence to be object, got ${j.type_name()}')
+			return error('expected Presence to be object, got ${j.type_name()}')
 		}
 	}
 }

@@ -76,39 +76,39 @@ pub fn TriggerMetadata.parse(j json2.Any) !TriggerMetadata {
 		map[string]json2.Any {
 			return TriggerMetadata{
 				keyword_filter: if a := j['keyword_filter'] {
-					?[]string((a as []json2.Any).map(|s| s as string))
+					(a as []json2.Any).map(|s| s as string)
 				} else {
 					none
 				}
 				regex_patterns: if a := j['regex_patterns'] {
-					?[]string((a as []json2.Any).map(|s| s as string))
+					(a as []json2.Any).map(|s| s as string)
 				} else {
 					none
 				}
 				presets: if a := j['presets'] {
-					?[]KeywordPresetType((a as []json2.Any).map(|i| unsafe { KeywordPresetType(i.int()) }))
+					(a as []json2.Any).map(|i| unsafe { KeywordPresetType(i.int()) })
 				} else {
 					none
 				}
 				allow_list: if a := j['allow_list'] {
-					?[]string((a as []json2.Any).map(|s| s as string))
+					(a as []json2.Any).map(|s| s as string)
 				} else {
 					none
 				}
 				mention_total_limit: if i := j['mention_total_limit'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				mention_raid_protection_enabled: if b := j['mention_raid_protection_enabled'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected trigger metadata to be object, got ${j.type_name()}')
+			return error('expected TriggerMetadata to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -151,24 +151,24 @@ pub fn ActionMetadata.parse(j json2.Any) !ActionMetadata {
 		map[string]json2.Any {
 			return ActionMetadata{
 				channel_id: if s := j['channel_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				duration_seconds: if i := j['duration_seconds'] {
-					?time.Duration(i.int() * time.second)
+					i.int() * time.second
 				} else {
 					none
 				}
 				custom_message: if s := j['custom_message'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected action metadta to be object, got ${j.type_name()}')
+			return error('expected ActionMetadata to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -204,7 +204,7 @@ pub fn Action.parse(j json2.Any) !Action {
 			}
 		}
 		else {
-			return error('expected action to be object, got ${j.type_name()}')
+			return error('expected Action to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -259,14 +259,14 @@ pub fn AutoModerationRule.parse(j json2.Any) !AutoModerationRule {
 			}
 		}
 		else {
-			return error('expected auto moderation rule to be object, got ${j.type_name()}')
+			return error('expected AutoModerationRule to be object, got ${j.type_name()}')
 		}
 	}
 }
 
 // Get a list of all rules currently configured for the guild. Returns a list of auto moderation rule objects for the given guild.
 pub fn (c Client) list_auto_moderation_rules_for_guild(guild_id Snowflake) ![]AutoModerationRule {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules')!.body)! as []json2.Any,
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/auto-moderation/rules')!.body)! as []json2.Any,
 		fn (j json2.Any) !AutoModerationRule {
 		return AutoModerationRule.parse(j)!
 	})!
@@ -274,12 +274,12 @@ pub fn (c Client) list_auto_moderation_rules_for_guild(guild_id Snowflake) ![]Au
 
 // Get a single rule. Returns an auto moderation rule object.
 pub fn (c Client) fetch_auto_moderation_rule(guild_id Snowflake, auto_moderation_rule_id Snowflake) !AutoModerationRule {
-	return AutoModerationRule.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.build())}')!.body)!)!
+	return AutoModerationRule.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.str())}')!.body)!)!
 }
 
 @[params]
 pub struct CreateAutoModerationRuleParams {
-pub:
+pub mut:
 	reason ?string
 	// the rule name
 	name string @[required]
@@ -313,17 +313,17 @@ pub fn (params CreateAutoModerationRuleParams) build() json2.Any {
 		r['enabled'] = enabled
 	}
 	if exempt_roles := params.exempt_roles {
-		r['exempt_roles'] = exempt_roles.map(|s| json2.Any(s.build()))
+		r['exempt_roles'] = exempt_roles.map(|s| s.build())
 	}
 	if exempt_channels := params.exempt_channels {
-		r['exempt_channels'] = exempt_channels.map(|s| json2.Any(s.build()))
+		r['exempt_channels'] = exempt_channels.map(|s| s.build())
 	}
 	return r
 }
 
 // Create a new rule. Returns an auto moderation rule on success. Fires an Auto Moderation Rule Create Gateway event.
 pub fn (c Client) create_auto_moderation_rule(guild_id Snowflake, params CreateAutoModerationRuleParams) !AutoModerationRule {
-	return AutoModerationRule.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules',
+	return AutoModerationRule.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.str())}/auto-moderation/rules',
 		json: params.build()
 		reason: params.reason
 	)!.body)!)!
@@ -331,7 +331,7 @@ pub fn (c Client) create_auto_moderation_rule(guild_id Snowflake, params CreateA
 
 @[params]
 pub struct EditAutoModerationRuleParams {
-pub:
+pub mut:
 	reason ?string
 	// the rule name
 	name ?string
@@ -372,17 +372,17 @@ pub fn (params EditAutoModerationRuleParams) build() json2.Any {
 		r['enabled'] = enabled
 	}
 	if exempt_roles := params.exempt_roles {
-		r['exempt_roles'] = exempt_roles.map(|s| json2.Any(s.build()))
+		r['exempt_roles'] = exempt_roles.map(|s| s.build())
 	}
 	if exempt_channels := params.exempt_channels {
-		r['exempt_channels'] = exempt_channels.map(|s| json2.Any(s.build()))
+		r['exempt_channels'] = exempt_channels.map(|s| s.build())
 	}
 	return r
 }
 
 // Modify an existing rule. Returns an auto moderation rule on success. Fires an Auto Moderation Rule Update Gateway event.
 pub fn (c Client) edit_auto_moderation_rule(guild_id Snowflake, auto_moderation_rule_id Snowflake, params EditAutoModerationRuleParams) !AutoModerationRule {
-	return AutoModerationRule.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.build())}',
+	return AutoModerationRule.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.str())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.str())}',
 		json: params.build()
 		reason: params.reason
 	)!.body)!)!
@@ -390,7 +390,7 @@ pub fn (c Client) edit_auto_moderation_rule(guild_id Snowflake, auto_moderation_
 
 // Delete a rule. Returns a 204 on success. Fires an Auto Moderation Rule Delete Gateway event.
 pub fn (c Client) delete_auto_moderation_rule(guild_id Snowflake, auto_moderation_rule_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.build())}',
+	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.str())}/auto-moderation/rules/${urllib.path_escape(auto_moderation_rule_id.str())}',
 		reason: params.reason
 	)!
 }

@@ -65,7 +65,7 @@ pub fn InviteMetadata.parse(j json2.Any) !InviteMetadata {
 			}
 		}
 		else {
-			return error('expected invite metadata to be object, got ${j.type_name()}')
+			return error('expected InviteMetadata to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -76,13 +76,13 @@ pub fn Invite.parse(j json2.Any) !Invite {
 			return Invite{
 				code: j['code']! as string
 				guild: if o := j['guild'] {
-					?PartialGuild(PartialGuild.parse(o)!)
+					PartialGuild.parse(o)!
 				} else {
 					none
 				}
 				channel: if o := j['channel'] {
 					if o !is json2.Null {
-						?PartialChannel(PartialChannel.parse(o)!)
+						PartialChannel.parse(o)!
 					} else {
 						none
 					}
@@ -90,38 +90,38 @@ pub fn Invite.parse(j json2.Any) !Invite {
 					none
 				}
 				inviter: if o := j['inviter'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				target_type: if i := j['target_type'] {
-					?InviteTargetType(unsafe { InviteTargetType(i.int()) })
+					unsafe { InviteTargetType(i.int()) }
 				} else {
 					none
 				}
 				target_user: if o := j['target_user'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				target_application: if o := j['target_application'] {
-					?PartialApplication(PartialApplication.parse(o)!)
+					PartialApplication.parse(o)!
 				} else {
 					none
 				}
 				approximate_presence_count: if i := j['approximate_presence_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				approximate_member_count: if i := j['approximate_member_count'] {
-					?int(i.int())
+					i.int()
 				} else {
 					none
 				}
 				expires_at: if s := j['expires_at'] {
 					if s !is json2.Null {
-						?time.Time(time.parse_iso8601(s as string)!)
+						time.parse_iso8601(s as string)!
 					} else {
 						none
 					}
@@ -129,21 +129,21 @@ pub fn Invite.parse(j json2.Any) !Invite {
 					none
 				}
 				guild_scheduled_event: if o := j['guild_scheduled_event'] {
-					?GuildScheduledEvent(GuildScheduledEvent.parse(o)!)
+					GuildScheduledEvent.parse(o)!
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected invite to be object, got ${j.type_name()}')
+			return error('expected Invite to be object, got ${j.type_name()}')
 		}
 	}
 }
 
 @[params]
 pub struct FetchInviteParams {
-pub:
+pub mut:
 	// whether the invite should contain approximate member counts
 	with_counts ?bool
 	// whether the invite should contain the expiration date
@@ -161,7 +161,7 @@ pub fn (params FetchInviteParams) build_query_values() urllib.Values {
 		query_params.add('with_expiration', with_expiration.str())
 	}
 	if guild_scheduled_event_id := params.guild_scheduled_event_id {
-		query_params.add('guild_scheduled_event_id', guild_scheduled_event_id.build())
+		query_params.add('guild_scheduled_event_id', guild_scheduled_event_id.str())
 	}
 	return query_params
 }
@@ -176,7 +176,7 @@ pub fn (c Client) fetch_invite(code string, params FetchInviteParams) !Invite {
 		query_params.add('with_expiration', with_expiration.str())
 	}
 	if guild_scheduled_event_id := params.guild_scheduled_event_id {
-		query_params.add('guild_scheduled_event_id', guild_scheduled_event_id.build())
+		query_params.add('guild_scheduled_event_id', guild_scheduled_event_id.str())
 	}
 	return Invite.parse(c.request(.get, '/invites/${urllib.path_escape(code)}',
 		query_params: params.build_query_values()

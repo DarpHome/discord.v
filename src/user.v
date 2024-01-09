@@ -225,12 +225,12 @@ pub fn (c Client) fetch_my_user() !User {
 
 // Returns a [user](#User) object for a given user ID.
 pub fn (c Client) fetch_user(user_id Snowflake) !User {
-	return User.parse(json2.raw_decode(c.request(.get, '/users/${urllib.path_escape(user_id.build())}')!.body)!)!
+	return User.parse(json2.raw_decode(c.request(.get, '/users/${urllib.path_escape(user_id.str())}')!.body)!)!
 }
 
 @[params]
 pub struct EditMyUserParams {
-pub:
+pub mut:
 	// user's username, if changed may cause the user's discriminator to be randomized.
 	username ?string
 	// if passed, modifies the user's avatar
@@ -259,12 +259,12 @@ pub fn (c Client) edit_my_user(params EditMyUserParams) !User {
 
 // Returns a [guild member](#GuildMember) object for the current user. Requires the `guilds.members.read` OAuth2 scope.
 pub fn (c Client) fetch_my_guild_member(guild_id Snowflake) !GuildMember {
-	return GuildMember.parse(c.request(.get, '/users/@me/guilds/${urllib.path_escape(guild_id.build())}/member')!.body)!
+	return GuildMember.parse(c.request(.get, '/users/@me/guilds/${urllib.path_escape(guild_id.str())}/member')!.body)!
 }
 
 // Leave a guild. Fires a Guild Delete Gateway event and a Guild Member Remove Gateway event.
 pub fn (c Client) leave_guild(guild_id Snowflake) ! {
-	c.request(.delete, '/users/@me/guilds/${urllib.path_escape(guild_id.build())}')!
+	c.request(.delete, '/users/@me/guilds/${urllib.path_escape(guild_id.str())}')!
 }
 
 // Create a new DM channel with a user. Returns a [DM channel](#Channel) object (if one already exists, it will be returned instead).
@@ -272,14 +272,14 @@ pub fn (c Client) leave_guild(guild_id Snowflake) ! {
 pub fn (c Client) create_dm(recipient_id Snowflake) !Channel {
 	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels',
 		json: {
-			'recipient_id': json2.Any(recipient_id.build())
+			'recipient_id': recipient_id.build()
 		}
 	)!.body)!)!
 }
 
 @[params]
 pub struct CreateGroupDMParams {
-pub:
+pub mut:
 	// access tokens of users that have granted your app the `gdm.join` scope
 	access_tokens []string @[required]
 	// a dictionary of user ids to their respective nicknames
@@ -291,7 +291,7 @@ pub fn (params CreateGroupDMParams) build() json2.Any {
 		'access_tokens': json2.Any(params.access_tokens.map(|t| json2.Any(t)))
 		'nicks':         maps.to_map[Snowflake, string, string, json2.Any](params.nicks,
 			fn (k Snowflake, v string) (string, json2.Any) {
-			return k.build(), json2.Any(v)
+			return k.str(), json2.Any(v)
 		})
 	}
 }
@@ -563,7 +563,7 @@ pub fn ApplicationRoleConnection.parse(j json2.Any) !ApplicationRoleConnection {
 
 // Returns the [application role connection](#ApplicationRoleConnection) for the user. Requires an OAuth2 access token with `role_connections.write` scope for the application specified in the path.
 pub fn (c Client) fetch_my_application_role_connection(application_id Snowflake) !ApplicationRoleConnection {
-	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.get, '/users/@me/applications/${urllib.path_escape(application_id.build())}/role-connection')!.body)!)!
+	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.get, '/users/@me/applications/${urllib.path_escape(application_id.str())}/role-connection')!.body)!)!
 }
 
 @[params]
@@ -595,7 +595,7 @@ pub fn (params UpdateMyApplicationRoleConnectionParams) build() json2.Any {
 
 // Updates and returns the [application role connection](#ApplicationRoleConnection) for the user. Requires an OAuth2 access token with `role_connections.write` scope for the application specified in the path.
 pub fn (c Client) update_my_application_role_connection(application_id Snowflake, params UpdateMyApplicationRoleConnectionParams) !ApplicationRoleConnection {
-	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.put, '/users/@me/applications/${urllib.path_escape(application_id.build())}/role-connection',
+	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.put, '/users/@me/applications/${urllib.path_escape(application_id.str())}/role-connection',
 		json: params.build()
 	)!.body)!)!
 }

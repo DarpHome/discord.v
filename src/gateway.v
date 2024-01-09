@@ -5,6 +5,44 @@ import net.websocket
 import time
 
 @[flag]
+pub enum GatewayIntents {
+	guilds
+	guild_members
+	guild_moderation
+	guild_emojis_and_stickers
+	guild_integrations
+	guild_webhooks
+	guild_invites
+	guild_voice_states
+	guild_presences
+	guild_messages
+	guild_message_reactions
+	guild_message_typing
+	direct_messages
+	direct_message_reactions
+	direct_message_typing
+	message_content
+	guild_scheduled_events
+	reserved_17
+	reserved_18
+	reserved_19
+	auto_moderation_configuration
+	auto_moderation_execution
+}
+
+pub fn GatewayIntents.all_unprivileged() GatewayIntents {
+	return .guilds | .guild_moderation | .guild_emojis_and_stickers | .guild_integrations | .guild_webhooks | .guild_invites | .guild_voice_states | .guild_messages | .guild_message_reactions | .guild_message_typing | .direct_messages | .direct_message_reactions | .direct_message_typing | .guild_scheduled_events | .auto_moderation_configuration | .auto_moderation_execution
+}
+
+pub fn GatewayIntents.all_privileged() GatewayIntents {
+	return .guild_members | .guild_presences | .message_content
+}
+
+pub fn GatewayIntents.all() GatewayIntents {
+	return GatewayIntents.all_unprivileged() | GatewayIntents.all_privileged()
+}
+
+@[flag]
 pub enum GatewayClientSettings {
 	ignore_unknown_events
 	dont_process
@@ -438,8 +476,8 @@ pub type ArrayOrSnowflake = Snowflake | []Snowflake
 
 pub fn (aos ArrayOrSnowflake) build() json2.Any {
 	return match aos {
-		Snowflake { json2.Any(aos.build()) }
-		[]Snowflake { json2.Any(aos.map(|s| json2.Any(s.build()))) }
+		Snowflake { aos.build() }
+		[]Snowflake { json2.Any(aos.map(|s| s.build())) }
 	}
 }
 
@@ -463,7 +501,7 @@ pub:
 
 pub fn (params RequestGuildMembersParams) build() json2.Any {
 	mut j := {
-		'guild_id': json2.Any(params.guild_id)
+		'guild_id': params.guild_id.build()
 	}
 	if query := params.query {
 		j['query'] = query
@@ -505,9 +543,9 @@ pub:
 
 pub fn (params VoiceStateUpdateParams) build() json2.Any {
 	return {
-		'guild_id':   json2.Any(params.guild_id.build())
+		'guild_id':   params.guild_id.build()
 		'channel_id': if s := params.channel_id {
-			json2.Any(s.build())
+			s.build()
 		} else {
 			json2.null
 		}

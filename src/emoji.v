@@ -65,7 +65,7 @@ pub fn PartialEmoji.parse(j json2.Any) !PartialEmoji {
 			}
 		}
 		else {
-			return error('expected partial emoji to be object, got ${j.type_name()}')
+			return error('expected PartialEmoji to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -89,51 +89,51 @@ pub fn Emoji.parse(j json2.Any) !Emoji {
 			name := j['name']!
 			return Emoji{
 				id: if id !is json2.Null {
-					?Snowflake(Snowflake.parse(id)!)
+					Snowflake.parse(id)!
 				} else {
 					none
 				}
 				name: if name !is json2.Null {
-					?string(name as string)
+					name as string
 				} else {
 					none
 				}
 				roles: if a := j['roles'] {
-					?[]Snowflake(maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
+					maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
 						return Snowflake.parse(k)!
-					})!)
+					})!
 				} else {
 					none
 				}
 				user: if o := j['user'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
 				require_colons: if b := j['require_colons'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				managed: if b := j['managed'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				animated: if b := j['animated'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 				available: if b := j['available'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}
 			}
 		}
 		else {
-			return error('expected emoji to be object, got ${j.type_name()}')
+			return error('expected Emoji to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -155,7 +155,7 @@ pub fn ReactionCountDetails.parse(j json2.Any) !ReactionCountDetails {
 			}
 		}
 		else {
-			return error('expected reaction count details to be object, got ${j.type_name()}')
+			return error('expected ReactionCountDetails to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -191,14 +191,14 @@ pub fn Reaction.parse(j json2.Any) !Reaction {
 			}
 		}
 		else {
-			return error('expected reaction to be object, got ${j.type_name()}')
+			return error('expected Reaction to be object, got ${j.type_name()}')
 		}
 	}
 }
 
 // Returns a list of [emoji](#Emoji) objects for the given guild. Includes user fields if the bot has the `.create_guild_expressions` or `.manage_guild_expressions` permission.
 pub fn (c Client) list_guild_emojis(guild_id Snowflake) ![]Emoji {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/emojis')!.body)! as []json2.Any,
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/emojis')!.body)! as []json2.Any,
 		fn (j json2.Any) !Emoji {
 		return Emoji.parse(j)!
 	})!
@@ -206,12 +206,12 @@ pub fn (c Client) list_guild_emojis(guild_id Snowflake) ![]Emoji {
 
 // Returns an [emoji](#Emoji) object for the given guild and emoji IDs. Includes the user field if the bot has the `.manage_guild_expressions` permission, or if the bot created the emoji and has the the `.create_guild_expressions` permission.
 pub fn (c Client) fetch_guild_emoji(guild_id Snowflake, emoji_id Snowflake) !Emoji {
-	return Emoji.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/emojis/${urllib.path_escape(emoji_id.build())}')!.body)!)!
+	return Emoji.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}')!.body)!)!
 }
 
 @[params]
 pub struct CreateGuildEmojiParams {
-pub:
+pub mut:
 	reason ?string
 	// name of the emoji
 	name string @[required]
@@ -227,14 +227,14 @@ pub fn (params CreateGuildEmojiParams) build() json2.Any {
 		'image': params.image.build()
 	}
 	if roles := params.roles {
-		r['roles'] = roles.map(|s| json2.Any(s.build()))
+		r['roles'] = roles.map(|s| s.build())
 	}
 	return r
 }
 
 // Create a new emoji for the guild. Requires the `.create_guild_expressions` permission. Returns the new [emoji](#Emoji) object on success. Fires a Guild Emojis Update Gateway event.
 pub fn (c Client) create_guild_emoji(guild_id Snowflake, params CreateGuildEmojiParams) !Emoji {
-	return Emoji.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/emojis',
+	return Emoji.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.str())}/emojis',
 		json: params.build()
 		reason: params.reason
 	)!.body)!)!
@@ -257,7 +257,7 @@ pub fn (params EditGuildEmojiParams) build() json2.Any {
 	}
 	if roles := params.roles {
 		if !is_sentinel(roles) {
-			r['roles'] = roles.map(|s| json2.Any(s.build()))
+			r['roles'] = roles.map(|s| s.build())
 		}
 	} else {
 		r['roles'] = json2.null
@@ -267,7 +267,7 @@ pub fn (params EditGuildEmojiParams) build() json2.Any {
 
 // Modify the given emoji. For emojis created by the current user, requires either the `.create_guild_expressions` or `.manage_guild_expressions` permission. For other emojis, requires the `.manage_guild_expressions` permission. Returns the updated [emoji](#Emoji) object on success. Fires a Guild Emojis Update Gateway event.
 pub fn (c Client) edit_guild_emoji(guild_id Snowflake, emoji_id Snowflake, params EditGuildEmojiParams) !Emoji {
-	return Emoji.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/emojis/${urllib.path_escape(emoji_id.build())}',
+	return Emoji.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}',
 		json: params.build()
 		reason: params.reason
 	)!.body)!)!
@@ -275,7 +275,7 @@ pub fn (c Client) edit_guild_emoji(guild_id Snowflake, emoji_id Snowflake, param
 
 // Delete the given emoji. For emojis created by the current user, requires either the `.create_guild_expressions` or `.manage_guild_expressions` permission. For other emojis, requires the `.manage_guild_expressions` permission. Returns 204 No Content on success. Fires a Guild Emojis Update Gateway event.
 pub fn (c Client) delete_guild_emoji(guild_id Snowflake, emoji_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/emojis/${urllib.path_escape(emoji_id.build())}',
+	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}',
 		reason: params.reason
 	)!
 }

@@ -70,7 +70,7 @@ pub fn (c Client) fetch_guild_template(template_code string) !GuildTemplate {
 
 @[params]
 pub struct CreateGuildFromGuildTemplateParams {
-pub:
+pub mut:
 	// name of the guild (2-100 characters)
 	name string @[required]
 	// base64 128x128 image for the guild icon
@@ -97,7 +97,7 @@ pub fn (c Client) create_guild_from_guild_template(template_code string, params 
 
 // Returns an array of [guild template](#GuildTemplate) objects. Requires the `.manage_guild` permission.
 pub fn (c Client) fetch_guild_templates(guild_id Snowflake) ![]GuildTemplate {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.build())}/templates')!.body)! as []json2.Any,
+	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/templates')!.body)! as []json2.Any,
 		fn (j json2.Any) !GuildTemplate {
 		return GuildTemplate.parse(j)!
 	})!
@@ -128,14 +128,14 @@ pub fn (params CreateGuildTemplateParams) build() json2.Any {
 
 // Creates a template for the guild. Requires the `.manage_guild` permission. Returns the created [guild template](#GuildTemplate) object on success.
 pub fn (c Client) create_guild_template(guild_id Snowflake, params CreateGuildTemplateParams) !GuildTemplate {
-	return GuildTemplate.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.build())}/templates',
+	return GuildTemplate.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.str())}/templates',
 		json: params.build()
 	)!.body)!)!
 }
 
 // Syncs the template to the guild's current state. Requires the `.manage_guild` permission. Returns the [guild template](#GuildTemplate) object on success.
 pub fn (c Client) sync_guild_template(guild_id Snowflake, template_code string) !GuildTemplate {
-	return GuildTemplate.parse(json2.raw_decode(c.request(.put, '/guilds/${urllib.path_escape(guild_id.build())}/templates/${urllib.path_escape(template_code)}')!.body)!)!
+	return GuildTemplate.parse(json2.raw_decode(c.request(.put, '/guilds/${urllib.path_escape(guild_id.str())}/templates/${urllib.path_escape(template_code)}')!.body)!)!
 }
 
 @[params]
@@ -164,12 +164,12 @@ pub fn (params EditGuildTemplateParams) build() json2.Any {
 
 // Modifies the template's metadata. Requires the `.manage_guild` permission. Returns the [guild template](#GuildTemplate) object on success.
 pub fn (c Client) edit_guild_template(guild_id Snowflake, template_code string, params EditGuildTemplateParams) !GuildTemplate {
-	return GuildTemplate.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.build())}/templates/${urllib.path_escape(template_code)}',
+	return GuildTemplate.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.str())}/templates/${urllib.path_escape(template_code)}',
 		json: params.build()
 	)!.body)!)!
 }
 
 // Deletes the template. Requires the `.manage_guild` permission. Returns the deleted [guild template](#GuildTemplate) object on success.
 pub fn (c Client) delete_guild_template(guild_id Snowflake, template_code string) !GuildTemplate {
-	return GuildTemplate.parse(json2.raw_decode(c.request(.delete, '/guilds/${urllib.path_escape(guild_id.build())}/templates/${urllib.path_escape(template_code)}')!.body)!)!
+	return GuildTemplate.parse(json2.raw_decode(c.request(.delete, '/guilds/${urllib.path_escape(guild_id.str())}/templates/${urllib.path_escape(template_code)}')!.body)!)!
 }

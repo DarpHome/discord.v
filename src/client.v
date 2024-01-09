@@ -47,7 +47,7 @@ pub struct BotConfig {
 	ClientConfig
 pub:
 	cache         Cache
-	intents       Intents
+	intents       GatewayIntents
 	presence      ?UpdatePresenceParams
 	properties    Properties
 	read_timeout  ?time.Duration
