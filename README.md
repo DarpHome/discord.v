@@ -67,8 +67,10 @@ fn main() {
 ...
 2023-12-21 18:46:20.237000 [ERROR] Websocket closed with 4014 Disallowed intent(s).
 2023-12-21 18:46:20.237000 [INFO ] Quit client listener, server(false)...
-2023-12-21 18:46:20.238000 [ERROR] Recieved close code 4014: Disallowed intent(s): You sent a disallowed intent for a Gateway Intent. You may have tried to specify an intent that you have not enabled or are not approved for.
-V panic: result not set (Disallowed intent(s): You sent a disallowed intent for a Gateway Intent. You may have tried to specify an intent that you have not enabled or are not approved for.)      
+2023-12-21 18:46:20.238000 [ERROR] Recieved close code 4014: Disallowed intent(s): You sent a disallowed intent for a 
+Gateway Intent. You may have tried to specify an intent that you have not enabled or are not approved for.
+V panic: result not set (Disallowed intent(s): You sent a disallowed intent for a Gateway Intent. You may have tried to
+specify an intent that you have not enabled or are not approved for.)      
 ...
 ```
 
