@@ -279,9 +279,11 @@ pub:
 pub fn AuditLogEntry.parse(j json2.Any) !AuditLogEntry {
 	match j {
 		map[string]json2.Any {
+			target_id := j['target_id']!
+			user_id := j['user_id']!
 			return AuditLogEntry{
-				target_id: if s := j['target_id'] {
-					s as string
+				target_id: if target_id !is json2.Null {
+					target_id as string
 				} else {
 					none
 				}
@@ -292,8 +294,8 @@ pub fn AuditLogEntry.parse(j json2.Any) !AuditLogEntry {
 				} else {
 					none
 				}
-				user_id: if s := j['user_id'] {
-					Snowflake.parse(s)!
+				user_id: if user_id !is json2.Null {
+					Snowflake.parse(user_id)!
 				} else {
 					none
 				}
