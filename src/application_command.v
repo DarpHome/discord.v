@@ -445,14 +445,14 @@ pub fn (params CreateApplicationCommandParams) build() json2.Any {
 
 // Create a new global command. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
 pub fn (c Client) create_global_application_command(application_id Snowflake, params CreateApplicationCommandParams) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.post, '/application/${urllib.path_escape(application_id.str())}/commands',
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.post, '/applications/${urllib.path_escape(application_id.str())}/commands',
 		json: params.build()
 	)!.body)!)!
 }
 
 // Fetch a global command for your application. Returns an application command object.
 pub fn (c Client) fetch_global_application_command(application_id Snowflake, command_id Snowflake) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.get, '/application/${urllib.path_escape(application_id.str())}/commands/${urllib.path_escape(command_id.str())}')!.body)!)!
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.str())}/commands/${urllib.path_escape(command_id.str())}')!.body)!)!
 }
 
 @[params]
@@ -511,14 +511,14 @@ pub fn (params EditApplicationCommandParams) build() json2.Any {
 
 // Edit a global command. Returns application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
 pub fn (c Client) edit_global_application_command(application_id Snowflake, command_id Snowflake, params EditApplicationCommandParams) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.patch, '/application/${urllib.path_escape(application_id.str())}/commands/${urllib.path_escape(command_id.str())}',
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.patch, '/applications/${urllib.path_escape(application_id.str())}/commands/${urllib.path_escape(command_id.str())}',
 		json: params.build()
 	)!.body)!)!
 }
 
 // Deletes a global command. Returns 204 No Content on success.
 pub fn (c Client) delete_global_application_command(application_id Snowflake, command_id Snowflake) ! {
-	c.request(.delete, '/application/${urllib.path_escape(application_id.str())}/commands/${urllib.path_escape(command_id.str())}')!
+	c.request(.delete, '/applications/${urllib.path_escape(application_id.str())}/commands/${urllib.path_escape(command_id.str())}')!
 }
 
 // Takes a list of application commands, overwriting the existing global command list for this application. Returns 200 and a list of application command objects. Commands that do not already exist will count toward daily application command create limits.
@@ -532,26 +532,26 @@ pub fn (c Client) bulk_overwrite_global_application_commands(application_id Snow
 
 // Create a new guild command. New guild commands will be available in the guild immediately. Returns 201 if a command with the same name does not already exist, or a 200 if it does (in which case the previous command will be overwritten). Both responses include an application command object.
 pub fn (c Client) create_guild_application_command(application_id Snowflake, guild_id Snowflake, params CreateApplicationCommandParams) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.post, '/application/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands',
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.post, '/applications/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands',
 		json: params.build()
 	)!.body)!)!
 }
 
 // Fetch a guild command for your application. Returns an application command object.
 pub fn (c Client) fetch_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.get, '/application/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}')!.body)!)!
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}')!.body)!)!
 }
 
 // Edit a guild command. Updates for guild commands will be available immediately. Returns application command object. All fields are optional, but any fields provided will entirely overwrite the existing values of those fields.
 pub fn (c Client) edit_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake, params EditApplicationCommandParams) !ApplicationCommand {
-	return ApplicationCommand.parse(json2.raw_decode(c.request(.patch, '/application/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}',
+	return ApplicationCommand.parse(json2.raw_decode(c.request(.patch, '/applications/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}',
 		json: params.build()
 	)!.body)!)!
 }
 
 // Delete a guild command. Returns 204 No Content on success.
 pub fn (c Client) delete_guild_application_command(application_id Snowflake, guild_id Snowflake, command_id Snowflake) ! {
-	c.request(.delete, '/application/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}')!
+	c.request(.delete, '/applications/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}')!
 }
 
 // Takes a list of application commands, overwriting the existing command list for this application for the targeted guild. Returns 200 and a list of application command objects.

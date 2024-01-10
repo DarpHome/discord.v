@@ -11,32 +11,34 @@ pub:
 }
 
 pub enum ChannelType {
+	// unknown type
+	unknown             = -1
 	// a text channel within a server
 	guild_text          = 0
 	// a direct message between users
-	dm                  = 1
+	dm
 	// a voice channel within a server
-	guild_voice         = 2
+	guild_voice
 	// a direct message between multiple users
-	group_dm            = 3
+	group_dm
 	// an organizational category that contains up to 50 channels
-	guild_category      = 4
+	guild_category
 	// a channel that users can follow and crosspost into their own server (formerly news channels)
-	guild_announcement  = 5
+	guild_announcement
 	// a temporary sub-channel within a GUILD_ANNOUNCEMENT channel
 	announcement_thread = 10
 	// a temporary sub-channel within a GUILD_TEXT or GUILD_FORUM channel
-	public_thread       = 11
+	public_thread
 	// a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
-	private_thread      = 12
+	private_thread
 	// a voice channel for hosting events with an audience
-	guild_stage_voice   = 13
+	guild_stage_voice
 	// the channel in a hub containing the listed servers
-	guild_directory     = 14
+	guild_directory
 	// Channel that can only contain threads
-	guild_forum         = 15
+	guild_forum
 	// Channel that can only contain threads, similar to GUILD_FORUM channels
-	guild_media         = 16
+	guild_media
 }
 
 pub enum PermissionOverwriteType {
@@ -210,7 +212,11 @@ pub fn PartialChannel.parse(j json2.Any) !PartialChannel {
 		map[string]json2.Any {
 			return PartialChannel{
 				id: Snowflake.parse(j['id']!)!
-				typ: unsafe { ChannelType(j['type']!.int()) }
+				typ: if i := j['type'] {
+					unsafe { ChannelType(i.int()) }
+				} else {
+					.unknown
+				}
 				name: j['name']! as string
 				topic: if s := j['topic'] {
 					if s !is json2.Null {
@@ -504,7 +510,7 @@ pub:
 	// explicit permission overwrites for members and roles
 	permission_overwrites ?[]PermissionOverwrite
 	// the name of the channel (1-100 characters)
-	name ?string
+	name string
 	// the channel topic (0-4096 characters for GUILD_FORUM and GUILD_MEDIA channels, 0-1024 characters for all others)
 	topic ?string
 	// whether the channel is nsfw
@@ -592,10 +598,10 @@ pub fn Channel.parse(j json2.Any) !Channel {
 					if s !is json2.Null {
 						s as string
 					} else {
-						none
+						''
 					}
 				} else {
-					none
+					''
 				}
 				topic: if s := j['topic'] {
 					if s !is json2.Null {
@@ -613,7 +619,7 @@ pub fn Channel.parse(j json2.Any) !Channel {
 				}
 				last_message_id: if s := j['last_message_id'] {
 					if s !is json2.Null {
-						Snowflake.parse(j)!
+						Snowflake.parse(s)!
 					} else {
 						none
 					}

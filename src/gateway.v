@@ -214,6 +214,7 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, mut client GatewayClient) ! {
 		if reason != 'closed by client' {
 			client.close_code = code
+
 			client.logger.error('Websocket closed with ${code} ${reason}')
 		}
 	}, &mut c)
@@ -358,27 +359,19 @@ pub fn (mut c GatewayClient) init() ! {
 
 pub fn (mut c GatewayClient) run() ! {
 	c.close_code = none
-	mut reconnect := true
 	mut connected := false
 	for {
-		$if trace ? {
-			eprintln('iteration: ${reconnect}')
-		}
-		if reconnect {
-			if connected {
-				c.ws.close(1000, 'reconnect') or {}
-			}
+		if connected {
+			c.ws.close(1000, 'reconnect') or {}
 			c.resume_gateway_url = ''
-			c.ws.connect() or {
-				$if trace ? {
-					eprintln('c.ws.connect() failed: ${err}; with code ${err.code()}')
-				}
-				return err
-			}
-			connected = true
-		} else {
-			reconnect = true
 		}
+		c.ws.connect() or {
+			$if trace ? {
+				eprintln('c.ws.connect() failed: ${err}; with code ${err.code()}')
+			}
+			return err
+		}
+		connected = true
 		$if trace ? {
 			eprintln('calling listen')
 		}
@@ -395,7 +388,6 @@ pub fn (mut c GatewayClient) run() ! {
 			}
 			// EINTR/SSL, should retry
 			time.sleep(5 * time.second)
-			reconnect = true
 			c.ready = false
 			c.session_id = ''
 			c.sequence = none
@@ -404,15 +396,8 @@ pub fn (mut c GatewayClient) run() ! {
 		$if trace ? {
 			eprintln('listen returned')
 		}
-		if !reconnect {
-			c.hello() or {
-				reconnect = true
-				continue
-			}
-		}
 		close_code := c.close_code or { 0 }
 		if close_code == 0 {
-			reconnect = true
 			continue
 		}
 		cc := discord.gateway_close_code_table[close_code] or {
@@ -430,6 +415,7 @@ pub fn (mut c GatewayClient) run() ! {
 			// resume
 			mut ws := websocket.new_client(c.resume_gateway_url.trim_right('/?') +
 				'?v=10&encoding=json', c.websocket_opts())!
+			c.ready = false
 			c.ws = ws
 			c.init_ws(mut ws)
 		} else {
@@ -461,19 +447,64 @@ pub fn (mut c GatewayClient) launch() ! {
 }
 
 pub fn (c Client) fetch_gateway_url() !string {
-	r1 := json2.raw_decode(c.request(.get, '/gateway', authenticate: false)!.body)!
-	return match r1 {
+	return (json2.raw_decode(c.request(.get, '/gateway', authenticate: false)!.body)! as map[string]json2.Any)['url']! as string
+}
+
+pub struct SessionStartLimit {
+pub:
+	// Total number of session starts the current user is allowed
+	total int
+	// Remaining number of session starts the current user is allowed
+	remaining int
+	// Number of milliseconds after which the limit resets
+	reset_after time.Duration
+	// Number of identify requests allowed per 5 seconds
+	max_concurrency int
+}
+
+pub fn SessionStartLimit.parse(j json2.Any) !SessionStartLimit {
+	match j {
 		map[string]json2.Any {
-			r2 := r1['url']!
-			match r2 {
-				string { r2 }
-				else { error('invalid url from api') }
+			return SessionStartLimit{
+				total: j['total']!.int()
+				remaining: j['remaining']!.int()
+				reset_after: j['reset_after']!.i64() * time.millisecond
+				max_concurrency: j['max_concurrency']!.int()
 			}
 		}
 		else {
-			error('invalid response from api')
+			return error('expected SessionStartLimit to be object, got ${j.type_name()}')
 		}
 	}
+}
+
+pub struct GatewayConfiguration {
+pub:
+	// WSS URL that can be used for connecting to the Gateway
+	url string
+	// Recommended number of shards to use when connecting
+	shards int
+	// Information on the current session start limit
+	session_start_limit SessionStartLimit
+}
+
+pub fn GatewayConfiguration.parse(j json2.Any) !GatewayConfiguration {
+	match j {
+		map[string]json2.Any {
+			return GatewayConfiguration{
+				url: j['url']! as string
+				shards: j['shards']!.int()
+				session_start_limit: SessionStartLimit.parse(j['session_start_limit']!)!
+			}
+		}
+		else {
+			return error('expected GatewayConfiguration to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub fn (c Client) fetch_gateway_configuration() !GatewayConfiguration {
+	return GatewayConfiguration.parse(json2.raw_decode(c.request(.get, '/gateway/bot')!.body)!)!
 }
 
 pub type ArrayOrSnowflake = Snowflake | []Snowflake

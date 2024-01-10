@@ -1159,7 +1159,7 @@ pub fn GuildPreview.parse(j json2.Any) !GuildPreview {
 			}
 		}
 		else {
-			return error('expected guild preview to be object, got ${j.type_name()}')
+			return error('expected GuildPreview to be object, got ${j.type_name()}')
 		}
 	}
 }
@@ -2049,13 +2049,13 @@ pub fn IntegrationApplication.parse(j json2.Any) !IntegrationApplication {
 				id: Snowflake.parse(j['id']!)!
 				name: j['name']! as string
 				icon: if icon !is json2.Null {
-					?string(icon as string)
+					icon as string
 				} else {
 					none
 				}
 				description: j['description']! as string
 				bot: if o := j['bot'] {
-					?User(User.parse(o)!)
+					User.parse(o)!
 				} else {
 					none
 				}
@@ -2423,11 +2423,11 @@ pub fn GuildWidget.parse(j json2.Any) !GuildWidget {
 				} else {
 					none
 				}
-				channels: maybe_map(j['channels']! as []json2.Any, fn (j json2.Any) !PartialChannel {
-					return PartialChannel.parse(j)!
+				channels: maybe_map(j['channels']! as []json2.Any, fn (k json2.Any) !PartialChannel {
+					return PartialChannel.parse(k)!
 				})!
-				members: maybe_map(j['members']! as []json2.Any, fn (j json2.Any) !PartialUser {
-					return PartialUser.parse(j)!
+				members: maybe_map(j['members']! as []json2.Any, fn (k json2.Any) !PartialUser {
+					return PartialUser.parse(k)!
 				})!
 				presence_count: j['presence_count']!.int()
 			}

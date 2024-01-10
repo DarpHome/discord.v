@@ -2,13 +2,34 @@ module discord
 
 import net.http
 import os
+import time
 
-fn test_http() {
-	bot := make_client('Bot ' + os.getenv_opt('TEST_TOKEN') or {
+struct InterfacePlaceholder {
+	v voidptr @[export: '_object']
+}
+
+fn cast_interface[T, U](u U) T {
+	$if U is $interface {
+		if u is T {
+			// cannot use `u` directly due to cgen bug
+			return unsafe { *&T((&InterfacePlaceholder(voidptr(&u))).v) }
+		} else {
+			panic('expected t to be ${typeof[T]().name}, got ${typeof[U]().name}')
+		}
+	} $else {
+		$compile_error('not an interface')
+	}
+}
+
+fn grab_bot() ?Client {
+	return make_client('Bot ' + os.getenv_opt('TEST_TOKEN') or {
 		println('no test token, skipping')
-		return
+		return none
 	})
-	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
+}
+
+fn init() {
+	bot := grab_bot() or { return }
 	channel_id := Snowflake(os.getenv('TEST_CHANNEL').u64())
 
 	// from nyxx
@@ -23,6 +44,37 @@ fn test_http() {
 			'Running dv job `#${run_number}` started by `${actor}` on `${ref}` on commit `${sha}`'
 		}
 	) or { panic(err) }
+}
+ 
+fn test_applications() {
+	bot := grab_bot() or { return }
+	application := bot.fetch_my_application() or { panic(err) }
+	assert bot.list_skus(application.id) or { panic(err)} == []
+
+	current_time := time.now().unix.str()
+	assert bot.edit_my_application(description: current_time) or { panic(err) }.description == current_time
+}
+
+fn test_users() {
+	bot := grab_bot() or { return }
+	assert bot.fetch_my_user() or { panic(err) }.bot or { panic(err) }
+	assert bot.fetch_my_guilds() or { panic(err) }.len >= 1
+	assert bot.fetch_my_connections() or { panic(err) }.len == 0
+}
+
+fn test_channels() {
+	bot := grab_bot() or { return }
+
+	channel_id := Snowflake(os.getenv('TEST_CHANNEL').u64())
+	channel := bot.fetch_channel(channel_id) or { panic(err) }
+	assert channel.typ == .guild_text
+	assert channel.name == 'ci'
+}
+
+fn test_messages() {
+	bot := grab_bot() or { return }
+	channel_id := Snowflake(os.getenv('TEST_CHANNEL').u64())
+
 	message := bot.create_message(channel_id, content: 'test message') or { panic(err) }
 	assert message.content == 'test message'
 	message2 := bot.edit_message(channel_id, message.id, content: 'new message') or { panic(err) }
@@ -161,5 +213,304 @@ fn test_http() {
 	assert components[0] is ActionRow
 	assert components[1] is ActionRow
 	assert components[2] is ActionRow
+	component1 := cast_interface[ActionRow, Component](components[0])
+	assert component1.components.len == 5
+	component2 := cast_interface[ActionRow, Component](components[1])
+	assert component2.components.len == 5
+	component3 := cast_interface[ActionRow, Component](components[2])
+	assert component3.components.len == 1
+	component4 := cast_interface[Button, Component](component1.components[0])
+	assert component4.style == .primary
+	if label := component4.label {
+		assert label == 'Primary'
+	} else {
+		assert false
+	}
+	assert component4.emoji == none
+	if custom_id := component4.custom_id {
+		assert custom_id == 'a'
+	} else {
+		assert false
+	}
+	assert component4.url == none
+	component5 := cast_interface[Button, Component](component1.components[1])
+	assert component5.style == .secondary
+	if label := component5.label {
+		assert label == 'Secondary'
+	} else {
+		assert false
+	}
+	assert component5.emoji == none
+	if custom_id := component5.custom_id {
+		assert custom_id == 'b'
+	} else {
+		assert false
+	}
+	assert component5.url == none
+	component6 := cast_interface[Button, Component](component1.components[2])
+	assert component6.style == .success
+	if label := component6.label {
+		assert label == 'Success'
+	} else {
+		assert false
+	}
+	assert component6.emoji == none
+	if custom_id := component6.custom_id {
+		assert custom_id == 'c'
+	} else {
+		assert false
+	}
+	assert component6.url == none
+	component7 := cast_interface[Button, Component](component1.components[3])
+	assert component7.style == .danger
+	if label := component7.label {
+		assert label == 'Danger'
+	} else {
+		assert false
+	}
+	assert component7.emoji == none
+	if custom_id := component7.custom_id {
+		assert custom_id == 'd'
+	} else {
+		assert false
+	}
+	assert component7.url == none
+	component8 := cast_interface[Button, Component](component1.components[4])
+	assert component8.style == .link
+	if label := component8.label {
+		assert label == 'Link'
+	} else {
+		assert false
+	}
+	assert component8.emoji == none
+	assert component8.custom_id == none
+	if url := component8.url {
+		assert url == 'https://github.com/DarpHome/discord.v'
+	} else {
+		assert false
+	}
+	component9 := cast_interface[Button, Component](component2.components[0])
+	assert component9.style == .primary
+	if label := component9.label {
+		assert label == 'Primary'
+	} else {
+		assert false
+	}
+	assert component9.emoji == none
+	if custom_id := component9.custom_id {
+		assert custom_id == 'e'
+	} else {
+		assert false
+	}
+	assert component9.url == none
+	component10 := cast_interface[Button, Component](component2.components[1])
+	assert component10.style == .secondary
+	if label := component10.label {
+		assert label == 'Secondary'
+	} else {
+		assert false
+	}
+	assert component10.emoji == none
+	if custom_id := component10.custom_id {
+		assert custom_id == 'f'
+	} else {
+		assert false
+	}
+	assert component10.url == none
+	component11 := cast_interface[Button, Component](component2.components[2])
+	assert component11.style == .success
+	if label := component11.label {
+		assert label == 'Success'
+	} else {
+		assert false
+	}
+	assert component11.emoji == none
+	if custom_id := component11.custom_id {
+		assert custom_id == 'g'
+	} else {
+		assert false
+	}
+	assert component11.url == none
+	if disabled := component11.disabled {
+		assert disabled
+	} else {
+		assert false
+	}
+	component12 := cast_interface[Button, Component](component2.components[3])
+	assert component12.style == .danger
+	if label := component12.label {
+		assert label == 'Danger'
+	} else {
+		assert false
+	}
+	assert component12.emoji == none
+	if custom_id := component12.custom_id {
+		assert custom_id == 'h'
+	} else {
+		assert false
+	}
+	assert component12.url == none
+	if disabled := component12.disabled {
+		assert disabled
+	} else {
+		assert false
+	}
+	component13 := cast_interface[Button, Component](component2.components[4])
+	assert component13.style == .link
+	if label := component13.label {
+		assert label == 'Link'
+	} else {
+		assert false
+	}
+	assert component13.emoji == none
+	assert component13.custom_id == none
+	if url := component13.url {
+		assert url == 'https://github.com/DarpHome/discord.v'
+	} else {
+		assert false
+	}
+	if disabled := component13.disabled {
+		assert disabled
+	} else {
+		assert false
+	}
+	component14 := cast_interface[StringSelect, Component](component3.components[0])
+	assert component14.custom_id == 'i'
+	assert component14.options.len == 3
+	assert component14.options[0].label == 'One'
+	assert component14.options[0].value == '1'
+	assert component14.options[0].description == none
+	assert component14.options[0].emoji == none
+	assert component14.options[1].label == 'Two'
+	assert component14.options[1].value == '2'
+	assert component14.options[1].description == none
+	if emoji := component14.options[1].emoji {
+		assert emoji.id == none
+		assert emoji.name == '❤️'
+		assert !emoji.animated
+	} else {
+		assert false
+	}
+	assert component14.options[2].label == 'Three'
+	assert component14.options[2].value == '3'
+	assert component14.options[2].description == none
+	assert component14.options[2].emoji == none
 	bot.delete_message(channel_id, message5.id) or { panic(err) }
+}
+
+fn test_webhooks() {
+	bot := grab_bot() or { return }
+	channel_id := Snowflake(os.getenv('TEST_CHANNEL').u64())
+
+	webhook := bot.create_webhook(channel_id, name: 'Test webhook') or { panic(err) }
+	if name := webhook.name {
+		assert name == 'Test webhook'
+	} else {
+		assert false
+	}
+	token := webhook.token or { panic(err) }
+	assert token != ''
+	
+	message := bot.execute_webhook(webhook.id, token, wait: true, content: 'Test webhook message') or { panic(err) }
+	assert message != unsafe { nil }
+	message2 := bot.edit_webhook_message(webhook.id, token, message.id, content: 'New webhook content') or { panic(err) }
+	assert message2.id == message.id
+	bot.delete_webhook_message(webhook.id, token, message.id) or { panic(err) }
+	bot.delete_webhook_with_token(webhook.id, token) or { panic(err) }
+
+}
+
+fn test_voice() {
+	bot := grab_bot() or { return }
+	assert bot.list_voice_regions() or { panic(err) }.len != 0
+}
+
+fn test_guilds() {
+	bot := grab_bot() or { return }
+	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
+
+	guild := bot.fetch_guild(guild_id) or { panic(err) }
+	assert guild.id == guild_id
+
+	preview := bot.fetch_guild_preview(guild_id) or { panic(err) }
+	assert preview.id == guild_id
+
+	channels := bot.fetch_guild_channels(guild_id) or { panic(err) }
+	assert channels.len >= 1
+	
+	bot.list_active_guild_threads(guild_id) or { panic(err) }
+	assert bot.fetch_guild_voice_regions(guild_id) or { panic(err) }.len >= 1
+	
+	bot.fetch_guild_widget(guild_id) or { panic(err) }
+	bot.fetch_guild_welcome_screen(guild_id) or { }
+	bot.fetch_guild_onboarding(guild_id) or { }
+}
+
+fn test_members() {
+	bot := grab_bot() or { return }
+	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
+
+	user := bot.fetch_my_user() or { panic(err) }
+
+	assert bot.fetch_guild_member(guild_id, user.id) or { panic(err) }.roles.len >= 1
+}
+
+fn test_roles() {
+	bot := grab_bot() or { return }
+	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
+
+	user := bot.fetch_my_user() or { panic(err) }
+
+	assert bot.fetch_guild_roles(guild_id) or { panic(err) }.len >= 3
+}
+
+fn test_gateway() {
+	bot := grab_bot() or { return }
+
+	assert bot.fetch_gateway_url() or { panic(err) }.starts_with('wss:')
+	bot.fetch_gateway_configuration() or { panic(err) }
+}
+
+fn test_scheduled_events() {
+	bot := grab_bot() or { return }
+	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
+
+	bot.list_scheduled_events_for_guild(guild_id) or { panic(err) }
+}
+
+fn test_commands() {
+	bot := grab_bot() or { return }
+
+	application := bot.fetch_my_application() or { panic(err) }
+
+	command := bot.create_global_application_command(application.id, name: 'test', description: 'A test command') or { panic(err) }
+	assert command.name == 'test'
+	assert command.description == 'A test command'
+	assert command.options or { [] }.len == 0
+
+	command2 := bot.fetch_global_application_command(application.id, command.id) or { panic(err) }
+	assert command2.id == command.id
+	assert command2.name == command.name
+	assert command2.description == command.description
+	assert command2.options or { [] }.len == command.options or { [] }.len
+
+	command3 := bot.edit_global_application_command(application.id, command2.id, name: 'new_name') or { panic(err) }	
+	assert command3.id == command2.id
+	assert command3.name == 'new_name'
+	assert command3.description == command2.description
+	assert command3.options or { [] }.len == command2.options or { [] }.len
+
+	commands := bot.fetch_global_application_commands(application.id) or { panic(err) }
+	assert commands.len >= 1
+
+	commands2 := bot.bulk_overwrite_global_application_commands(application.id, [
+		CreateApplicationCommandParams{
+			name: 'test_2'
+			description: 'A test command'
+		}
+	]) or { panic(err) }
+	assert commands2.len == 1
+	assert commands2[0].name == 'test_2' && commands2[0].description == 'A test command'
+
+	bot.delete_global_application_command(application.id, commands2[0].id) or { panic(err) }
 }
