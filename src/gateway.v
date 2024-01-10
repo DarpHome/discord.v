@@ -54,10 +54,11 @@ pub enum GatewayClientSettings {
 pub struct GatewayClient {
 	Client
 pub:
-	settings    GatewayClientSettings
-	intents     int
-	properties  Properties
-	gateway_url string = 'wss://gateway.discord.gg'
+	settings        GatewayClientSettings
+	intents         int
+	properties      Properties
+	large_threshold ?int
+	gateway_url     string = 'wss://gateway.discord.gg'
 mut:
 	presence           ?UpdatePresenceParams
 	ready              bool
@@ -191,6 +192,9 @@ fn (mut gc GatewayClient) hello() ! {
 				'browser': props.browser
 				'device':  props.device
 			})
+		}
+		if large_threshold := gc.large_threshold {
+			data['large_threshold'] = large_threshold
 		}
 		if presence := gc.presence {
 			data['presence'] = presence.build()

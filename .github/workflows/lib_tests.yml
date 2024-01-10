@@ -1,0 +1,20 @@
+name: Library tests
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup V
+        uses: nocturlab/setup-vlang-action@v1
+        with:
+          id: v
+          v-version: master
+
+      - name: Test library
+        run: v test src/

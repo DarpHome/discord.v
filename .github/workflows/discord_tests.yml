@@ -1,17 +1,15 @@
-name: CI
+name: Discord tests
 
-on:
-  push:
-    branches-ignore:
-      - main
+on: [push]
 
 jobs:
   tests:
     name: Run tests
     runs-on: ubuntu-latest
-    # commented until api coverage
-    #env:
-    #  TEST_TOKEN: ${{ secrets.TEST_TOKEN }}
+    env:
+      TEST_TOKEN: ${{ secrets.TEST_TOKEN }}
+      TEST_GUILD: ${{ secrets.TEST_GUILD }}
+      TEST_CHANNEL: ${{ secrets.TEST_CHANNEL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -22,6 +20,5 @@ jobs:
           id: v
           v-version: master
 
-
-      - name: Test library
-        run: v test src/
+      - name: Test HTTP
+        run: v test src/http_test.v
