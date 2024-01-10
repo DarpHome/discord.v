@@ -686,7 +686,7 @@ pub fn RoleSubscriptionData.parse(j json2.Any) !RoleSubscriptionData {
 			return RoleSubscriptionData{
 				role_subscription_listing_id: Snowflake.parse(j['role_subscription_listing_id']!)!
 				tier_name: j['tier_name']! as string
-				total_months_subscribed: j['total_months_subscribed']! as int
+				total_months_subscribed: j['total_months_subscribed']!.int()
 				is_renewal: j['is_renewal']! as bool
 			}
 		}
@@ -696,6 +696,7 @@ pub fn RoleSubscriptionData.parse(j json2.Any) !RoleSubscriptionData {
 	}
 }
 
+@[heap]
 pub struct Message {
 pub:
 	// id of the message
@@ -745,6 +746,7 @@ pub:
 	// message flags combined as a bitfield
 	flags ?MessageFlags
 	// the message associated with the message_reference
+	// > May be nil
 	referenced_message ?&Message
 	// sent if the message is a response to an Interaction
 	interaction ?MessageInteraction
@@ -856,7 +858,7 @@ pub fn Message.parse(j json2.Any) !Message {
 					if o !is json2.Null {
 						Message.parse(o)!
 					} else {
-						none
+						unsafe { nil }
 					}
 				} else {
 					none

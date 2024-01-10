@@ -1825,12 +1825,27 @@ fn event_process_guild_emojis_update(mut gc GatewayClient, data json2.Any, optio
 		creator: gc
 	})!
 	gc.events.on_guild_emojis_update.emit(event, options)
+	if mut m := gc.cache.emojis[event.guild_id] {
+		m.clear()
+	}
+	for emoji in event.emojis {
+		cache_add2(mut gc.cache.emojis, gc.cache.emojis_max_size1, gc.cache.emojis_max_size2,
+			gc.cache.emojis_check, event.guild_id, emoji.id or { return }, emoji)
+	}
 }
 
 fn event_process_guild_stickers_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
-	gc.events.on_guild_stickers_update.emit(GuildStickersUpdateEvent.parse(data, BaseEvent{
+	event := GuildStickersUpdateEvent.parse(data, BaseEvent{
 		creator: gc
-	})!, options)
+	})!
+	gc.events.on_guild_stickers_update.emit(event, options)
+	if mut m := gc.cache.stickers[event.guild_id] {
+		m.clear()
+	}
+	for sticker in event.stickers {
+		cache_add2(mut gc.cache.stickers, gc.cache.stickers_max_size1, gc.cache.stickers_max_size2,
+			gc.cache.stickers_check, event.guild_id, sticker.id, sticker)
+	}
 }
 
 fn event_process_guild_integrations_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
