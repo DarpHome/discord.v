@@ -45,11 +45,11 @@ fn init() {
 		}
 	) or { panic(err) }
 }
- 
+
 fn test_applications() {
 	bot := grab_bot() or { return }
 	application := bot.fetch_my_application() or { panic(err) }
-	assert bot.list_skus(application.id) or { panic(err)} == []
+	assert bot.list_skus(application.id) or { panic(err) } == []
 
 	current_time := time.now().unix.str()
 	assert bot.edit_my_application(description: current_time) or { panic(err) }.description == current_time
@@ -410,14 +410,17 @@ fn test_webhooks() {
 	}
 	token := webhook.token or { panic(err) }
 	assert token != ''
-	
-	message := bot.execute_webhook(webhook.id, token, wait: true, content: 'Test webhook message') or { panic(err) }
+
+	message := bot.execute_webhook(webhook.id, token, wait: true, content: 'Test webhook message') or {
+		panic(err)
+	}
 	assert message != unsafe { nil }
-	message2 := bot.edit_webhook_message(webhook.id, token, message.id, content: 'New webhook content') or { panic(err) }
+	message2 := bot.edit_webhook_message(webhook.id, token, message.id,
+		content: 'New webhook content'
+	) or { panic(err) }
 	assert message2.id == message.id
 	bot.delete_webhook_message(webhook.id, token, message.id) or { panic(err) }
 	bot.delete_webhook_with_token(webhook.id, token) or { panic(err) }
-
 }
 
 fn test_voice() {
@@ -437,13 +440,13 @@ fn test_guilds() {
 
 	channels := bot.fetch_guild_channels(guild_id) or { panic(err) }
 	assert channels.len >= 1
-	
+
 	bot.list_active_guild_threads(guild_id) or { panic(err) }
 	assert bot.fetch_guild_voice_regions(guild_id) or { panic(err) }.len >= 1
-	
+
 	bot.fetch_guild_widget(guild_id) or { panic(err) }
-	bot.fetch_guild_welcome_screen(guild_id) or { }
-	bot.fetch_guild_onboarding(guild_id) or { }
+	bot.fetch_guild_welcome_screen(guild_id) or {}
+	bot.fetch_guild_onboarding(guild_id) or {}
 }
 
 fn test_members() {
@@ -483,7 +486,10 @@ fn test_commands() {
 
 	application := bot.fetch_my_application() or { panic(err) }
 
-	command := bot.create_global_application_command(application.id, name: 'test', description: 'A test command') or { panic(err) }
+	command := bot.create_global_application_command(application.id,
+		name: 'test'
+		description: 'A test command'
+	) or { panic(err) }
 	assert command.name == 'test'
 	assert command.description == 'A test command'
 	assert command.options or { [] }.len == 0
@@ -494,7 +500,9 @@ fn test_commands() {
 	assert command2.description == command.description
 	assert command2.options or { [] }.len == command.options or { [] }.len
 
-	command3 := bot.edit_global_application_command(application.id, command2.id, name: 'new_name') or { panic(err) }	
+	command3 := bot.edit_global_application_command(application.id, command2.id, name: 'new_name') or {
+		panic(err)
+	}
 	assert command3.id == command2.id
 	assert command3.name == 'new_name'
 	assert command3.description == command2.description
@@ -507,7 +515,7 @@ fn test_commands() {
 		CreateApplicationCommandParams{
 			name: 'test_2'
 			description: 'A test command'
-		}
+		},
 	]) or { panic(err) }
 	assert commands2.len == 1
 	assert commands2[0].name == 'test_2' && commands2[0].description == 'A test command'
