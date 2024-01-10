@@ -369,6 +369,11 @@ pub fn (mut c GatewayClient) run() ! {
 			$if trace ? {
 				eprintln('c.ws.connect() failed: ${err}; with code ${err.code()}')
 			}
+			if err.code() in [7] {
+				c.logger.info('Retrying reconnect in 3 seconds')
+				time.sleep(3 * time.second)
+				continue
+			}
 			return err
 		}
 		connected = true
@@ -380,7 +385,7 @@ pub fn (mut c GatewayClient) run() ! {
 			$if trace ? {
 				eprintln('listen failed: ${err}; with code ${err.code()}; message: ${err.msg()}')
 			}
-			if ![4, -29184].contains(err.code()) && !err.msg().contains('SSL') {
+			if err.code() !in [4, -76, -29184] && !err.msg().contains('SSL') {
 				$if trace ? {
 					eprintln('returned error')
 				}
