@@ -360,22 +360,26 @@ pub fn (mut c GatewayClient) init() ! {
 pub fn (mut c GatewayClient) run() ! {
 	c.close_code = none
 	mut connected := false
+	mut n := 0
 	for {
 		if connected {
 			c.ws.close(1000, 'reconnect') or {}
-			c.resume_gateway_url = ''
 		}
 		c.ws.connect() or {
 			$if trace ? {
 				eprintln('c.ws.connect() failed: ${err}; with code ${err.code()}')
 			}
-			if err.code() in [7] {
+			if n < 3 {
 				c.logger.info('Retrying reconnect in 3 seconds')
 				time.sleep(3 * time.second)
+				n++
 				continue
+			} else {
+				c.logger.error('Unable to connect to discord 3 times (${err.code()}); ${err}')
+				return err
 			}
-			return err
 		}
+		n = 0
 		connected = true
 		$if trace ? {
 			eprintln('calling listen')
@@ -394,6 +398,7 @@ pub fn (mut c GatewayClient) run() ! {
 			// EINTR/SSL, should retry
 			time.sleep(5 * time.second)
 			c.ready = false
+			c.resume_gateway_url = ''
 			c.session_id = ''
 			c.sequence = none
 			continue
@@ -403,6 +408,7 @@ pub fn (mut c GatewayClient) run() ! {
 		}
 		close_code := c.close_code or { 0 }
 		if close_code == 0 {
+			connected = false
 			continue
 		}
 		cc := discord.gateway_close_code_table[close_code] or {
