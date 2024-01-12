@@ -1,5 +1,6 @@
 module discord
 
+import net.http
 import encoding.base64
 import log
 import os as v_os
@@ -14,6 +15,11 @@ pub:
 
 pub const default_user_agent = 'DiscordBot (https://github.com/DarpHome/discord.v, 1.10.0) V ${@VHASH}'
 
+pub interface HTTPClient {
+	is_http_client()
+	perform(http.Request) !http.Response
+}
+
 @[heap]
 pub struct Client {
 pub:
@@ -21,9 +27,9 @@ pub:
 
 	base_url   string = 'https://discord.com/api/v10'
 	user_agent string = discord.default_user_agent
-mut:
-	logger log.Logger
+	http       ?HTTPClient
 pub mut:
+	logger log.Logger
 	user_data map[string]voidptr
 }
 
@@ -31,6 +37,7 @@ pub mut:
 pub struct ClientConfig {
 pub:
 	debug      bool
+	http       ?HTTPClient
 	user_agent string = discord.default_user_agent
 }
 
@@ -63,6 +70,7 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 	return GatewayClient{
 		token: 'Bot ${token}'
 		cache: config.cache
+		http: config.http
 		intents: int(config.intents)
 		properties: config.properties
 		large_threshold: config.large_threshold
@@ -81,6 +89,7 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 pub fn make_client(token string, config ClientConfig) Client {
 	return Client{
 		token: token
+		http: config.http
 		logger: log.Log{
 			level: config.get_level()
 			output_label: 'discord.v'
