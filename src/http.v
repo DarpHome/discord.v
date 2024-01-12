@@ -67,7 +67,7 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 	$if trace ? {
 		eprintln('HTTP > ${method.str()} ${route}; with payload: ${req.data}')
 	}
-	
+
 	res := if h := c.http {
 		h.perform(req)!
 	} else {

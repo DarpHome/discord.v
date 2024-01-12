@@ -438,7 +438,7 @@ pub fn (mut c GatewayClient) run() ! {
 
 pub fn (mut c GatewayClient) launch() ! {
 	if !c.settings.has(.no_info_block) {
-	// vfmt off
+		// vfmt off
 		c.logger.info('\n' +
 			'+----- Running discord.v -----+\n' +
 			'|                             |\n' +

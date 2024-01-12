@@ -29,7 +29,7 @@ pub:
 	user_agent string = discord.default_user_agent
 	http       ?HTTPClient
 pub mut:
-	logger log.Logger
+	logger    log.Logger
 	user_data map[string]voidptr
 }
 
