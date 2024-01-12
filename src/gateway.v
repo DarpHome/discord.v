@@ -48,6 +48,7 @@ pub enum GatewayClientSettings {
 	dont_process
 	dont_cut_debug
 	dont_process_guild_events
+	no_info_block
 }
 
 @[heap]
@@ -436,23 +437,25 @@ pub fn (mut c GatewayClient) run() ! {
 }
 
 pub fn (mut c GatewayClient) launch() ! {
+	if !c.settings.has(.no_info_block) {
 	// vfmt off
-	c.logger.info('\n' +
-		'+----- Running discord.v -----+\n' +
-		'|                             |\n' +
-		'| HTTP:                       |-\n' +
-		'| - User agent:               | ${c.user_agent}\n' +
-		'|                             |\n' +
-		'| Gateway:                    |-\n' +
-		'| - Properties:               |--\n' +
-		'| -- Operating system:        | ${c.properties.os}\n' +
-		'| -- Browser:                 | ${c.properties.browser}\n' +
-		'| -- Device:                  | ${c.properties.device}\n' +
-		'|                             |--\n' +
-		'|                             |-\n' +
-		'|                             |\n' +
-		'+-----------------------------+')
-	// vfmt on
+		c.logger.info('\n' +
+			'+----- Running discord.v -----+\n' +
+			'|                             |\n' +
+			'| HTTP:                       |-\n' +
+			'| - User agent:               | ${c.user_agent}\n' +
+			'|                             |\n' +
+			'| Gateway:                    |-\n' +
+			'| - Properties:               |--\n' +
+			'| -- Operating system:        | ${c.properties.os}\n' +
+			'| -- Browser:                 | ${c.properties.browser}\n' +
+			'| -- Device:                  | ${c.properties.device}\n' +
+			'|                             |--\n' +
+			'|                             |-\n' +
+			'|                             |\n' +
+			'+-----------------------------+')
+		// vfmt on
+	}
 	c.init()!
 	c.run()!
 }
