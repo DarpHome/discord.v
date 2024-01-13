@@ -15,7 +15,7 @@ type C.CURLINFO = int
 fn C.curl_easy_strerror(C.CURLcode) &char
 
 fn handle_curlcode(code C.CURLcode) ! {
-	if C.CURL_EOK == code {
+	if C.CURLE_OK == code {
 		return
 	}
 	return error(unsafe { tos_clone(&u8(C.curl_easy_strerror(code))) })
