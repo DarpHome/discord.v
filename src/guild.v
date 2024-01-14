@@ -544,6 +544,33 @@ pub:
 	safety_alerts_channel_id ?Snowflake
 }
 
+pub fn (g Guild) get_role(role_id Snowflake) ?Role {
+	for role in g.roles {
+		if role.id == role_id {
+			return role
+		}
+	}
+	return none
+}
+
+pub fn (g Guild) get_emoji(emoji_id Snowflake) ?Emoji {
+	for emoji in g.emojis {
+		if emoji.id? == emoji_id {
+			return emoji
+		}
+	}
+	return none
+}
+
+pub fn (g Guild) get_sticker(sticker_id Snowflake) ?Sticker {
+	for sticker in g.stickers {
+		if sticker.id == sticker_id {
+			return sticker
+		}
+	}
+	return none
+}
+
 pub fn Guild.internal_parse(j map[string]json2.Any) !Guild {
 	icon := j['icon']!
 	splash := j['splash']!

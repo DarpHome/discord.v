@@ -571,6 +571,16 @@ pub:
 	default_forum_layout ?ForumLayoutType
 }
 
+pub fn (c Channel) get_overwrite(id Snowflake) ?PermissionOverwrite {
+	overwrites := c.permission_overwrites?
+	for overwrite in overwrites {
+		if overwrite.id == id {
+			return overwrite
+		}
+	}
+	return none
+}
+
 pub fn Channel.parse(j json2.Any) !Channel {
 	match j {
 		map[string]json2.Any {
@@ -1671,4 +1681,61 @@ pub fn (c Client) create_guild_channel(guild_id Snowflake, params CreateGuildCha
 // Returns all active threads in the guild, including public and private threads. Threads are ordered by their [`id`](#Snowflake), in descending order.
 pub fn (c Client) list_active_guild_threads(guild_id Snowflake) !ListThreadsResponse {
 	return ListThreadsResponse.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/threads/active')!.body)!)!
+}
+
+fn compute_base_permissions(member GuildMember, guild Guild) Permissions {
+	if guild.owner_id == member.user or { return Permissions.zero() }.id {
+		return Permissions.all()
+	}
+	everyone := guild.get_role(guild.id) or { return Permissions.zero() }
+	mut permissions := everyone.permissions
+	for role in member.roles {
+		permissions.set(guild.get_role(role) or { continue }.permissions)
+	}
+	if permissions.has(.administrator) {
+		return Permissions.all()
+	}
+	return permissions
+}
+
+fn compute_overwrites(base_permissions Permissions, member GuildMember, channel Channel) Permissions {
+	if base_permissions.has(.administrator) {
+		return Permissions.all()
+	}
+	mut permissions := base_permissions
+	if overwrite_everyone := channel.get_overwrite(channel.guild_id or { return Permissions.zero() }) {
+		permissions.clear(overwrite_everyone.deny)
+		permissions.set(overwrite_everyone.allow)
+	}
+	mut allow := Permissions.zero()
+	mut deny := Permissions.zero()
+	for role_id in member.roles {
+		if overwrite_role := channel.get_overwrite(role_id) {
+			allow.set(overwrite_role.allow)
+			deny.clear(overwrite_role.allow)
+		}
+	}
+	permissions.clear(deny)
+	permissions.set(allow)
+	if overwrite_member := channel.get_overwrite(member.user or { return Permissions.zero() }.id) {
+		permissions.clear(overwrite_member.deny)
+		permissions.set(overwrite_member.allow)
+	}
+	return permissions
+}
+
+// Overwrites can be used to apply certain permissions to roles or members on a channel-level. Applicable permissions are indicated by a T for text channels, V for voice channels, or S for stage channels in the table above.
+// When using overwrites, there are cases where permission collisions could occur for a user; that is to say, the user may have certain overwrites with permissions that contradict each other or their guild-level role permissions. With this in mind, permissions are applied to users in the following hierarchy:
+// 1. Base permissions given to @everyone are applied at a guild level
+// 2. Permissions allowed to a user by their roles are applied at a guild level
+// 3. Overwrites that deny permissions for @everyone are applied at a channel level
+// 4. Overwrites that allow permissions for @everyone are applied at a channel level
+// 5. Overwrites that deny permissions for specific roles are applied at a channel level
+// 6. Overwrites that allow permissions for specific roles are applied at a channel level
+// 7. Member-specific overwrites that deny permissions are applied at a channel level
+// 8. Member-specific overwrites that allow permissions are applied at a channel level
+// More at https://discord.com/developers/docs/topics/permissions#permission-overwrites...
+pub fn compute_permissions(member GuildMember, channel Channel, guild Guild) Permissions {
+	base_permissions := compute_base_permissions(member, guild)
+	return compute_overwrites(base_permissions, member, channel)
 }
