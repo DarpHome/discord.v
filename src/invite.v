@@ -82,6 +82,7 @@ pub fn Invite.parse(j json2.Any) !Invite {
 	match j {
 		map[string]json2.Any {
 			return Invite{
+				typ: unsafe { InviteType(j['type']!.int()) }
 				code: j['code']! as string
 				guild: if o := j['guild'] {
 					PartialGuild.parse(o)!
