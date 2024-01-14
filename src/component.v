@@ -583,7 +583,7 @@ pub fn RoleSelect.internal_parse(j map[string]json2.Any) !RoleSelect {
 	return RoleSelect{
 		custom_id: j['custom_id']! as string
 		placeholder: if s := j['placeholder'] {
-			?string(s as string)
+			s as string
 		} else {
 			none
 		}

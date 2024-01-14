@@ -1,6 +1,7 @@
 module discord
 
 import x.json2
+import math
 import net.websocket
 import time
 
@@ -87,6 +88,7 @@ fn (mut c GatewayClient) send(message WSMessage) ! {
 }
 
 fn (mut c GatewayClient) heartbeat() ! {
+	c.last_heartbeat_req = time.now()
 	c.send(WSMessage{
 		opcode: .heartbeat
 		data: if seq := c.sequence {
@@ -155,7 +157,6 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 					return
 				}
 			}
-			client.last_heartbeat_req = time.now()
 			client.logger.debug('Sending HEARTBEAT')
 			client.heartbeat() or {
 				client.logger.error('Got error when sending heartbeat: ${err}')
@@ -343,7 +344,7 @@ const gateway_close_code_table = {
 	}
 }
 
-fn (c GatewayClient) websocket_opts() websocket.ClientOpt {
+fn (mut c GatewayClient) websocket_opts() websocket.ClientOpt {
 	return websocket.ClientOpt{
 		read_timeout: c.read_timeout or { 10 * time.second }
 		write_timeout: c.write_timeout or { 10 * time.second }
@@ -458,6 +459,12 @@ pub fn (mut c GatewayClient) launch() ! {
 	}
 	c.init()!
 	c.run()!
+}
+
+pub fn (mut gc GatewayClient) latency() f64 {
+	return gc.last_heartbeat_res or { return math.nan() } - gc.last_heartbeat_req or {
+		return math.nan()
+	}
 }
 
 pub fn (c Client) fetch_gateway_url() !string {

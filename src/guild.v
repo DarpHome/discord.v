@@ -232,12 +232,12 @@ pub fn WelcomeChannel.parse(j json2.Any) !WelcomeChannel {
 				channel_id: Snowflake.parse(j['channel_id']!)!
 				description: j['description']! as string
 				emoji_id: if emoji_id !is json2.Null {
-					?Snowflake(Snowflake.parse(emoji_id)!)
+					Snowflake.parse(emoji_id)!
 				} else {
 					none
 				}
 				emoji_name: if emoji_name !is json2.Null {
-					?string(emoji_name as string)
+					emoji_name as string
 				} else {
 					none
 				}
@@ -458,6 +458,26 @@ pub fn (c Client) fetch_my_guilds(params FetchMyGuildsParams) ![]PartialGuild {
 	)!.body)! as []json2.Any, fn (j json2.Any) !PartialGuild {
 		return PartialGuild.parse(j)!
 	})!
+}
+
+pub struct UnavailableGuild {
+pub:
+	id          Snowflake
+	unavailable bool
+}
+
+pub fn UnavailableGuild.parse(j json2.Any) !UnavailableGuild {
+	match j {
+		map[string]json2.Any {
+			return UnavailableGuild{
+				id: Snowflake.parse(j['id']!)!
+				unavailable: j['unavailable']! as bool
+			}
+		}
+		else {
+			return error('expected UnavailableGuild to be object')
+		}
+	}
 }
 
 pub struct Guild {
@@ -1155,17 +1175,17 @@ pub fn GuildPreview.parse(j json2.Any) !GuildPreview {
 				id: Snowflake.parse(j['id']!)!
 				name: j['name']! as string
 				icon: if icon !is json2.Null {
-					?string(icon as string)
+					icon as string
 				} else {
 					none
 				}
 				splash: if splash !is json2.Null {
-					?string(splash as string)
+					splash as string
 				} else {
 					none
 				}
 				discovery_splash: if discovery_splash !is json2.Null {
-					?string(discovery_splash as string)
+					discovery_splash as string
 				} else {
 					none
 				}
@@ -1176,7 +1196,7 @@ pub fn GuildPreview.parse(j json2.Any) !GuildPreview {
 				approximate_member_count: j['approximate_member_count']!.int()
 				approximate_presence_count: j['approximate_presence_count']!.int()
 				description: if description !is json2.Null {
-					?string(icon as string)
+					icon as string
 				} else {
 					none
 				}
@@ -1661,7 +1681,7 @@ pub fn Ban.parse(j json2.Any) !Ban {
 			reason := j['reason']!
 			return Ban{
 				reason: if reason !is json2.Null {
-					?string(reason as string)
+					reason as string
 				} else {
 					none
 				}
@@ -1669,7 +1689,7 @@ pub fn Ban.parse(j json2.Any) !Ban {
 			}
 		}
 		else {
-			return error('expected ban to be object, got ${j.type_name()}')
+			return error('expected Ban to be object, got ${j.type_name()}')
 		}
 	}
 }

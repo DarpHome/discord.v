@@ -22,7 +22,7 @@ pub fn PartialEmoji.parse(j json2.Any) !PartialEmoji {
 			return PartialEmoji{
 				id: if s := j['id'] {
 					if s !is json2.Null {
-						?Snowflake(Snowflake.parse(s)!)
+						Snowflake.parse(s)!
 					} else {
 						none
 					}

@@ -189,7 +189,7 @@ pub fn EmbedProvider.parse(j json2.Any) !EmbedProvider {
 			return EmbedProvider{
 				name: j['name']! as string
 				url: if s := j['url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
@@ -229,17 +229,17 @@ pub fn EmbedAuthor.parse(j json2.Any) !EmbedAuthor {
 			return EmbedAuthor{
 				name: j['name']! as string
 				url: if s := j['url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				icon_url: if s := j['icon_url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
 				proxy_icon_url: if s := j['proxy_icon_url'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}
@@ -351,6 +351,8 @@ pub struct Embed {
 pub:
 	// title of embed
 	title ?string
+	// type of embed (always "rich" for webhook embeds)
+	typ ?string
 	// description of embed
 	description ?string
 	// url of embed
@@ -380,6 +382,11 @@ pub fn Embed.parse(j json2.Any) !Embed {
 		map[string]json2.Any {
 			return Embed{
 				title: if s := j['title'] {
+					s as string
+				} else {
+					none
+				}
+				typ: if s := j['type'] {
 					s as string
 				} else {
 					none
@@ -450,44 +457,47 @@ pub fn Embed.parse(j json2.Any) !Embed {
 }
 
 pub fn (e Embed) build() json2.Any {
-	mut r := map[string]json2.Any{}
+	mut j := map[string]json2.Any{}
 	if title := e.title {
-		r['title'] = title
+		j['title'] = title
+	}
+	if typ := e.typ {
+		j['type'] = typ
 	}
 	if description := e.description {
-		r['description'] = description
+		j['description'] = description
 	}
 	if url := e.url {
-		r['url'] = url
+		j['url'] = url
 	}
 	if timestamp := e.timestamp {
-		r['timestamp'] = format_iso8601(timestamp)
+		j['timestamp'] = format_iso8601(timestamp)
 	}
 	if color := e.color {
-		r['color'] = color
+		j['color'] = color
 	}
 	if footer := e.footer {
-		r['footer'] = footer.build()
+		j['footer'] = footer.build()
 	}
 	if image := e.image {
-		r['image'] = image.build()
+		j['image'] = image.build()
 	}
 	if thumbnail := e.thumbnail {
-		r['thumbnail'] = thumbnail.build()
+		j['thumbnail'] = thumbnail.build()
 	}
 	if video := e.video {
-		r['video'] = video.build()
+		j['video'] = video.build()
 	}
 	if provider := e.provider {
-		r['provider'] = provider.build()
+		j['provider'] = provider.build()
 	}
 	if author := e.author {
-		r['author'] = author.build()
+		j['author'] = author.build()
 	}
 	if fields := e.fields {
-		r['fields'] = fields.map(|field| field.build())
+		j['fields'] = fields.map(|f| f.build())
 	}
-	return r
+	return j
 }
 
 pub type Nonce = int | string
@@ -547,7 +557,7 @@ pub fn MessageActivity.parse(j json2.Any) !MessageActivity {
 			return MessageActivity{
 				typ: unsafe { MessageActivityType(j['type']!.int()) }
 				party_id: if s := j['party_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
@@ -576,17 +586,17 @@ pub fn MessageReference.parse(j json2.Any) !MessageReference {
 		map[string]json2.Any {
 			return MessageReference{
 				message_id: if s := j['message_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				channel_id: if s := j['channel_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}

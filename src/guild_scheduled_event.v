@@ -33,7 +33,7 @@ pub fn GuildScheduledEventEntityMetadata.parse(j json2.Any) !GuildScheduledEvent
 		map[string]json2.Any {
 			return GuildScheduledEventEntityMetadata{
 				location: if s := j['location'] {
-					?string(s as string)
+					s as string
 				} else {
 					none
 				}

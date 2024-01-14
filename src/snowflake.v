@@ -7,6 +7,7 @@ pub const snowflake_epoch = u64(1420070400000)
 
 pub type Snowflake = u64
 
+@[inline]
 pub fn (s Snowflake) raw_timestamp() u64 {
 	return (s >> 22) + discord.snowflake_epoch
 }
@@ -44,5 +45,5 @@ pub fn (s Snowflake) str() string {
 }
 
 pub fn (s Snowflake) json_str() string {
-	return json2.Any(s.str()).json_str()
+	return s.build().json_str()
 }

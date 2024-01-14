@@ -15,6 +15,62 @@ pub:
 	data json2.Any
 }
 
+pub struct ReadyEvent {
+	BaseEvent
+pub:
+	// Information about the user including email
+	user User
+	// Guilds the user is in
+	guilds []UnavailableGuild
+	// Used for resuming connections
+	session_id string
+	// Gateway URL for resuming connections
+	resume_gateway_url string
+	// Contains id and flags
+	application PartialApplication
+}
+
+pub fn ReadyEvent.parse(j json2.Any, base BaseEvent) !ReadyEvent {
+	match j {
+		map[string]json2.Any {
+			return ReadyEvent{
+				BaseEvent: base
+				user: User.parse(j['user']!)!
+				guilds: maybe_map(j['guilds']! as []json2.Any, fn (k json2.Any) !UnavailableGuild {
+					return UnavailableGuild.parse(k)!
+				})!
+				session_id: j['session_id']! as string
+				resume_gateway_url: j['resume_gateway_url']! as string
+				application: PartialApplication.parse(j['application']!)!
+			}
+		}
+		else {
+			return error('expected ReadyEvent to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+pub struct ResumedEvent {
+	BaseEvent
+pub:
+	// Information about the user including email
+	user User
+	// Guilds the user is in
+	guilds []UnavailableGuild
+	// Used for resuming connections
+	session_id string
+	// Gateway URL for resuming connections
+	resume_gateway_url string
+	// Contains id and flags
+	application PartialApplication
+}
+
+pub fn ResumedEvent.parse(j json2.Any, base BaseEvent) !ResumedEvent {
+	return ResumedEvent{
+		BaseEvent: base
+	}
+}
+
 pub struct ApplicationCommandPermissionsUpdateEvent {
 	BaseEvent
 pub:
@@ -1329,14 +1385,14 @@ pub fn TypingStartEvent.parse(j json2.Any, base BaseEvent) !TypingStartEvent {
 				BaseEvent: base
 				channel_id: Snowflake.parse(j['channel_id']!)!
 				guild_id: if s := j['guild_id'] {
-					?Snowflake(Snowflake.parse(s)!)
+					Snowflake.parse(s)!
 				} else {
 					none
 				}
 				user_id: Snowflake.parse(j['user_id']!)!
 				timestamp: time.unix(j['timestamp']!.i64())
 				member: if o := j['member'] {
-					?GuildMember(GuildMember.parse(o)!)
+					GuildMember.parse(o)!
 				} else {
 					none
 				}
@@ -1486,6 +1542,7 @@ pub struct Events {
 pub mut:
 	on_raw_event                              EventController[DispatchEvent]
 	on_ready                                  EventController[ReadyEvent]
+	on_resumed                                EventController[ResumedEvent]
 	on_application_command_permissions_update EventController[ApplicationCommandPermissionsUpdateEvent]
 	on_auto_moderation_rule_create            EventController[AutoModerationRuleCreateEvent]
 	on_auto_moderation_rule_update            EventController[AutoModerationRuleUpdateEvent]
@@ -1555,6 +1612,12 @@ fn event_process_ready(mut gc GatewayClient, data json2.Any, options EmitOptions
 	})!
 	gc.user = event.user
 	gc.events.on_ready.emit(event, options)
+}
+
+fn event_process_resumed(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
+	gc.events.on_resumed.emit(ResumedEvent.parse(data, BaseEvent{
+		creator: gc
+	})!, options)
 }
 
 fn event_process_application_command_permissions_update(mut gc GatewayClient, data json2.Any, options EmitOptions) ! {
@@ -2158,6 +2221,7 @@ type EventsTable = map[string]fn (mut GatewayClient, json2.Any, EmitOptions) !
 
 const events_table = EventsTable({
 	'READY':                                  event_process_ready
+	'RESUMED':                                event_process_resumed
 	'APPLICATION_COMMAND_PERMISSIONS_UPDATE': event_process_application_command_permissions_update
 	'AUTO_MODERATION_RULE_CREATE':            event_process_auto_moderation_rule_create
 	'AUTO_MODERATION_RULE_UPDATE':            event_process_auto_moderation_rule_update
