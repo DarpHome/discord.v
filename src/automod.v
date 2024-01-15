@@ -197,7 +197,7 @@ pub fn Action.parse(j json2.Any) !Action {
 			return Action{
 				typ: unsafe { ActionType(j['type']!.int()) }
 				metadata: if o := j['metadata'] {
-					?ActionMetadata(ActionMetadata.parse(o)!)
+					ActionMetadata.parse(o)!
 				} else {
 					none
 				}

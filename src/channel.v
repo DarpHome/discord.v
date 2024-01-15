@@ -572,8 +572,7 @@ pub:
 }
 
 pub fn (c Channel) get_overwrite(id Snowflake) ?PermissionOverwrite {
-	overwrites := c.permission_overwrites?
-	for overwrite in overwrites {
+	for overwrite in c.permission_overwrites? {
 		if overwrite.id == id {
 			return overwrite
 		}

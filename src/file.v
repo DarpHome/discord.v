@@ -121,7 +121,7 @@ pub fn Attachment.parse(j json2.Any) !Attachment {
 					none
 				}
 				ephemeral: if b := j['ephemeral'] {
-					?bool(b as bool)
+					b as bool
 				} else {
 					none
 				}

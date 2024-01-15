@@ -280,7 +280,7 @@ pub fn (acd ApplicationCommandData) get(option string) ?ApplicationCommandIntera
 }
 
 pub fn (i Interaction) get_application_command_data() !ApplicationCommandData {
-	return ApplicationCommandData.parse(i.data or { panic('no data') })!
+	return ApplicationCommandData.parse(i.data or { panic(err) })!
 }
 
 pub struct MessageComponentData {
@@ -493,10 +493,7 @@ pub:
 fn (_ InteractionResponse) is_interaction_response() {}
 
 pub fn (ir InteractionResponse) get_files() ?[]File {
-	if d := ir.data {
-		return d.get_files()
-	}
-	return none
+	return ir.data?.get_files()
 }
 
 pub fn (ir InteractionResponse) build() json2.Any {
@@ -516,7 +513,7 @@ pub struct MessageInteractionResponse {
 fn (_ MessageInteractionResponse) is_interaction_response() {}
 
 pub fn (r MessageInteractionResponse) get_files() ?[]File {
-	return r.files
+	return r.MessageResponseData.files
 }
 
 pub fn (mir MessageInteractionResponse) build() json2.Any {
@@ -533,7 +530,7 @@ pub struct UpdateMessageInteractionResponse {
 fn (_ UpdateMessageInteractionResponse) is_interaction_response() {}
 
 pub fn (r UpdateMessageInteractionResponse) get_files() ?[]File {
-	return r.get_files()
+	return r.MessageResponseData.get_files()
 }
 
 pub fn (umir UpdateMessageInteractionResponse) build() json2.Any {
@@ -607,12 +604,12 @@ pub fn (c Client) create_interaction_response(interaction_id Snowflake, interact
 	}
 }
 
-// Returns the initial Interaction response. Functions the same as [`c.fetch_webhook_message`](#Client.fetch_webhook_message).
+// Returns the initial Interaction response. Functions the same as [`Clientc.fetch_webhook_message`](#Client.fetch_webhook_message).
 pub fn (c Client) fetch_original_interaction_response(application_id Snowflake, interaction_token string) !Message {
 	return c.fetch_webhook_message(application_id, interaction_token, none)!
 }
 
-// Edits the initial Interaction response. Functions the same as [`c.edit_webhook_message`](#Client.edit_webhook_message).
+// Edits the initial Interaction response. Functions the same as [`Client.edit_webhook_message`](#Client.edit_webhook_message).
 pub fn (c Client) edit_original_interaction_response(application_id Snowflake, interaction_token string, params EditWebhookMessageParams) !Message {
 	return c.edit_webhook_message(application_id, interaction_token, none, params)!
 }
@@ -622,8 +619,8 @@ pub fn (c Client) delete_original_interaction_response(application_id Snowflake,
 	c.delete_webhook_message(application_id, interaction_token, none)!
 }
 
-// Create a followup message for an Interaction. Functions the same as [`c.execute_webhook`](#Client.execute_webhook), but `wait` is always `true`. The thread_id, avatar_url, and username parameters are not supported when using this endpoint for interaction followups.
-// `flags` can be set to `64` to mark the message as ephemeral, except when it is the first followup message to a deferred Interactions Response. In that case, the `flags` field will be ignored, and the ephemerality of the message will be determined by the `flags` value in your original ACK.
+// Create a followup message for an Interaction. Functions the same as [`Client.execute_webhook`](#Client.execute_webhook), but `wait` is always `true`. The `thread_id`, `avatar_url`, and `username` parameters are not supported when using this endpoint for interaction followups.
+// `flags` can be set to `.ephemeral` to mark the message as ephemeral, except when it is the first followup message to a deferred Interactions Response. In that case, the `flags` field will be ignored, and the ephemerality of the message will be determined by the `flags` value in your original ACK.
 pub fn (c Client) create_followup_message(application_id Snowflake, interaction_token string, params ExecuteWebhookParams) !Message {
 	unsafe {
 		return *c.execute_webhook(application_id, interaction_token, ExecuteWebhookParams{
@@ -636,4 +633,9 @@ pub fn (c Client) create_followup_message(application_id Snowflake, interaction_
 			applied_tags: none
 		})!
 	}
+}
+
+// Returns a followup message for an Interaction. Functions the same as [`Client.fetch_webhook_message`](#Client.fetch_webhook_message).
+pub fn (c Client) fetch_followup_message(application_id Snowflake, interaction_token string, message_id Snowflake) ! {
+	return c.fetch_webhook_message(application_id, interaction_token, message_id)!
 }
