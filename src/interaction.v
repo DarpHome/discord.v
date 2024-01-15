@@ -636,6 +636,16 @@ pub fn (c Client) create_followup_message(application_id Snowflake, interaction_
 }
 
 // Returns a followup message for an Interaction. Functions the same as [`Client.fetch_webhook_message`](#Client.fetch_webhook_message).
-pub fn (c Client) fetch_followup_message(application_id Snowflake, interaction_token string, message_id Snowflake) ! {
+pub fn (c Client) fetch_followup_message(application_id Snowflake, interaction_token string, message_id Snowflake) !Message {
 	return c.fetch_webhook_message(application_id, interaction_token, message_id)!
+}
+
+// Edits a followup message for an Interaction. Functions the same as [`Client.edit_webhook_message`](#Client.edit_webhook_message).
+pub fn (c Client) edit_followup_message(application_id Snowflake, interaction_token string, message_id Snowflake, params EditWebhookMessageParams) !Message {
+	return c.edit_webhook_message(application_id, interaction_token, message_id, params)!
+}
+
+// Deletes a followup message for an Interaction. Returns `204 No Content` on success
+pub fn (c Client) delete_followup_message(application_id Snowflake, interaction_token string, message_id Snowflake) ! {
+	c.delete_webhook_message(application_id, interaction_token, message_id)!
 }
