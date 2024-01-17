@@ -3,12 +3,12 @@ module discord
 import net.http
 import encoding.base64
 import log
-import os as v_os
+import os
 import time
 
 pub struct Properties {
 pub:
-	os      string = v_os.user_os()
+	os      string = os.user_os()
 	browser string = 'discord.v'
 	device  string = 'discord.v'
 }

@@ -91,6 +91,64 @@ pub mut:
 	users map[Snowflake]User
 }
 
+pub fn (cache &Cache) get_guild(guild_id Snowflake) ?Guild {
+	return cache.guilds[guild_id] or { return none }
+}
+
+pub fn (cache &Cache) get_role(guild_id Snowflake, role_id Snowflake) ?Role {
+	return cache.roles[guild_id] or { return none }[role_id] or { return none }
+}
+
+pub fn (cache &Cache) get_emoji(guild_id Snowflake, emoji_id Snowflake) ?Emoji {
+	return cache.emojis[guild_id] or { return none }[emoji_id] or { return none }
+}
+
+pub fn (cache &Cache) get_sticker(guild_id Snowflake, sticker_id Snowflake) ?Sticker {
+	return cache.stickers[guild_id] or { return none }[sticker_id] or { return none }
+}
+
+pub fn (cache &Cache) get_voice_state(guild_id Snowflake, user_id Snowflake) ?VoiceState {
+	return cache.voice_states[guild_id] or { return none }[user_id] or { return none }
+}
+
+pub fn (cache &Cache) get_member(guild_id Snowflake, user_id Snowflake) ?GuildMember {
+	return cache.members[guild_id] or { return none }[user_id] or { return none }
+}
+
+pub fn (cache &Cache) get_channel(channel_id Snowflake) ?Channel {
+	return cache.channels[channel_id] or { return none }
+}
+
+pub fn (cache &Cache) get_message(channel_id Snowflake, message_id Snowflake) ?Message {
+	return cache.messages[channel_id] or { return none }[message_id] or { return none }
+}
+
+pub fn (cache &Cache) get_thread(guild_id Snowflake, thread_id Snowflake) ?Channel {
+	return cache.threads[guild_id] or { return none }[thread_id] or { return none }
+}
+
+pub fn (cache &Cache) get_presence(guild_id Snowflake, user_id Snowflake) ?Presence {
+	return cache.presences[guild_id] or { return none }[user_id] or { return none }
+}
+
+pub fn (cache &Cache) get_stage_instance(guild_id Snowflake, channel_id Snowflake) ?StageInstance {
+	return cache.stage_instances[guild_id] or { return none }[channel_id] or { return none }
+}
+
+pub fn (cache &Cache) get_guild_scheduled_event(guild_id Snowflake, guild_scheduled_event_id Snowflake) ?GuildScheduledEvent {
+	return cache.guild_scheduled_events[guild_id] or { return none }[guild_scheduled_event_id] or {
+		return none
+	}
+}
+
+pub fn (cache &Cache) get_entitlement(owner_id Snowflake, entitlement_id Snowflake) ?Entitlement {
+	return cache.entitlements[owner_id] or { return none }[entitlement_id] or { return none }
+}
+
+pub fn (cache &Cache) get_user(user_id Snowflake) ?User {
+	return cache.users[user_id] or { return none }
+}
+
 pub fn cache_add1[T](mut m1 map[Snowflake]T, max_size ?int, check fn (id1 Snowflake, o T) bool, id1 Snowflake, o T) {
 	if check != unsafe { nil } {
 		if !check(id1, o) {
