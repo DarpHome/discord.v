@@ -21,15 +21,15 @@ fn cast_interface[T, U](u U) T {
 	}
 }
 
-fn grab_bot() ?Client {
-	return make_client('Bot ' + os.getenv_opt('TEST_TOKEN') or {
+fn grab_rest() ?REST {
+	return new_rest('Bot ' + os.getenv_opt('TEST_TOKEN') or {
 		println('no test token, skipping')
 		return none
 	})
 }
 
 fn init() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 	channel_id := Snowflake(os.getenv('TEST_CHANNEL').u64())
 
 	// from nyxx
@@ -37,7 +37,7 @@ fn init() {
 	actor := os.getenv('GITHUB_ACTOR')
 	ref := os.getenv('GITHUB_REF')
 	sha := os.getenv('GITHUB_SHA')
-	bot.create_message(channel_id,
+	rest.create_message(channel_id,
 		content: if run_number == '' {
 			'Testing new local build'
 		} else {
@@ -47,43 +47,43 @@ fn init() {
 }
 
 fn test_applications() {
-	bot := grab_bot() or { return }
-	application := bot.fetch_my_application() or { panic(err) }
-	assert bot.list_skus(application.id) or { panic(err) } == []
+	rest := grab_rest() or { return }
+	application := rest.fetch_my_application() or { panic(err) }
+	assert rest.list_skus(application.id) or { panic(err) } == []
 
 	current_time := time.now().unix.str()
-	assert bot.edit_my_application(description: current_time) or { panic(err) }.description == current_time
+	assert rest.edit_my_application(description: current_time) or { panic(err) }.description == current_time
 }
 
 fn test_users() {
-	bot := grab_bot() or { return }
-	assert bot.fetch_my_user() or { panic(err) }.bot or { panic(err) }
-	assert bot.fetch_my_guilds() or { panic(err) }.len >= 1
-	assert bot.fetch_my_connections() or { panic(err) }.len == 0
+	rest := grab_rest() or { return }
+	assert rest.fetch_my_user() or { panic(err) }.bot or { panic(err) }
+	assert rest.fetch_my_guilds() or { panic(err) }.len >= 1
+	assert rest.fetch_my_connections() or { panic(err) }.len == 0
 }
 
 fn test_channels() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 
 	channel_id := Snowflake(os.getenv('TEST_CHANNEL').u64())
-	channel := bot.fetch_channel(channel_id) or { panic(err) }
+	channel := rest.fetch_channel(channel_id) or { panic(err) }
 	assert channel.typ == .guild_text
 	assert channel.name == 'ci'
 }
 
 fn test_messages() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 	channel_id := Snowflake(os.getenv('TEST_CHANNEL').u64())
 
-	message := bot.create_message(channel_id, content: 'test message') or { panic(err) }
+	message := rest.create_message(channel_id, content: 'test message') or { panic(err) }
 	assert message.content == 'test message'
-	message2 := bot.edit_message(channel_id, message.id, content: 'new message') or { panic(err) }
+	message2 := rest.edit_message(channel_id, message.id, content: 'new message') or { panic(err) }
 	assert message2.id == message.id
 	assert message2.content == 'new message'
-	bot.pin_message(channel_id, message.id) or { panic(err) }
-	bot.unpin_message(channel_id, message.id) or { panic(err) }
-	bot.delete_message(channel_id, message.id) or { panic(err) }
-	message3 := bot.create_message(channel_id,
+	rest.pin_message(channel_id, message.id) or { panic(err) }
+	rest.unpin_message(channel_id, message.id) or { panic(err) }
+	rest.delete_message(channel_id, message.id) or { panic(err) }
+	message3 := rest.create_message(channel_id,
 		files: [
 			File{
 				filename: '1.txt'
@@ -95,7 +95,7 @@ fn test_messages() {
 	assert message3.attachments[0].filename == '1.txt'
 	assert message3.attachments[0].url != ''
 	assert http.get_text(message3.attachments[0].url) == 'foo'
-	message4 := bot.create_message(channel_id,
+	message4 := rest.create_message(channel_id,
 		files: [
 			File{
 				filename: '2.txt'
@@ -114,8 +114,8 @@ fn test_messages() {
 	assert message4.attachments[1].filename == '3.txt'
 	assert message4.attachments[1].url != ''
 	assert http.get_text(message4.attachments[1].url) == 'baz'
-	bot.delete_messages(channel_id, [message3.id, message4.id]) or { panic(err) }
-	message5 := bot.create_message(channel_id,
+	rest.delete_messages(channel_id, [message3.id, message4.id]) or { panic(err) }
+	message5 := rest.create_message(channel_id,
 		content: 'Components test'
 		components: [
 			ActionRow{
@@ -395,14 +395,14 @@ fn test_messages() {
 	assert component14.options[2].value == '3'
 	assert component14.options[2].description == none
 	assert component14.options[2].emoji == none
-	bot.delete_message(channel_id, message5.id) or { panic(err) }
+	rest.delete_message(channel_id, message5.id) or { panic(err) }
 }
 
 fn test_webhooks() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 	channel_id := Snowflake(os.getenv('TEST_CHANNEL').u64())
 
-	webhook := bot.create_webhook(channel_id, name: 'Test webhook') or { panic(err) }
+	webhook := rest.create_webhook(channel_id, name: 'Test webhook') or { panic(err) }
 	if name := webhook.name {
 		assert name == 'Test webhook'
 	} else {
@@ -411,82 +411,82 @@ fn test_webhooks() {
 	token := webhook.token or { panic(err) }
 	assert token != ''
 
-	message := bot.execute_webhook(webhook.id, token, wait: true, content: 'Test webhook message') or {
+	message := rest.execute_webhook(webhook.id, token, wait: true, content: 'Test webhook message') or {
 		panic(err)
 	}
 	assert message != unsafe { nil }
-	message2 := bot.edit_webhook_message(webhook.id, token, message.id,
+	message2 := rest.edit_webhook_message(webhook.id, token, message.id,
 		content: 'New webhook content'
 	) or { panic(err) }
 	assert message2.id == message.id
-	bot.delete_webhook_message(webhook.id, token, message.id) or { panic(err) }
-	bot.delete_webhook_with_token(webhook.id, token) or { panic(err) }
+	rest.delete_webhook_message(webhook.id, token, message.id) or { panic(err) }
+	rest.delete_webhook_with_token(webhook.id, token) or { panic(err) }
 }
 
 fn test_voice() {
-	bot := grab_bot() or { return }
-	assert bot.list_voice_regions() or { panic(err) }.len != 0
+	rest := grab_rest() or { return }
+	assert rest.list_voice_regions() or { panic(err) }.len != 0
 }
 
 fn test_guilds() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
 
-	guild := bot.fetch_guild(guild_id) or { panic(err) }
+	guild := rest.fetch_guild(guild_id) or { panic(err) }
 	assert guild.id == guild_id
 
-	preview := bot.fetch_guild_preview(guild_id) or { panic(err) }
+	preview := rest.fetch_guild_preview(guild_id) or { panic(err) }
 	assert preview.id == guild_id
 
-	channels := bot.fetch_guild_channels(guild_id) or { panic(err) }
+	channels := rest.fetch_guild_channels(guild_id) or { panic(err) }
 	assert channels.len >= 1
 
-	bot.list_active_guild_threads(guild_id) or { panic(err) }
-	assert bot.fetch_guild_voice_regions(guild_id) or { panic(err) }.len >= 1
+	rest.list_active_guild_threads(guild_id) or { panic(err) }
+	assert rest.fetch_guild_voice_regions(guild_id) or { panic(err) }.len >= 1
 
-	bot.fetch_guild_widget(guild_id) or { panic(err) }
-	bot.fetch_guild_welcome_screen(guild_id) or {}
-	bot.fetch_guild_onboarding(guild_id) or {}
+	rest.fetch_guild_widget(guild_id) or { panic(err) }
+	rest.fetch_guild_welcome_screen(guild_id) or {}
+	rest.fetch_guild_onboarding(guild_id) or {}
 }
 
 fn test_members() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
 
-	user := bot.fetch_my_user() or { panic(err) }
+	user := rest.fetch_my_user() or { panic(err) }
 
-	assert bot.fetch_guild_member(guild_id, user.id) or { panic(err) }.roles.len >= 1
+	assert rest.fetch_guild_member(guild_id, user.id) or { panic(err) }.roles.len >= 1
 }
 
 fn test_roles() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
 
-	user := bot.fetch_my_user() or { panic(err) }
+	user := rest.fetch_my_user() or { panic(err) }
 
-	assert bot.fetch_guild_roles(guild_id) or { panic(err) }.len >= 3
+	assert rest.fetch_guild_roles(guild_id) or { panic(err) }.len >= 3
 }
 
 fn test_gateway() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 
-	assert bot.fetch_gateway_url() or { panic(err) }.starts_with('wss:')
-	bot.fetch_gateway_configuration() or { panic(err) }
+	assert rest.fetch_gateway_url() or { panic(err) }.starts_with('wss:')
+	rest.fetch_gateway_configuration() or { panic(err) }
 }
 
 fn test_scheduled_events() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 	guild_id := Snowflake(os.getenv('TEST_GUILD').u64())
 
-	bot.list_scheduled_events_for_guild(guild_id) or { panic(err) }
+	rest.list_scheduled_events_for_guild(guild_id) or { panic(err) }
 }
 
 fn test_commands() {
-	bot := grab_bot() or { return }
+	rest := grab_rest() or { return }
 
-	application := bot.fetch_my_application() or { panic(err) }
+	application := rest.fetch_my_application() or { panic(err) }
 
-	command := bot.create_global_application_command(application.id,
+	command := rest.create_global_application_command(application.id,
 		name: 'test'
 		description: 'A test command'
 	) or { panic(err) }
@@ -494,13 +494,13 @@ fn test_commands() {
 	assert command.description == 'A test command'
 	assert command.options or { [] }.len == 0
 
-	command2 := bot.fetch_global_application_command(application.id, command.id) or { panic(err) }
+	command2 := rest.fetch_global_application_command(application.id, command.id) or { panic(err) }
 	assert command2.id == command.id
 	assert command2.name == command.name
 	assert command2.description == command.description
 	assert command2.options or { [] }.len == command.options or { [] }.len
 
-	command3 := bot.edit_global_application_command(application.id, command2.id, name: 'new_name') or {
+	command3 := rest.edit_global_application_command(application.id, command2.id, name: 'new_name') or {
 		panic(err)
 	}
 	assert command3.id == command2.id
@@ -508,10 +508,10 @@ fn test_commands() {
 	assert command3.description == command2.description
 	assert command3.options or { [] }.len == command2.options or { [] }.len
 
-	commands := bot.fetch_global_application_commands(application.id) or { panic(err) }
+	commands := rest.fetch_global_application_commands(application.id) or { panic(err) }
 	assert commands.len >= 1
 
-	commands2 := bot.bulk_overwrite_global_application_commands(application.id, [
+	commands2 := rest.bulk_overwrite_global_application_commands(application.id, [
 		CreateApplicationCommandParams{
 			name: 'test_2'
 			description: 'A test command'
@@ -520,5 +520,5 @@ fn test_commands() {
 	assert commands2.len == 1
 	assert commands2[0].name == 'test_2' && commands2[0].description == 'A test command'
 
-	bot.delete_global_application_command(application.id, commands2[0].id) or { panic(err) }
+	rest.delete_global_application_command(application.id, commands2[0].id) or { panic(err) }
 }

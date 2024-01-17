@@ -1,6 +1,7 @@
 module discord
 
 import x.json2
+import log
 import math
 import net.websocket
 import time
@@ -54,23 +55,25 @@ pub enum GatewayClientSettings {
 
 @[heap]
 pub struct GatewayClient {
-	Client
 pub:
 	settings        GatewayClientSettings
 	intents         int
 	properties      Properties
 	large_threshold ?int
 	gateway_url     string = 'wss://gateway.discord.gg'
+	rest            REST
+	token           string
 mut:
-	presence           ?UpdatePresenceParams
-	ready              bool
-	sequence           ?int
+	close_code         ?int
 	last_heartbeat_req ?time.Time
 	last_heartbeat_res ?time.Time
-	close_code         ?int
-	session_id         string
-	resume_gateway_url string
+	logger             log.Logger
+	presence           ?UpdatePresenceParams
 	read_timeout       ?time.Duration
+	ready              bool
+	resume_gateway_url string
+	sequence           ?int
+	session_id         string
 	write_timeout      ?time.Duration
 pub mut:
 	user   User
@@ -443,8 +446,8 @@ pub fn (mut c GatewayClient) launch() ! {
 		c.logger.info('\n' +
 			'+----- Running discord.v -----+\n' +
 			'|                             |\n' +
-			'| HTTP:                       |-\n' +
-			'| - User agent:               | ${c.user_agent}\n' +
+			'| REST:                       |-\n' +
+			'| - User agent:               | ${c.rest.user_agent}\n' +
 			'|                             |\n' +
 			'| Gateway:                    |-\n' +
 			'| - Properties:               |--\n' +
@@ -467,8 +470,8 @@ pub fn (mut gc GatewayClient) latency() f64 {
 	}
 }
 
-pub fn (c Client) fetch_gateway_url() !string {
-	return (json2.raw_decode(c.request(.get, '/gateway', authenticate: false)!.body)! as map[string]json2.Any)['url']! as string
+pub fn (rest &REST) fetch_gateway_url() !string {
+	return (json2.raw_decode(rest.request(.get, '/gateway', authenticate: false)!.body)! as map[string]json2.Any)['url']! as string
 }
 
 pub struct SessionStartLimit {
@@ -524,8 +527,8 @@ pub fn GatewayConfiguration.parse(j json2.Any) !GatewayConfiguration {
 	}
 }
 
-pub fn (c Client) fetch_gateway_configuration() !GatewayConfiguration {
-	return GatewayConfiguration.parse(json2.raw_decode(c.request(.get, '/gateway/bot')!.body)!)!
+pub fn (rest &REST) fetch_gateway_configuration() !GatewayConfiguration {
+	return GatewayConfiguration.parse(json2.raw_decode(rest.request(.get, '/gateway/bot')!.body)!)!
 }
 
 pub type ArrayOrSnowflake = Snowflake | []Snowflake

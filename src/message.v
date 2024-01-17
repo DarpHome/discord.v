@@ -1231,16 +1231,16 @@ pub fn (params GetChannelMessagesParams) build_query_values() urllib.Values {
 	return query_params
 }
 
-pub fn (c Client) fetch_messages(channel_id Snowflake, params GetChannelMessagesParams) ![]Message {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.str())}/messages',
+pub fn (rest &REST) fetch_messages(channel_id Snowflake, params GetChannelMessagesParams) ![]Message {
+	return maybe_map(json2.raw_decode(rest.request(.get, '/channels/${urllib.path_escape(channel_id.str())}/messages',
 		query_params: params.build_query_values()
 	)!.body)! as []json2.Any, fn (j json2.Any) !Message {
 		return Message.parse(j)!
 	})!
 }
 
-pub fn (c Client) fetch_message(channel_id Snowflake, message_id Snowflake) !Message {
-	return Message.parse(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}')!.body)!)!
+pub fn (rest &REST) fetch_message(channel_id Snowflake, message_id Snowflake) !Message {
+	return Message.parse(json2.raw_decode(rest.request(.get, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}')!.body)!)!
 }
 
 pub enum AllowedMentionType {
@@ -1354,17 +1354,17 @@ pub fn (params CreateMessageParams) build() json2.Any {
 	return r
 }
 
-pub fn (c Client) create_message(channel_id Snowflake, params CreateMessageParams) !Message {
+pub fn (rest &REST) create_message(channel_id Snowflake, params CreateMessageParams) !Message {
 	if files := params.files {
 		body, boundary := build_multipart_with_files(files, params.build())
-		return Message.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/messages',
+		return Message.parse(json2.raw_decode(rest.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/messages',
 			body: body
 			common_headers: {
 				.content_type: 'multipart/form-data; boundary="${boundary}"'
 			}
 		)!.body)!)!
 	} else {
-		return Message.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/messages',
+		return Message.parse(json2.raw_decode(rest.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/messages',
 			json: params.build()
 		)!.body)!)!
 	}
@@ -1372,8 +1372,8 @@ pub fn (c Client) create_message(channel_id Snowflake, params CreateMessageParam
 
 // Crosspost a message in an Announcement Channel to following channels. This endpoint requires the SEND_MESSAGES permission, if the current user sent the message, or additionally the `.manage_messages` permission, for all other messages, to be present for the current user.
 // Returns a [`message`](#Message) object. Fires a Message Update Gateway event.
-pub fn (c Client) crosspost_message(channel_id Snowflake, message_id Snowflake) !Message {
-	return Message.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/crosspost')!.body)!)!
+pub fn (rest &REST) crosspost_message(channel_id Snowflake, message_id Snowflake) !Message {
+	return Message.parse(json2.raw_decode(rest.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/crosspost')!.body)!)!
 }
 
 @[params]
@@ -1392,18 +1392,18 @@ pub fn (params ReactionParams) build() string {
 }
 
 // Create a reaction for the message. This endpoint requires the `.read_message_history` permission to be present on the current user. Additionally, if nobody else has reacted to the message using this emoji, this endpoint requires the `.add_reactions` permission to be present on the current user. Fires a Message Reaction Add Gateway event.
-pub fn (c Client) create_reaction(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
-	c.request(.put, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}/@me')!
+pub fn (rest &REST) create_reaction(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
+	rest.request(.put, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}/@me')!
 }
 
 // Delete a reaction the current user has made for the message. Fires a Message Reaction Remove Gateway event.
-pub fn (c Client) delete_own_reaction(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
-	c.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}/@me')!
+pub fn (rest &REST) delete_own_reaction(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
+	rest.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}/@me')!
 }
 
 // Deletes another user's reaction. This endpoint requires the `.manage_messages` permission to be present on the current user. Fires a Message Reaction Remove Gateway event.
-pub fn (c Client) delete_user_reaction(channel_id Snowflake, message_id Snowflake, user_id Snowflake, params ReactionParams) ! {
-	c.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}/${urllib.path_escape(user_id.str())}')!
+pub fn (rest &REST) delete_user_reaction(channel_id Snowflake, message_id Snowflake, user_id Snowflake, params ReactionParams) ! {
+	rest.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}/${urllib.path_escape(user_id.str())}')!
 }
 
 @[params]
@@ -1426,8 +1426,8 @@ pub fn (params FetchReactionsParams) build_query_values() urllib.Values {
 }
 
 // Get a list of users that reacted with this emoji. Returns an array of [user](#User) objects on success.
-pub fn (c Client) fetch_reactions(channel_id Snowflake, message_id Snowflake, params FetchReactionsParams) ![]User {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}',
+pub fn (rest &REST) fetch_reactions(channel_id Snowflake, message_id Snowflake, params FetchReactionsParams) ![]User {
+	return maybe_map(json2.raw_decode(rest.request(.get, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}',
 		query_params: params.build_query_values()
 	)!.body)! as []json2.Any, fn (j json2.Any) !User {
 		return User.parse(j)!
@@ -1435,13 +1435,13 @@ pub fn (c Client) fetch_reactions(channel_id Snowflake, message_id Snowflake, pa
 }
 
 // Deletes all reactions on a message. This endpoint requires the `.manage_messages` permission to be present on the current user. Fires a Message Reaction Remove All Gateway event.
-pub fn (c Client) delete_all_reactions(channel_id Snowflake, message_id Snowflake) ! {
-	c.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions')!
+pub fn (rest &REST) delete_all_reactions(channel_id Snowflake, message_id Snowflake) ! {
+	rest.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions')!
 }
 
 // Deletes all the reactions for a given emoji on a message. This endpoint requires the `.manage_messages` permission to be present on the current user. Fires a Message Reaction Remove Emoji Gateway event.
-pub fn (c Client) delete_all_reactions_for_emoji(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
-	c.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}')!
+pub fn (rest &REST) delete_all_reactions_for_emoji(channel_id Snowflake, message_id Snowflake, params ReactionParams) ! {
+	rest.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}/reactions/${params.build()}')!
 }
 
 @[params]
@@ -1493,24 +1493,24 @@ pub fn (params EditMessageParams) build() json2.Any {
 // Edit a previously sent message. The fields `content`, `embeds`, and `flags` can be edited by the original message author. Other users can only edit `flags` and only if they have the `.manage_messages` permission in the corresponding channel. When specifying flags, ensure to include all previously set flags/bits in addition to ones that you are modifying. Only `flags` documented in the table below may be modified by users (unsupported flag changes are currently ignored without error).
 // When the `content` field is edited, the `mentions` array in the message object will be reconstructed from scratch based on the new content. The `allowed_mentions` field of the edit request controls how this happens. If there is no explicit `allowed_mentions` in the edit request, the content will be parsed with default allowances, that is, without regard to whether or not an `allowed_mentions` was present in the request that originally created the message.
 // Returns a [message](#Message) object. Fires a Message Update Gateway event.
-pub fn (c Client) edit_message(channel_id Snowflake, message_id Snowflake, params EditMessageParams) !Message {
+pub fn (rest &REST) edit_message(channel_id Snowflake, message_id Snowflake, params EditMessageParams) !Message {
 	if fs := params.files {
 		body, boundary := build_multipart_with_files(fs, params.build())
-		return Message.parse(json2.raw_decode(c.request(.patch, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}',
+		return Message.parse(json2.raw_decode(rest.request(.patch, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}',
 			body: body
 			common_headers: {
 				.content_type: 'multipart/form-data; boundary="${boundary}"'
 			}
 		)!.body)!)!
 	}
-	return Message.parse(json2.raw_decode(c.request(.patch, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}',
+	return Message.parse(json2.raw_decode(rest.request(.patch, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}',
 		json: params.build()
 	)!.body)!)!
 }
 
 // Delete a message. If operating on a guild channel and trying to delete a message that was not sent by the current user, this endpoint requires the `.manage_messages` permission. Fires a Message Delete Gateway event.
-pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}',
+pub fn (rest &REST) delete_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
+	rest.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/messages/${urllib.path_escape(message_id.str())}',
 		reason: params.reason
 	)!
 }
@@ -1518,8 +1518,8 @@ pub fn (c Client) delete_message(channel_id Snowflake, message_id Snowflake, par
 // Delete multiple messages in a single request. This endpoint can only be used on guild channels and requires the `.manage_messages` permission. Fires a Message Delete Bulk Gateway event.
 // Any message IDs given that do not exist or are invalid will count towards the minimum and maximum message count (currently 2 and 100 respectively).
 // > ! This endpoint will not delete messages older than 2 weeks, and will fail with a 400 BAD REQUEST if any message provided is older than that or if any duplicate message IDs are provided.
-pub fn (c Client) delete_messages(channel_id Snowflake, message_ids []Snowflake, params ReasonParam) ! {
-	c.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/messages/bulk-delete',
+pub fn (rest &REST) delete_messages(channel_id Snowflake, message_ids []Snowflake, params ReasonParam) ! {
+	rest.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/messages/bulk-delete',
 		reason: params.reason
 		json: {
 			'messages': json2.Any(message_ids.map(|s| s.build()))
@@ -1528,23 +1528,23 @@ pub fn (c Client) delete_messages(channel_id Snowflake, message_ids []Snowflake,
 }
 
 // Returns all pinned messages in the channel as an array of message objects.
-pub fn (c Client) fetch_pinned_messagse(channel_id Snowflake) ![]Message {
-	return maybe_map(json2.raw_decode(c.request(.get, '/channels/${urllib.path_escape(channel_id.str())}/pins')!.body)! as []json2.Any,
+pub fn (rest &REST) fetch_pinned_messagse(channel_id Snowflake) ![]Message {
+	return maybe_map(json2.raw_decode(rest.request(.get, '/channels/${urllib.path_escape(channel_id.str())}/pins')!.body)! as []json2.Any,
 		fn (j json2.Any) !Message {
 		return Message.parse(j)!
 	})!
 }
 
 // Pin a message in a channel. Requires the `.manage_messages` permission. Fires a Channel Pins Update Gateway event.
-pub fn (c Client) pin_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
-	c.request(.put, '/channels/${urllib.path_escape(channel_id.str())}/pins/${urllib.path_escape(message_id.str())}',
+pub fn (rest &REST) pin_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
+	rest.request(.put, '/channels/${urllib.path_escape(channel_id.str())}/pins/${urllib.path_escape(message_id.str())}',
 		reason: params.reason
 	)!
 }
 
 // Unpin a message in a channel. Requires the `.manage_messages` permission. Fires a Channel Pins Update Gateway event.
-pub fn (c Client) unpin_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/pins/${urllib.path_escape(message_id.str())}',
+pub fn (rest &REST) unpin_message(channel_id Snowflake, message_id Snowflake, params ReasonParam) ! {
+	rest.request(.delete, '/channels/${urllib.path_escape(channel_id.str())}/pins/${urllib.path_escape(message_id.str())}',
 		reason: params.reason
 	)!
 }
@@ -1636,10 +1636,10 @@ pub fn (params StartThreadInForumChannelParams) build() json2.Any {
 // - The maximum request size when sending a message is 25 MiB.
 // - Note that when sending a message, you must provide a value for at least one of `content`, `embeds`, `sticker_ids`, `components, or `files[n]`.
 // > ! Discord may strip certain characters from message content, like invalid unicode characters or characters which cause unexpected message formatting. If you are passing user-generated strings into message content, consider sanitizing the data to prevent unexpected behavior and using `allowed_mentions` to prevent unexpected mentions.
-pub fn (c Client) start_thread_in_forum_channel(channel_id Snowflake, params StartThreadInForumChannelParams) !Channel {
+pub fn (rest &REST) start_thread_in_forum_channel(channel_id Snowflake, params StartThreadInForumChannelParams) !Channel {
 	if files := params.message.files {
 		body, boundary := build_multipart_with_files(files, params.build())
-		return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/threads',
+		return Channel.parse(json2.raw_decode(rest.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/threads',
 			body: body
 			common_headers: {
 				.content_type: 'multipart/form-data; boundary="${boundary}"'
@@ -1647,7 +1647,7 @@ pub fn (c Client) start_thread_in_forum_channel(channel_id Snowflake, params Sta
 			reason: params.reason
 		)!.body)!)!
 	} else {
-		return Channel.parse(json2.raw_decode(c.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/threads',
+		return Channel.parse(json2.raw_decode(rest.request(.post, '/channels/${urllib.path_escape(channel_id.str())}/threads',
 			json: params.build()
 			reason: params.reason
 		)!.body)!)!

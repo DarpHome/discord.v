@@ -21,11 +21,11 @@ pub struct RequestOptions {
 	headers        map[string]string
 }
 
-pub fn (c Client) request(method http.Method, route string, options RequestOptions) !http.Response {
+pub fn (rest &REST) request(method http.Method, route string, options RequestOptions) !http.Response {
 	if options.json != none && options.body != none {
 		return error('cannot have json and body')
 	}
-	mut req := http.new_request(method, c.base_url.trim_right('/') + '/' + route.all_before('?') + (if query_params := options.query_params {
+	mut req := http.new_request(method, rest.base_url.trim_right('/') + '/' + route.all_before('?') + (if query_params := options.query_params {
 		tmp := query_params.encode()
 		if tmp != '' {
 			'?${tmp}'
@@ -41,10 +41,10 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 	} else {
 		''
 	})
-	req.user_agent = c.user_agent
+	req.user_agent = rest.user_agent
 	req.header = http.Header{}
 	if options.authenticate {
-		req.header.add(.authorization, c.token)
+		req.header.add(.authorization, rest.token)
 	}
 	if options.json != none {
 		req.header.add(.content_type, 'application/json')
@@ -68,7 +68,7 @@ pub fn (c Client) request(method http.Method, route string, options RequestOptio
 		eprintln('HTTP > ${method.str()} ${route}; with payload: ${req.data}')
 	}
 
-	res := if h := c.http {
+	res := if h := rest.http {
 		h.perform(req)!
 	} else {
 		req.do()!

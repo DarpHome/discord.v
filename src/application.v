@@ -421,8 +421,8 @@ pub fn Application.parse(j json2.Any) !Application {
 }
 
 // Returns the application object associated with the requesting bot user.
-pub fn (c Client) fetch_my_application() !Application {
-	return Application.parse(json2.raw_decode(c.request(.get, '/applications/@me')!.body)!)!
+pub fn (rest &REST) fetch_my_application() !Application {
+	return Application.parse(json2.raw_decode(rest.request(.get, '/applications/@me')!.body)!)!
 }
 
 @[params]
@@ -497,8 +497,8 @@ pub fn (params EditApplicationParams) build() json2.Any {
 }
 
 // Edit properties of the app associated with the requesting bot user. Only properties that are passed will be updated. Returns the updated application object on success.
-pub fn (c Client) edit_my_application(params EditApplicationParams) !Application {
-	return Application.parse(json2.raw_decode(c.request(.patch, '/applications/@me',
+pub fn (rest &REST) edit_my_application(params EditApplicationParams) !Application {
+	return Application.parse(json2.raw_decode(rest.request(.patch, '/applications/@me',
 		json: params.build()
 	)!.body)!)!
 }

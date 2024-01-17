@@ -124,8 +124,8 @@ pub fn (params ListEntitlementParams) build_query_values() urllib.Values {
 }
 
 // Returns all entitlements for a given app, active and expired.
-pub fn (c Client) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement {
-	return maybe_map(json2.raw_decode(c.request(.get, '/applications/${urllib.path_escape(application_id.str())}/entitlements',
+pub fn (rest &REST) list_entitlements(application_id Snowflake, params ListEntitlementParams) ![]Entitlement {
+	return maybe_map(json2.raw_decode(rest.request(.get, '/applications/${urllib.path_escape(application_id.str())}/entitlements',
 		query_params: params.build_query_values()
 	)!.body)! as []json2.Any, fn (k json2.Any) !Entitlement {
 		return Entitlement.parse(k)!
@@ -160,13 +160,13 @@ pub fn (params CreateTestEntitlementParams) build() json2.Any {
 
 // Creates a test entitlement to a given SKU for a given guild or user. Discord will act as though that user or guild has entitlement to your premium offering.
 // After creating a test entitlement, you'll need to reload your Discord client. After doing so, you'll see that your server or user now has premium access.
-pub fn (c Client) create_test_entitlement(application_id Snowflake, params CreateTestEntitlementParams) !Entitlement {
-	return Entitlement.parse(json2.raw_decode(c.request(.post, '/applications/${urllib.path_escape(application_id.str())}/entitlements',
+pub fn (rest &REST) create_test_entitlement(application_id Snowflake, params CreateTestEntitlementParams) !Entitlement {
+	return Entitlement.parse(json2.raw_decode(rest.request(.post, '/applications/${urllib.path_escape(application_id.str())}/entitlements',
 		json: params.build()
 	)!.body)!)!
 }
 
 // Deletes a currently-active test entitlement. Discord will act as though that user or guild no longer has entitlement to your premium offering.
-pub fn (c Client) delete_test_entitlement(application_id Snowflake, entitlement_id Snowflake) ! {
-	c.request(.delete, '/applications/${urllib.path_escape(application_id.str())}/entitlements/${urllib.path_escape(entitlement_id.str())}')!
+pub fn (rest &REST) delete_test_entitlement(application_id Snowflake, entitlement_id Snowflake) ! {
+	rest.request(.delete, '/applications/${urllib.path_escape(application_id.str())}/entitlements/${urllib.path_escape(entitlement_id.str())}')!
 }

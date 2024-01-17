@@ -167,25 +167,15 @@ pub fn (params FetchInviteParams) build_query_values() urllib.Values {
 }
 
 // Returns an invite object for the given code.
-pub fn (c Client) fetch_invite(code string, params FetchInviteParams) !Invite {
-	mut query_params := urllib.new_values()
-	if with_counts := params.with_counts {
-		query_params.add('with_counts', with_counts.str())
-	}
-	if with_expiration := params.with_expiration {
-		query_params.add('with_expiration', with_expiration.str())
-	}
-	if guild_scheduled_event_id := params.guild_scheduled_event_id {
-		query_params.add('guild_scheduled_event_id', guild_scheduled_event_id.str())
-	}
-	return Invite.parse(c.request(.get, '/invites/${urllib.path_escape(code)}',
+pub fn (rest &REST) fetch_invite(code string, params FetchInviteParams) !Invite {
+	return Invite.parse(rest.request(.get, '/invites/${urllib.path_escape(code)}',
 		query_params: params.build_query_values()
 	)!.body)!
 }
 
 // Delete an invite. Requires the `.manage_channels` permission on the channel this invite belongs to, or `.manage_guild` to remove any invite across the guild. Returns an [`Invite`](#Invite) object on success. Fires an Invite Delete Gateway event.
-pub fn (c Client) delete_invite(code string, params ReasonParam) !Invite {
-	return Invite.parse(c.request(.delete, '/invites/${urllib.path_escape(code)}',
+pub fn (rest &REST) delete_invite(code string, params ReasonParam) !Invite {
+	return Invite.parse(rest.request(.delete, '/invites/${urllib.path_escape(code)}',
 		reason: params.reason
 	)!.body)!
 }

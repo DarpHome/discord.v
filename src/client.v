@@ -20,8 +20,8 @@ pub interface HTTPClient {
 	perform(http.Request) !http.Response
 }
 
-@[heap]
-pub struct Client {
+//@[heap]
+pub struct Client1 {
 pub:
 	token string
 
@@ -33,27 +33,36 @@ pub mut:
 	user_data map[string]voidptr
 }
 
-@[params]
-pub struct ClientConfig {
+pub struct REST {
 pub:
-	debug      bool
+	token string
+	base_url   string = 'https://discord.com/api/v10'
+	user_agent string = discord.default_user_agent
+	http       ?HTTPClient
+}
+
+@[params]
+pub struct RESTConfig {
+pub:
+	base_url   string = 'https://discord.com/api/v10'
 	http       ?HTTPClient
 	user_agent string = discord.default_user_agent
 }
 
-fn (config ClientConfig) get_level() log.Level {
-	return if config.debug {
-		.debug
-	} else {
-		.info
+pub fn new_rest(token string, config RESTConfig) REST {
+	return REST{
+		token: token
+		http: config.http
+		user_agent: config.user_agent
 	}
 }
 
 @[params]
 pub struct BotConfig {
-	ClientConfig
+	RESTConfig
 pub:
 	cache           Cache
+	debug           bool
 	intents         GatewayIntents
 	properties      Properties
 	large_threshold ?int
@@ -63,6 +72,14 @@ pub:
 	write_timeout   ?time.Duration
 }
 
+fn (config BotConfig) get_level() log.Level {
+	return if config.debug {
+		.debug
+	} else {
+		.info
+	}
+}
+
 // `bot` creates a new [GatewayClient] that can be used to listen events.
 // Use `launch` to connect to gateway.
 // note: token should not contain `Bot` prefix
@@ -70,42 +87,28 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 	return GatewayClient{
 		token: 'Bot ${token}'
 		cache: config.cache
-		http: config.http
 		intents: int(config.intents)
-		properties: config.properties
 		large_threshold: config.large_threshold
-		presence: config.presence
 		logger: log.Log{
 			level: config.get_level()
 			output_label: 'discord.v'
 		}
+		presence: config.presence
+		properties: config.properties
 		read_timeout: config.read_timeout
-		settings: config.settings
-		user_agent: config.user_agent
+		rest: new_rest(token, config.RESTConfig)
 		write_timeout: config.write_timeout
 	}
 }
 
-pub fn make_client(token string, config ClientConfig) Client {
-	return Client{
-		token: token
-		http: config.http
-		logger: log.Log{
-			level: config.get_level()
-			output_label: 'discord.v'
-		}
-		user_agent: config.user_agent
-	}
-}
-
-// `bearer` accepts access token and returns Client that can be used to fetch user data
+// `bearer` accepts access token and returns [REST](#REST) that can be used to make requests
 // note: token should not contain `Bearer` prefix
-pub fn bearer(token string, config ClientConfig) Client {
-	return make_client('Bearer ${token}', config)
+pub fn bearer(token string, config RESTConfig) REST {
+	return new_rest('Bearer ${token}', config)
 }
 
-// `oauth2_app` accepts client ID and secret and returns Client with Basic token
-pub fn oauth2_app(client_id Snowflake, client_secret string, config ClientConfig) Client {
-	return make_client('Basic ' + base64.encode_str('${client_id.build()}:${client_secret}'),
+// `oauth2_app` accepts client ID and secret and returns [REST](#REST) with Basic token
+pub fn oauth2_app(client_id Snowflake, client_secret string, config RESTConfig) REST {
+	return new_rest('Basic ' + base64.encode_str('${client_id.build()}:${client_secret}'),
 		config)
 }

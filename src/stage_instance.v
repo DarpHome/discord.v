@@ -82,16 +82,16 @@ pub fn (params CreateStageInstanceParams) build() json2.Any {
 
 // Creates a new Stage instance associated to a Stage channel. Returns that [Stage instance](#StageInstance). Fires a Stage Instance Create Gateway event.
 // Requires the user to be a moderator of the Stage channel.
-pub fn (c Client) create_stage_instance(params CreateStageInstanceParams) !StageInstance {
-	return StageInstance.parse(json2.raw_decode(c.request(.post, '/stage-instances',
+pub fn (rest &REST) create_stage_instance(params CreateStageInstanceParams) !StageInstance {
+	return StageInstance.parse(json2.raw_decode(rest.request(.post, '/stage-instances',
 		json: params.build()
 		reason: params.reason
 	)!.body)!)!
 }
 
 // Gets the stage instance associated with the Stage channel, if it exists.
-pub fn (c Client) fetch_stage_instance(channel_id Snowflake) !StageInstance {
-	return StageInstance.parse(json2.raw_decode(c.request(.get, '/stage-instances/${urllib.path_escape(channel_id.str())}')!.body)!)!
+pub fn (rest &REST) fetch_stage_instance(channel_id Snowflake) !StageInstance {
+	return StageInstance.parse(json2.raw_decode(rest.request(.get, '/stage-instances/${urllib.path_escape(channel_id.str())}')!.body)!)!
 }
 
 @[params]
@@ -117,8 +117,8 @@ pub fn (params EditStageInstanceParams) build() json2.Any {
 
 // Updates fields of an existing Stage instance. Returns the updated [Stage instance](#StageInstance). Fires a Stage Instance Update Gateway event.
 // Requires the user to be a moderator of the Stage channel.
-pub fn (c Client) edit_stage_instance(channel_id Snowflake, params EditStageInstanceParams) !StageInstance {
-	return StageInstance.parse(json2.raw_decode(c.request(.patch, '/stage-instances/${urllib.path_escape(channel_id.str())}',
+pub fn (rest &REST) edit_stage_instance(channel_id Snowflake, params EditStageInstanceParams) !StageInstance {
+	return StageInstance.parse(json2.raw_decode(rest.request(.patch, '/stage-instances/${urllib.path_escape(channel_id.str())}',
 		json: params.build()
 		reason: params.reason
 	)!.body)!)!
@@ -126,8 +126,8 @@ pub fn (c Client) edit_stage_instance(channel_id Snowflake, params EditStageInst
 
 // Deletes the Stage instance. Returns `204 No Content`. Fires a Stage Instance Delete Gateway event.
 // Requires the user to be a moderator of the Stage channel.
-pub fn (c Client) delete_stage_instance(channel_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/stage-instances/${urllib.path_escape(channel_id.str())}',
+pub fn (rest &REST) delete_stage_instance(channel_id Snowflake, params ReasonParam) ! {
+	rest.request(.delete, '/stage-instances/${urllib.path_escape(channel_id.str())}',
 		reason: params.reason
 	)!
 }

@@ -197,16 +197,16 @@ pub fn Reaction.parse(j json2.Any) !Reaction {
 }
 
 // Returns a list of [emoji](#Emoji) objects for the given guild. Includes user fields if the bot has the `.create_guild_expressions` or `.manage_guild_expressions` permission.
-pub fn (c Client) list_guild_emojis(guild_id Snowflake) ![]Emoji {
-	return maybe_map(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/emojis')!.body)! as []json2.Any,
+pub fn (rest &REST) list_guild_emojis(guild_id Snowflake) ![]Emoji {
+	return maybe_map(json2.raw_decode(rest.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/emojis')!.body)! as []json2.Any,
 		fn (j json2.Any) !Emoji {
 		return Emoji.parse(j)!
 	})!
 }
 
 // Returns an [emoji](#Emoji) object for the given guild and emoji IDs. Includes the user field if the bot has the `.manage_guild_expressions` permission, or if the bot created the emoji and has the the `.create_guild_expressions` permission.
-pub fn (c Client) fetch_guild_emoji(guild_id Snowflake, emoji_id Snowflake) !Emoji {
-	return Emoji.parse(json2.raw_decode(c.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}')!.body)!)!
+pub fn (rest &REST) fetch_guild_emoji(guild_id Snowflake, emoji_id Snowflake) !Emoji {
+	return Emoji.parse(json2.raw_decode(rest.request(.get, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}')!.body)!)!
 }
 
 @[params]
@@ -233,8 +233,8 @@ pub fn (params CreateGuildEmojiParams) build() json2.Any {
 }
 
 // Create a new emoji for the guild. Requires the `.create_guild_expressions` permission. Returns the new [emoji](#Emoji) object on success. Fires a Guild Emojis Update Gateway event.
-pub fn (c Client) create_guild_emoji(guild_id Snowflake, params CreateGuildEmojiParams) !Emoji {
-	return Emoji.parse(json2.raw_decode(c.request(.post, '/guilds/${urllib.path_escape(guild_id.str())}/emojis',
+pub fn (rest &REST) create_guild_emoji(guild_id Snowflake, params CreateGuildEmojiParams) !Emoji {
+	return Emoji.parse(json2.raw_decode(rest.request(.post, '/guilds/${urllib.path_escape(guild_id.str())}/emojis',
 		json: params.build()
 		reason: params.reason
 	)!.body)!)!
@@ -266,16 +266,16 @@ pub fn (params EditGuildEmojiParams) build() json2.Any {
 }
 
 // Modify the given emoji. For emojis created by the current user, requires either the `.create_guild_expressions` or `.manage_guild_expressions` permission. For other emojis, requires the `.manage_guild_expressions` permission. Returns the updated [emoji](#Emoji) object on success. Fires a Guild Emojis Update Gateway event.
-pub fn (c Client) edit_guild_emoji(guild_id Snowflake, emoji_id Snowflake, params EditGuildEmojiParams) !Emoji {
-	return Emoji.parse(json2.raw_decode(c.request(.patch, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}',
+pub fn (rest &REST) edit_guild_emoji(guild_id Snowflake, emoji_id Snowflake, params EditGuildEmojiParams) !Emoji {
+	return Emoji.parse(json2.raw_decode(rest.request(.patch, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}',
 		json: params.build()
 		reason: params.reason
 	)!.body)!)!
 }
 
 // Delete the given emoji. For emojis created by the current user, requires either the `.create_guild_expressions` or `.manage_guild_expressions` permission. For other emojis, requires the `.manage_guild_expressions` permission. Returns 204 No Content on success. Fires a Guild Emojis Update Gateway event.
-pub fn (c Client) delete_guild_emoji(guild_id Snowflake, emoji_id Snowflake, params ReasonParam) ! {
-	c.request(.delete, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}',
+pub fn (rest &REST) delete_guild_emoji(guild_id Snowflake, emoji_id Snowflake, params ReasonParam) ! {
+	rest.request(.delete, '/guilds/${urllib.path_escape(guild_id.str())}/emojis/${urllib.path_escape(emoji_id.str())}',
 		reason: params.reason
 	)!
 }

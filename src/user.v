@@ -219,13 +219,13 @@ pub fn User.parse(j json2.Any) !User {
 }
 
 // Returns the user object of the requester's account. For OAuth2, this requires the `identify` scope, which will return the object without an email, and optionally the `email` scope, which returns the object _with_ an email.
-pub fn (c Client) fetch_my_user() !User {
-	return User.parse(json2.raw_decode(c.request(.get, '/users/@me')!.body)!)!
+pub fn (rest &REST) fetch_my_user() !User {
+	return User.parse(json2.raw_decode(rest.request(.get, '/users/@me')!.body)!)!
 }
 
 // Returns a [user](#User) object for a given user ID.
-pub fn (c Client) fetch_user(user_id Snowflake) !User {
-	return User.parse(json2.raw_decode(c.request(.get, '/users/${urllib.path_escape(user_id.str())}')!.body)!)!
+pub fn (rest &REST) fetch_user(user_id Snowflake) !User {
+	return User.parse(json2.raw_decode(rest.request(.get, '/users/${urllib.path_escape(user_id.str())}')!.body)!)!
 }
 
 @[params]
@@ -253,24 +253,24 @@ pub fn (params EditMyUserParams) build() json2.Any {
 }
 
 // Modify the requester's user account settings. Returns a user object on success. Fires a User Update Gateway event.
-pub fn (c Client) edit_my_user(params EditMyUserParams) !User {
-	return User.parse(json2.raw_decode(c.request(.patch, '/users/@me', json: params.build())!.body)!)!
+pub fn (rest &REST) edit_my_user(params EditMyUserParams) !User {
+	return User.parse(json2.raw_decode(rest.request(.patch, '/users/@me', json: params.build())!.body)!)!
 }
 
 // Returns a [guild member](#GuildMember) object for the current user. Requires the `guilds.members.read` OAuth2 scope.
-pub fn (c Client) fetch_my_guild_member(guild_id Snowflake) !GuildMember {
-	return GuildMember.parse(c.request(.get, '/users/@me/guilds/${urllib.path_escape(guild_id.str())}/member')!.body)!
+pub fn (rest &REST) fetch_my_guild_member(guild_id Snowflake) !GuildMember {
+	return GuildMember.parse(rest.request(.get, '/users/@me/guilds/${urllib.path_escape(guild_id.str())}/member')!.body)!
 }
 
 // Leave a guild. Fires a Guild Delete Gateway event and a Guild Member Remove Gateway event.
-pub fn (c Client) leave_guild(guild_id Snowflake) ! {
-	c.request(.delete, '/users/@me/guilds/${urllib.path_escape(guild_id.str())}')!
+pub fn (rest &REST) leave_guild(guild_id Snowflake) ! {
+	rest.request(.delete, '/users/@me/guilds/${urllib.path_escape(guild_id.str())}')!
 }
 
 // Create a new DM channel with a user. Returns a [DM channel](#Channel) object (if one already exists, it will be returned instead).
 // > You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action. If you open a significant amount of DMs too quickly, your bot may be rate limited or blocked from opening new ones.
-pub fn (c Client) create_dm(recipient_id Snowflake) !Channel {
-	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels',
+pub fn (rest &REST) create_dm(recipient_id Snowflake) !Channel {
+	return Channel.parse(json2.raw_decode(rest.request(.post, '/users/@me/channels',
 		json: {
 			'recipient_id': recipient_id.build()
 		}
@@ -297,8 +297,8 @@ pub fn (params CreateGroupDMParams) build() json2.Any {
 }
 
 // Create a new group DM channel with multiple users. Returns a [DM channel](#Channel) object. This endpoint was intended to be used with the now-deprecated GameBridge SDK. Fires a Channel Create Gateway event.
-pub fn (c Client) create_group_dm(params CreateGroupDMParams) !Channel {
-	return Channel.parse(json2.raw_decode(c.request(.post, '/users/@me/channels',
+pub fn (rest &REST) create_group_dm(params CreateGroupDMParams) !Channel {
+	return Channel.parse(json2.raw_decode(rest.request(.post, '/users/@me/channels',
 		json: params.build()
 	)!.body)!)!
 }
@@ -516,8 +516,8 @@ pub fn Connection.parse(j json2.Any) !Connection {
 }
 
 // Returns a list of [connection](#Connection) objects. Requires the `connections` OAuth2 scope.
-pub fn (c Client) fetch_my_connections() ![]Connection {
-	return maybe_map(json2.raw_decode(c.request(.get, '/users/@me/connections')!.body)! as []json2.Any,
+pub fn (rest &REST) fetch_my_connections() ![]Connection {
+	return maybe_map(json2.raw_decode(rest.request(.get, '/users/@me/connections')!.body)! as []json2.Any,
 		fn (j json2.Any) !Connection {
 		return Connection.parse(j)!
 	})!
@@ -562,8 +562,8 @@ pub fn ApplicationRoleConnection.parse(j json2.Any) !ApplicationRoleConnection {
 }
 
 // Returns the [application role connection](#ApplicationRoleConnection) for the user. Requires an OAuth2 access token with `role_connections.write` scope for the application specified in the path.
-pub fn (c Client) fetch_my_application_role_connection(application_id Snowflake) !ApplicationRoleConnection {
-	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.get, '/users/@me/applications/${urllib.path_escape(application_id.str())}/role-connection')!.body)!)!
+pub fn (rest &REST) fetch_my_application_role_connection(application_id Snowflake) !ApplicationRoleConnection {
+	return ApplicationRoleConnection.parse(json2.raw_decode(rest.request(.get, '/users/@me/applications/${urllib.path_escape(application_id.str())}/role-connection')!.body)!)!
 }
 
 @[params]
@@ -594,8 +594,8 @@ pub fn (params UpdateMyApplicationRoleConnectionParams) build() json2.Any {
 }
 
 // Updates and returns the [application role connection](#ApplicationRoleConnection) for the user. Requires an OAuth2 access token with `role_connections.write` scope for the application specified in the path.
-pub fn (c Client) update_my_application_role_connection(application_id Snowflake, params UpdateMyApplicationRoleConnectionParams) !ApplicationRoleConnection {
-	return ApplicationRoleConnection.parse(json2.raw_decode(c.request(.put, '/users/@me/applications/${urllib.path_escape(application_id.str())}/role-connection',
+pub fn (rest &REST) update_my_application_role_connection(application_id Snowflake, params UpdateMyApplicationRoleConnectionParams) !ApplicationRoleConnection {
+	return ApplicationRoleConnection.parse(json2.raw_decode(rest.request(.put, '/users/@me/applications/${urllib.path_escape(application_id.str())}/role-connection',
 		json: params.build()
 	)!.body)!)!
 }

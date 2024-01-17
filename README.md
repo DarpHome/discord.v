@@ -53,7 +53,7 @@ fn main() {
 		if event.message.content != '!ping' {
 			return
 		}
-		event.creator.create_message(event.message.channel_id, content: 'Pong')!
+		event.creator.rest.create_message(event.message.channel_id, content: 'Pong')!
 	})
 	c.launch()!
 }

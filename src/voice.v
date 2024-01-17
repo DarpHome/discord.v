@@ -107,14 +107,14 @@ pub fn VoiceRegion.parse(j json2.Any) !VoiceRegion {
 			}
 		}
 		else {
-			return error('expected voice region to be object, got ${j.type_name()}')
+			return error('expected VoiceRegion to be object, got ${j.type_name()}')
 		}
 	}
 }
 
 // Returns an array of voice region objects that can be used when setting a voice or stage channel's `rtc_region`.
-pub fn (c Client) list_voice_regions() ![]VoiceRegion {
-	return maybe_map(json2.raw_decode(c.request(.get, '/voice/regions')!.body)! as []json2.Any,
+pub fn (rest &REST) list_voice_regions() ![]VoiceRegion {
+	return maybe_map(json2.raw_decode(rest.request(.get, '/voice/regions')!.body)! as []json2.Any,
 		fn (j json2.Any) !VoiceRegion {
 		return VoiceRegion.parse(j)!
 	})!
