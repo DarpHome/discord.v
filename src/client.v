@@ -83,7 +83,7 @@ pub fn bot(token string, config BotConfig) GatewayClient {
 		presence: config.presence
 		properties: config.properties
 		read_timeout: config.read_timeout
-		rest: new_rest(token, config.RESTConfig)
+		rest: new_rest('Bot ${token}', config.RESTConfig)
 		write_timeout: config.write_timeout
 	}
 }

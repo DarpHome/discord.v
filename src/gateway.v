@@ -76,10 +76,11 @@ mut:
 	session_id         string
 	write_timeout      ?time.Duration
 pub mut:
-	user   User
-	cache  Cache
-	events Events
-	ws     &websocket.Client = unsafe { nil }
+	user     User
+	cache    Cache
+	events   Events
+	userdata map[string]voidptr
+	ws       &websocket.Client = unsafe { nil }
 }
 
 fn (mut c GatewayClient) recv() !WSMessage {
