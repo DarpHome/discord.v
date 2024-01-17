@@ -643,7 +643,8 @@ pub fn (rest &REST) fetch_guild_application_command_permissions(application_id S
 
 // Fetches permissions for a specific command for your application in a guild. Returns a guild application command permissions object.
 pub fn (rest &REST) fetch_application_command_permissions(application_id Snowflake, guild_id Snowflake, command_id Snowflake) !GuildApplicationCommandPermissions {
-	return GuildApplicationCommandPermissions.parse(json2.raw_decode(rest.request(.get, '/applications/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}/permissions')!.body)!)!
+	return GuildApplicationCommandPermissions.parse(json2.raw_decode(rest.request(.get,
+		'/applications/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}/permissions')!.body)!)!
 }
 
 @[params]
@@ -663,7 +664,8 @@ pub fn (params EditApplicationCommandPermissionsParams) build() json2.Any {
 //
 // You can add up to 100 permission overwrites for a command.
 pub fn (rest &REST) edit_application_command_permissions(application_id Snowflake, guild_id Snowflake, command_id Snowflake, params EditApplicationCommandPermissionsParams) !GuildApplicationCommandPermissions {
-	return GuildApplicationCommandPermissions.parse(json2.raw_decode(rest.request(.put, '/applications/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}/permissions',
+	return GuildApplicationCommandPermissions.parse(json2.raw_decode(rest.request(.put,
+		'/applications/${urllib.path_escape(application_id.str())}/guilds/${urllib.path_escape(guild_id.str())}/commands/${urllib.path_escape(command_id.str())}/permissions',
 		json: params.build()
 	)!.body)!)!
 }

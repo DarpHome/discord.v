@@ -20,22 +20,9 @@ pub interface HTTPClient {
 	perform(http.Request) !http.Response
 }
 
-//@[heap]
-pub struct Client1 {
-pub:
-	token string
-
-	base_url   string = 'https://discord.com/api/v10'
-	user_agent string = discord.default_user_agent
-	http       ?HTTPClient
-pub mut:
-	logger    log.Logger
-	user_data map[string]voidptr
-}
-
 pub struct REST {
 pub:
-	token string
+	token      string
 	base_url   string = 'https://discord.com/api/v10'
 	user_agent string = discord.default_user_agent
 	http       ?HTTPClient
