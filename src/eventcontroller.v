@@ -5,7 +5,7 @@ import time
 pub type EventListener[T] = fn (T) !
 
 @[heap]
-struct Chan[T] {
+struct InternalChan[T] {
 	c chan T
 }
 
@@ -13,7 +13,7 @@ pub type Check[T] = fn (T) bool
 
 struct EventWaiter[T] {
 	check ?Check[T]
-	c     Chan[T]
+	c     InternalChan[T]
 }
 
 /*
@@ -44,7 +44,7 @@ pub:
 
 // `emit` broadcasts passed object to all listeners
 pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
-	for i, w in ec.wait_fors {
+	for _, w in ec.wait_fors {
 		mut b := false
 		if w.check != none {
 			c := w.check or { panic('corrupted') }
@@ -54,7 +54,7 @@ pub fn (mut ec EventController[T]) emit(e T, options EmitOptions) {
 		}
 		if b {
 			w.c.c <- e
-			ec.wait_fors.delete(i)
+			// ec.wait_fors.delete(i)
 			return
 		}
 	}
@@ -105,24 +105,36 @@ pub:
 	timeout ?time.Duration
 }
 
-pub struct Awaitable[T] {
+pub struct EventChannel[T] {
 	id      int
 	timeout ?time.Duration
 mut:
 	controller &EventController[T]
 }
 
-// `do` waits for event and returns it.
-// After it returned event, it will return none
+// Closes an event channel
+pub fn (mut a EventChannel[T]) close() {
+	if a.controller == unsafe { nil } {
+		return
+	}
+	a.controller.wait_fors.delete(a.id)
+	a.controller = unsafe { nil }
+}
+
+// `receive` waits for event and returns it.
+// After it returned event, you should call `close()` on it to release resources.
 // If timeout is exceeded, it returns none
-pub fn (mut a Awaitable[T]) do() ?T {
+pub fn (mut a EventChannel[T]) receive() ?T {
+	if a.controller == unsafe { nil } {
+		return none
+	}
 	if w := a.controller.wait_fors[a.id] {
-		defer {
-			// unsafe {
-			//	w.free()
-			//}
-			a.controller.wait_fors.delete(a.id)
-		}
+		// defer {
+		// unsafe {
+		//	w.free()
+		//}
+		// a.controller.wait_fors.delete(a.id)
+		// }
 		if timeout := a.timeout {
 			select {
 				r := <-w.c.c {
@@ -138,15 +150,15 @@ pub fn (mut a Awaitable[T]) do() ?T {
 	return none
 }
 
-// `wait` returns Awaitable that can be used to get event
+// `wait` returns EventChannel that can be used to receive events
 // > ! Do not use that directly in events, please take a reference using `mut controller := &events.creator.events.on_x`
-pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) Awaitable[T] {
+pub fn (mut ec EventController[T]) wait(params EventWaitParams[T]) EventChannel[T] {
 	id := ec.generate_id()
 	ec.wait_fors[id] = EventWaiter[T]{
 		check: params.check
-		c: Chan[T]{}
+		c: InternalChan[T]{}
 	}
-	return Awaitable[T]{
+	return EventChannel[T]{
 		id: id
 		timeout: params.timeout
 		controller: unsafe { &mut ec }

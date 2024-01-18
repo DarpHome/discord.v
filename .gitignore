@@ -24,7 +24,8 @@ bin/
 *.js
 
 token.txt
-test.v
+/test.v
+/test*.v
 *.def
 /*.c
 /*.db
