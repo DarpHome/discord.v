@@ -120,6 +120,10 @@ pub enum AuditLogEvent {
 	creator_monetization_request_created        = 150
 	// Creator monetization terms were accepted
 	creator_monetization_terms_accepted
+	// A voice channel status was updated by a user
+	voice_channel_status_update                 = 192
+	// A voice channel status was deleted by a user
+	voice_channel_status_delete
 }
 
 pub struct AuditLogChange {
@@ -181,6 +185,8 @@ pub:
 	typ ?string
 	// The type of integration which performed the action
 	integration_type ?string
+	// The new voice channel status
+	status ?string
 }
 
 pub fn AuditEntryInfo.parse(j json2.Any) !AuditEntryInfo {
@@ -243,6 +249,11 @@ pub fn AuditEntryInfo.parse(j json2.Any) !AuditEntryInfo {
 					none
 				}
 				integration_type: if s := j['integration_type'] {
+					s as string
+				} else {
+					none
+				}
+				status: if s := j['status'] {
 					s as string
 				} else {
 					none
