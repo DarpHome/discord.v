@@ -1,10 +1,11 @@
 module discord
 
-import x.json2
+import io
 import log
 import math
 import net.websocket
 import time
+import x.json2
 
 @[flag]
 pub enum GatewayIntents {
@@ -394,6 +395,10 @@ pub fn (mut c GatewayClient) run() ! {
 		c.ws.listen() or {
 			$if trace ? {
 				eprintln('listen failed: ${err}; with code ${err.code()}; message: ${err.msg()}')
+			}
+			if err is io.Eof {
+				connected = false
+				continue
 			}
 			if err.code() !in [4, -76, -29184] && !err.msg().contains('SSL') {
 				$if trace ? {
