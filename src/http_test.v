@@ -4,10 +4,6 @@ import net.http
 import os
 import time
 
-struct InterfacePlaceholder {
-	v voidptr @[export: '_object']
-}
-
 fn cast_interface[T, U](u U) T {
 	$if U is $interface {
 		if u is T {
