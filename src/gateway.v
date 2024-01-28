@@ -394,13 +394,12 @@ pub fn (mut c GatewayClient) run() ! {
 				n++
 				continue
 			} else {
-				c.close_event <- unsafe { nil }
 				c.logger.error('Unable to connect to discord 3 times (${err.code()}); ${err}')
 				return err
 			}
 		}
-		n = 0
 		connected = true
+		n = 0
 		$if trace ? {
 			eprintln('calling listen')
 		}
@@ -428,6 +427,7 @@ pub fn (mut c GatewayClient) run() ! {
 			c.sequence = none
 			continue
 		}
+		c.close_event <- unsafe { nil }
 		$if trace ? {
 			eprintln('listen returned')
 		}
@@ -443,7 +443,6 @@ pub fn (mut c GatewayClient) run() ! {
 			}
 		}
 		c.logger.error('Recieved close code ${close_code}: ${cc.message}')
-		c.close_event <- unsafe { nil }
 		if !cc.reconnect {
 			return error(cc.message)
 		}
