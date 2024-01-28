@@ -414,7 +414,6 @@ pub fn (mut c GatewayClient) run() ! {
 		// blocks:
 		c.ws.listen() or {
 			eprintln('|8|')
-			c.close_event <- unsafe { nil }
 			eprintln('|9|')
 			$if trace ? {
 				eprintln('listen failed: ${err}; with code ${err.code()}; message: ${err.msg()}')
