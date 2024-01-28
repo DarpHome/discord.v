@@ -199,6 +199,7 @@ fn (mut gc GatewayClient) hello() ! {
 				'browser': props.browser
 				'device':  props.device
 			})
+			'shard':      [json2.Any(0), 1]
 		}
 		if large_threshold := gc.large_threshold {
 			data['large_threshold'] = large_threshold

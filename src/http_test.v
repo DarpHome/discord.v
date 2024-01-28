@@ -421,6 +421,24 @@ fn test_webhooks() {
 	assert message2.id == message.id
 	rest.delete_webhook_message(webhook.id, token, message.id) or { panic(err) }
 	rest.delete_webhook_with_token(webhook.id, token) or { panic(err) }
+
+	webhook2 := rest.create_webhook(channel_id, name: 'Test webhook 2') or { panic(err) }
+	if name := webhook2.name {
+		assert name == 'Test webhook 2'
+	} else {
+		assert false
+	}
+	token2 := webhook2.token or { panic(err) }
+	assert token2 != ''
+
+	message3 := webhook2.execute(wait: true, content: '[2] Test webhook message') or { panic(err) }
+	assert message3 != unsafe { nil }
+	message4 := rest.edit_webhook_message(webhook2.id, token2, message3.id,
+		content: '[2] New webhook content'
+	) or { panic(err) }
+	assert message4.id == message3.id
+	rest.delete_webhook_message(webhook2.id, token2, message3.id) or { panic(err) }
+	webhook2.delete() or { panic(err) }
 }
 
 fn test_voice() {

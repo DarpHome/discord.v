@@ -31,3 +31,4 @@ token.txt
 /*.db
 /test*.py
 /test.py
+/test*.vsh
