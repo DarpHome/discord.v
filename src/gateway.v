@@ -76,6 +76,7 @@ mut:
 	sequence           ?int
 	session_id         string
 	write_timeout      ?time.Duration
+	close_event        chan voidptr
 pub mut:
 	user     User
 	cache    Cache
@@ -140,9 +141,15 @@ fn (mut c GatewayClient) raw_dispatch(name string, data json2.Any) ! {
 fn (mut c GatewayClient) spawn_heart(interval i64) {
 	spawn fn (mut client GatewayClient, heartbeat_interval time.Duration) {
 		client.logger.info('Heart spawned with interval: ${heartbeat_interval}')
-		for client.ready {
+		for {
 			client.logger.debug('Sleeping')
-			time.sleep(heartbeat_interval)
+			select {
+				_ := <-client.close_event {
+					client.logger.info('Heart closed')
+					return
+				}
+				heartbeat_interval.nanoseconds() {}
+			}
 			s := client.last_heartbeat_res
 			if rq := client.last_heartbeat_req {
 				rs := s or { time.unix(0) }
@@ -220,9 +227,9 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 		$compile_warn('Websocket connection with Discord may die at some events with vschannel. Please pass `-d no_vschannel` if you want it work correctly.')
 	} */
 	ws.on_close_ref(fn (mut _ websocket.Client, code int, reason string, mut client GatewayClient) ! {
+		client.close_event <- unsafe { nil }
 		if reason != 'closed by client' {
 			client.close_code = code
-
 			client.logger.error('Websocket closed with ${code} ${reason}')
 		}
 	}, &mut c)
@@ -267,6 +274,7 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 				return
 			}
 			.reconnect {
+				client.close_event <- unsafe { nil }
 				client.ws.close(1000, 'Discord restarting')!
 			}
 			.invalid_session {
@@ -274,7 +282,9 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 					// not resumable
 					client.resume_gateway_url = ''
 					client.session_id = ''
+					client.sequence = none
 				}
+				client.close_event <- unsafe { nil }
 				client.ws.close(1000, 'Invalid session')!
 			}
 			else {}
@@ -371,6 +381,7 @@ pub fn (mut c GatewayClient) run() ! {
 	mut n := 0
 	for {
 		if connected {
+			c.close_event <- unsafe { nil }
 			c.ws.close(1000, 'reconnect') or {}
 		}
 		c.ws.connect() or {
@@ -383,6 +394,7 @@ pub fn (mut c GatewayClient) run() ! {
 				n++
 				continue
 			} else {
+				c.close_event <- unsafe { nil }
 				c.logger.error('Unable to connect to discord 3 times (${err.code()}); ${err}')
 				return err
 			}
@@ -394,6 +406,7 @@ pub fn (mut c GatewayClient) run() ! {
 		}
 		// blocks:
 		c.ws.listen() or {
+			c.close_event <- unsafe { nil }
 			$if trace ? {
 				eprintln('listen failed: ${err}; with code ${err.code()}; message: ${err.msg()}')
 			}
@@ -430,7 +443,7 @@ pub fn (mut c GatewayClient) run() ! {
 			}
 		}
 		c.logger.error('Recieved close code ${close_code}: ${cc.message}')
-		c.ready = false
+		c.close_event <- unsafe { nil }
 		if !cc.reconnect {
 			return error(cc.message)
 		}
