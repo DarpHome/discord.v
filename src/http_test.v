@@ -11,10 +11,9 @@ struct InterfacePlaceholder {
 fn cast_interface[T, U](u U) T {
 	$if U is $interface {
 		if u is T {
-			// cannot use `u` directly due to cgen bug
-			return unsafe { *&T((&InterfacePlaceholder(voidptr(&u))).v) }
+			return u
 		} else {
-			panic('expected t to be ${typeof[T]().name}, got ${typeof[U]().name}')
+			panic('expected `u` to be ${typeof[T]().name}, got ${typeof[U]().name}')
 		}
 	} $else {
 		$compile_error('not an interface')
