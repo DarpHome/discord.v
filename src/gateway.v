@@ -380,26 +380,27 @@ pub fn (mut c GatewayClient) run() ! {
 	mut connected := false
 	mut n := 0
 	for {
+		eprintln('|0|')
 		if connected {
-			eprintln('1')
+			eprintln('|1|')
 			c.close_event <- unsafe { nil }
-			eprintln('2')
+			eprintln('|2|')
 			c.ws.close(1000, 'reconnect') or {}
-			eprintln('3')
+			eprintln('|3|')
 		}
-		eprintln('4')
+		eprintln('|4|')
 		c.ws.connect() or {
 			$if trace ? {
 				eprintln('c.ws.connect() failed: ${err}; with code ${err.code()}')
 			}
-			eprintln('5')
+			eprintln('|5|')
 			if n < 3 {
 				c.logger.info('Retrying reconnect in 3 seconds')
 				time.sleep(3 * time.second)
 				n++
 				continue
 			} else {
-				eprintln('6')
+				eprintln('|6|')
 				c.logger.error('Unable to connect to discord 3 times (${err.code()}); ${err}')
 				return err
 			}
@@ -409,82 +410,82 @@ pub fn (mut c GatewayClient) run() ! {
 		$if trace ? {
 			eprintln('calling listen')
 		}
-		eprintln('7')
+		eprintln('|7|')
 		// blocks:
 		c.ws.listen() or {
-			eprintln('8')
+			eprintln('|8|')
 			c.close_event <- unsafe { nil }
-			eprintln('9')
+			eprintln('|9|')
 			$if trace ? {
 				eprintln('listen failed: ${err}; with code ${err.code()}; message: ${err.msg()}')
 			}
 			if err is io.Eof {
-				eprintln('10')
+				eprintln('|10|')
 				connected = false
 				continue
 			}
-			eprintln('11')
+			eprintln('|11|')
 			if err.code() !in [4, -76, -29184] && !err.msg().contains('SSL') {
-				eprintln('12')
+				eprintln('|12|')
 				$if trace ? {
 					eprintln('returned error')
 				}
 				return err
 			}
-			eprintln('13')
+			eprintln('|13|')
 			// EINTR/SSL, should retry
 			time.sleep(5 * time.second)
-			eprintln('14')
+			eprintln('|14|')
 			c.ready = false
 			c.resume_gateway_url = ''
 			c.session_id = ''
 			c.sequence = none
 			continue
 		}
-		eprintln('15')
+		eprintln('|15|')
 		c.close_event <- unsafe { nil }
-		eprintln('16')
+		eprintln('|16|')
 		$if trace ? {
 			eprintln('listen returned')
 		}
-		eprintln('17')
+		eprintln('|17|')
 		close_code := c.close_code or { 0 }
-		eprintln('18')
+		eprintln('|18|')
 		if close_code == 0 {
-			eprintln('19')
+			eprintln('|19|')
 			connected = false
 			continue
 		}
-		eprintln('20')
+		eprintln('|20|')
 		cc := discord.gateway_close_code_table[close_code] or {
 			GatewayCloseCode{
 				message: 'Unknown websocket close code ${close_code}'
 				reconnect: false
 			}
 		}
-		eprintln('21')
+		eprintln('|21|')
 		c.logger.error('Recieved close code ${close_code}: ${cc.message}')
 		if !cc.reconnect {
-			eprintln('22')
+			eprintln('|22|')
 			return error(cc.message)
 		}
-		eprintln('23')
+		eprintln('|23|')
 		if c.resume_gateway_url != '' {
 			// resume
-			eprintln('24')
+			eprintln('|24|')
 			mut ws := websocket.new_client(c.resume_gateway_url.trim_right('/?') +
 				'?v=10&encoding=json', c.websocket_opts())!
 			c.ready = false
 			c.ws = ws
-			eprintln('25')
+			eprintln('|25|')
 			c.init_ws(mut ws)
-			eprintln('26')
+			eprintln('|26|')
 		} else {
-			eprintln('27')
+			eprintln('|27|')
 			c.init()!
-			eprintln('28')
+			eprintln('|28|')
 		}
-		eprintln('29')
+		eprintln('|29|')
 	}
 }
 
