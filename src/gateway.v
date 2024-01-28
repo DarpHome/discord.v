@@ -241,10 +241,8 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 			}
 			client.ready = true
 			client.hello()!
-			if client.session_id == '' {
-				client.logger.debug('Spawning heart')
-				client.spawn_heart(message.data.as_map()['heartbeat_interval']!.i64())
-			}
+			client.logger.debug('Spawning heart')
+			client.spawn_heart(message.data.as_map()['heartbeat_interval']!.i64())
 			return
 		}
 		match message.opcode {
@@ -436,9 +434,9 @@ pub fn (mut c GatewayClient) run() ! {
 			time.sleep(2 * time.second)
 			eprintln('|14|')
 			c.ready = false
-			// c.resume_gateway_url = ''
-			// c.session_id = ''
-			// c.sequence = none
+			c.resume_gateway_url = ''
+			c.session_id = ''
+			c.sequence = none
 			connected = false
 			continue
 		}
