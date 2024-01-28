@@ -433,12 +433,12 @@ pub fn (mut c GatewayClient) run() ! {
 			}
 			eprintln('|13|')
 			// EINTR/SSL, should retry
-			time.sleep(5 * time.second)
+			time.sleep(2 * time.second)
 			eprintln('|14|')
 			c.ready = false
-			c.resume_gateway_url = ''
-			c.session_id = ''
-			c.sequence = none
+			// c.resume_gateway_url = ''
+			// c.session_id = ''
+			// c.sequence = none
 			connected = false
 			continue
 		}
