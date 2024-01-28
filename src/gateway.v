@@ -439,6 +439,7 @@ pub fn (mut c GatewayClient) run() ! {
 			c.resume_gateway_url = ''
 			c.session_id = ''
 			c.sequence = none
+			connected = false
 			continue
 		}
 		eprintln('|15|')
