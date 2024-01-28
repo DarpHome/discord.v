@@ -384,6 +384,7 @@ pub fn (mut c GatewayClient) run() ! {
 			c.close_event <- unsafe { nil }
 			c.ws.close(1000, 'reconnect') or {}
 		}
+		$dbg
 		c.ws.connect() or {
 			$if trace ? {
 				eprintln('c.ws.connect() failed: ${err}; with code ${err.code()}')
