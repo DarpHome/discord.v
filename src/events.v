@@ -2282,7 +2282,7 @@ const events_table = EventsTable({
 pub fn (mut c GatewayClient) process_dispatch(event DispatchEvent) !bool {
 	f := discord.events_table[event.name] or { return false }
 	if c.settings.has(.dont_spawn_events) {
-		f(mut c, data, error_handler: error_handler)!
+		f(mut c, event.data, error_handler: c.error_logger())!
 	} else {
 		spawn fn (f fn (mut gc GatewayClient, data json2.Any, options EmitOptions) !, mut c GatewayClient, data json2.Any, error_handler fn (int, IError)) {
 			f(mut c, data, error_handler: error_handler) or {}
