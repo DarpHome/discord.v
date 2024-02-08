@@ -1932,11 +1932,11 @@ pub fn (rest &REST) edit_guild_role(guild_id Snowflake, role_id Snowflake, param
 // Modify a guild's MFA level. Requires guild ownership. Returns the updated level on success. Fires a Guild Update Gateway event.
 pub fn (rest &REST) edit_guild_mfa_level(guild_id Snowflake, level MFALevel, params ReasonParam) !MFALevel {
 	return unsafe {
-		MFALevel(json2.raw_decode(rest.request(.patch, '/guilds/${urllib.path_escape(guild_id.str())}/mfa',
+		MFALevel((json2.raw_decode(rest.request(.patch, '/guilds/${urllib.path_escape(guild_id.str())}/mfa',
 			json: {
 				'level': json2.Any(int(level))
 			}
-		)!.body)!.int())
+		)!.body)! as map[string]json2.Any)['level']!.int())
 	}
 }
 
