@@ -1414,7 +1414,7 @@ pub mut:
 	// sorting position of the channel
 	position ?int = sentinel_int
 	// syncs the permission overwrites with the new parent, if moving to a new category
-	lock_permissions ?bool = sentinel_bool
+	lock_permissions ?bool
 	// the new parent ID for the channel that is moved
 	parent_id ?Snowflake = sentinel_snowflake
 }
@@ -1431,11 +1431,7 @@ pub fn (params EditGuildChannelPositionsParams) build() json2.Any {
 		r['position'] = json2.null
 	}
 	if lock_permissions := params.lock_permissions {
-		if !is_sentinel(lock_permissions) {
-			r['lock_permissions'] = lock_permissions
-		}
-	} else {
-		r['lock_permissions'] = json2.null
+		r['lock_permissions'] = lock_permissions
 	}
 	if parent_id := params.parent_id {
 		if !is_sentinel(parent_id) {
@@ -1544,9 +1540,9 @@ pub mut:
 	// array of role ids the member is assigned
 	roles ?[]Snowflake = sentinel_snowflakes
 	// whether the user is muted in voice channels. Will throw a 400 error if the user is not in a voice channel
-	mute ?bool = sentinel_bool
+	mute ?bool
 	// whether the user is deafened in voice channels. Will throw a 400 error if the user is not in a voice channel
-	deaf ?bool = sentinel_bool
+	deaf ?bool
 	// id of channel to move user to (if they are connected to voice)
 	channel_id ?Snowflake = sentinel_snowflake
 	// when the user's timeout will expire and the user will be able to communicate in the guild again (up to 28 days in the future), set to `none` to remove timeout. Will throw a 403 error if the user has the `administrator` permission or is the owner of the guild
@@ -1572,18 +1568,10 @@ pub fn (params EditGuildMemberParams) build() json2.Any {
 		r['roles'] = json2.null
 	}
 	if mute := params.mute {
-		if !is_sentinel(mute) {
-			r['mute'] = mute
-		}
-	} else {
-		r['mute'] = json2.null
+		r['mute'] = mute
 	}
 	if deaf := params.deaf {
-		if !is_sentinel(deaf) {
-			r['deaf'] = deaf
-		}
-	} else {
-		r['deaf'] = json2.null
+		r['deaf'] = deaf
 	}
 	if channel_id := params.channel_id {
 		if !is_sentinel(channel_id) {
@@ -1878,13 +1866,13 @@ pub mut:
 	// RGB color value
 	color ?int = sentinel_int
 	// whether the role should be displayed separately in the sidebar
-	hoist ?bool = sentinel_bool
+	hoist ?bool
 	// the role's icon image (if the guild has the ROLE_ICONS feature)
 	icon ?Image = sentinel_image
 	// the role's unicode emoji as a standard emoji (if the guild has the ROLE_ICONS feature)
 	unicode_emoji ?string = sentinel_string
 	// whether the role should be mentionable
-	mentionable ?bool = sentinel_bool
+	mentionable ?bool
 }
 
 pub fn (params EditGuildRoleParams) build() json2.Any {
@@ -1911,11 +1899,7 @@ pub fn (params EditGuildRoleParams) build() json2.Any {
 		r['color'] = json2.null
 	}
 	if hoist := params.hoist {
-		if !is_sentinel(hoist) {
-			r['hoist'] = hoist
-		}
-	} else {
-		r['hoist'] = json2.null
+		r['hoist'] = hoist
 	}
 	if icon := params.icon {
 		if !is_sentinel(icon) {
@@ -1932,11 +1916,7 @@ pub fn (params EditGuildRoleParams) build() json2.Any {
 		r['unicode_emoji'] = json2.null
 	}
 	if mentionable := params.mentionable {
-		if !is_sentinel(mentionable) {
-			r['mentionable'] = mentionable
-		}
-	} else {
-		r['mentionable'] = json2.null
+		r['mentionable'] = mentionable
 	}
 	return r
 }

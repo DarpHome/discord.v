@@ -849,7 +849,7 @@ pub mut:
 	// 0-1024 character channel topic (0-4096 characters for GUILD_FORUM and GUILD_MEDIA channels)	
 	topic ?string = sentinel_string
 	// whether the channel is nsfw
-	nsfw ?bool = sentinel_bool
+	nsfw ?bool
 	// amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected
 	rate_limit_per_user ?time.Duration = sentinel_duration
 	// the bitrate (in bits) of the voice or stage channel; min 8000
@@ -905,11 +905,7 @@ pub fn (params EditGuildChannelParams) build() json2.Any {
 		r['topic'] = json2.null
 	}
 	if nsfw := params.nsfw {
-		if !is_sentinel(nsfw) {
-			r['nsfw'] = nsfw
-		}
-	} else {
-		r['nsfw'] = json2.null
+		r['nsfw'] = nsfw
 	}
 	if rate_limit_per_user := params.rate_limit_per_user {
 		if !is_sentinel(rate_limit_per_user) {
@@ -1519,7 +1515,7 @@ pub mut:
 	// id of the parent category for a channel
 	parent_id ?Snowflake = sentinel_snowflake
 	// whether the channel is nsfw
-	nsfw ?bool = sentinel_bool
+	nsfw ?bool
 	// channel voice region id of the voice or stage channel, automatic when set to null
 	rtc_region ?string = sentinel_string
 	// the camera video quality mode of the voice channel
@@ -1601,11 +1597,7 @@ pub fn (params CreateGuildChannelParams) build() json2.Any {
 		r['parent_id'] = json2.null
 	}
 	if nsfw := params.nsfw {
-		if !is_sentinel(nsfw) {
-			r['nsfw'] = nsfw
-		}
-	} else {
-		r['nsfw'] = json2.null
+		r['nsfw'] = nsfw
 	}
 	if rtc_region := params.rtc_region {
 		if !is_sentinel(rtc_region) {
