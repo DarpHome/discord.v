@@ -1312,6 +1312,8 @@ pub mut:
 	files ?[]File
 	// Message flags combined as a bitfield (only SUPPRESS_EMBEDS and SUPPRESS_NOTIFICATIONS can be set)
 	flags ?MessageFlags
+	// If `true` and nonce is present, it will be checked for uniqueness in the past few minutes. If another message was created by the same author with the same nonce, that message will be returned and no new message will be created.
+	enforce_nonce ?bool
 }
 
 pub fn (params CreateMessageParams) build() json2.Any {
@@ -1350,6 +1352,9 @@ pub fn (params CreateMessageParams) build() json2.Any {
 	}
 	if flags := params.flags {
 		r['flags'] = int(flags)
+	}
+	if enforce_nonce := params.enforce_nonce {
+		r['enforce_nonce'] = enforce_nonce
 	}
 	return r
 }
