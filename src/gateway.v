@@ -45,6 +45,68 @@ pub fn GatewayIntents.all() GatewayIntents {
 	return GatewayIntents.all_unprivileged() | GatewayIntents.all_privileged()
 }
 
+pub enum GatewayOpcode {
+	// An event was dispatched.
+	dispatch              = 0
+	// Fired periodically by the client to keep the connection alive.
+	heartbeat
+	// Starts a new session during the initial handshake.
+	identify
+	// Update the client's presence.
+	update_presence
+	// Used to join/leave or move between voice channels.
+	voice_state_update
+	// Resume a previous session that was disconnected.
+	resume                = 6
+	// You should attempt to reconnect and resume immediately.
+	reconnect
+	// Request information about offline guild members in a large guild.
+	request_guild_members
+	// The session has been invalidated. You should reconnect and identify/resume accordingly.
+	invalid_session
+	// Sent immediately after connecting, contains the `heartbeat_interval` to use.
+	hello
+	// Sent in response to receiving a heartbeat to acknowledge that it has been received.
+	heartbeat_ack
+}
+
+pub struct GatewayMessage {
+pub:
+	opcode GatewayOpcode
+	data   json2.Any
+	seq    ?int
+	event  string
+}
+
+fn GatewayMessage.parse(j json2.Any) !GatewayMessage {
+	$if trace ? {
+		eprintln('Gateway < ${j}')
+	}
+	m := j as map[string]json2.Any
+	return GatewayMessage{
+		opcode: unsafe { GatewayOpcode(m['op']!.int()) }
+		data: m['d'] or { json2.null }
+		seq: if s := m['s'] {
+			if s !is json2.Null {
+				s.int()
+			} else {
+				none
+			}
+		} else {
+			none
+		}
+		event: if t := m['t'] {
+			if t !is json2.Null {
+				t.str()
+			} else {
+				''
+			}
+		} else {
+			''
+		}
+	}
+}
+
 @[flag]
 pub enum GatewayClientSettings {
 	ignore_unknown_events
@@ -86,23 +148,27 @@ pub mut:
 	ws       &websocket.Client = unsafe { nil }
 }
 
-fn (mut c GatewayClient) recv() !WSMessage {
-	return ws_recv_message(mut c.ws)!
+fn (mut c GatewayClient) recv() !GatewayMessage {
+	return GatewayMessage.parse(json2.raw_decode(c.ws.read_next_message()!.payload.bytestr())!)!
 }
 
-fn (mut c GatewayClient) send(message WSMessage) ! {
-	ws_send_message(mut c.ws, message)!
+fn (mut c GatewayClient) send(op GatewayOpcode, d json2.Any) ! {
+	payload := json2.Any({
+		'op': json2.Any(int(op))
+		'd':  d
+	}).json_str()
+	$if trace ? {
+		eprintln('Gateway > ${payload}')
+	}
+	c.ws.write(payload.bytes(), websocket.OPCode.text_frame)!
 }
 
 fn (mut c GatewayClient) heartbeat() ! {
 	c.last_heartbeat_req = time.now()
-	c.send(WSMessage{
-		opcode: .heartbeat
-		data: if seq := c.sequence {
-			json2.Any(seq)
-		} else {
-			json2.null
-		}
+	c.send(.heartbeat, if seq := c.sequence {
+		json2.Any(seq)
+	} else {
+		json2.null
 	})!
 }
 
@@ -183,23 +249,20 @@ fn (mut c GatewayClient) spawn_heart(interval i64) {
 fn (mut gc GatewayClient) hello() ! {
 	if gc.session_id != '' {
 		gc.logger.info('Sending RESUME')
-		gc.send(WSMessage{
-			opcode: .resume
-			data: json2.Any({
-				'token':      json2.Any(gc.token)
-				'session_id': gc.session_id
-				'seq':        if seq := gc.sequence {
-					int(seq)
-				} else {
-					json2.null
-				}
-			})
+		gc.send(.resume, {
+			'token':      json2.Any(gc.token)
+			'session_id': gc.session_id
+			'seq':        if seq := gc.sequence {
+				int(seq)
+			} else {
+				json2.null
+			}
 		})!
 		gc.logger.info('Sent RESUME')
 	} else {
 		props := gc.properties
 		gc.logger.info('Sending IDENTIFY')
-		mut data := {
+		mut d := {
 			'token':      json2.Any(gc.token)
 			'intents':    gc.intents
 			'properties': json2.Any({
@@ -210,15 +273,12 @@ fn (mut gc GatewayClient) hello() ! {
 			'shard':      [json2.Any(0), 1]
 		}
 		if large_threshold := gc.large_threshold {
-			data['large_threshold'] = large_threshold
+			d['large_threshold'] = large_threshold
 		}
 		if presence := gc.presence {
-			data['presence'] = presence.build()
+			d['presence'] = presence.build()
 		}
-		gc.send(WSMessage{
-			opcode: .identify
-			data: data
-		})!
+		gc.send(.identify, d)!
 	}
 }
 
@@ -235,7 +295,7 @@ fn (mut c GatewayClient) init_ws(mut ws websocket.Client) {
 		}
 	}, &mut c)
 	ws.on_message_ref(fn (mut _ websocket.Client, m &websocket.Message, mut client GatewayClient) ! {
-		message := decode_websocket_message(m)!
+		message := GatewayMessage.parse(json2.raw_decode(m.payload.bytestr())!)!
 		if !client.ready {
 			if message.opcode != .hello {
 				return error('First message was not HELLO')
@@ -599,10 +659,7 @@ pub fn (params RequestGuildMembersParams) build() json2.Any {
 }
 
 pub fn (mut gc GatewayClient) request_guild_members(params RequestGuildMembersParams) ! {
-	gc.send(WSMessage{
-		opcode: .request_guild_members
-		data: params.build()
-	})!
+	gc.send(.request_guild_members, params.build())!
 }
 
 @[params]
@@ -632,10 +689,7 @@ pub fn (params VoiceStateUpdateParams) build() json2.Any {
 }
 
 pub fn (mut gc GatewayClient) update_voice_state(params VoiceStateUpdateParams) ! {
-	gc.send(WSMessage{
-		opcode: .voice_state_update
-		data: params.build()
-	})!
+	gc.send(.voice_state_update, params.build())!
 }
 
 @[params]
@@ -665,8 +719,5 @@ pub fn (params UpdatePresenceParams) build() json2.Any {
 }
 
 pub fn (mut gc GatewayClient) update_presence(params UpdatePresenceParams) ! {
-	gc.send(WSMessage{
-		opcode: .update_presence
-		data: params.build()
-	})!
+	gc.send(.update_presence, params.build())!
 }
