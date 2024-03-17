@@ -1798,7 +1798,7 @@ pub mut:
 
 pub fn (params BulkGuildBanParams) build() json2.Any {
 	mut r := {
-		'user_ids': params.user_ids.map(|s| s.build())
+		'user_ids': json2.Any(params.user_ids.map(|s| s.build()))
 	}
 	if delete_message_seconds := params.delete_message_seconds {
 		r['delete_message_seconds'] = delete_message_seconds / time.second

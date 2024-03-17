@@ -117,6 +117,34 @@ pub enum GatewayClientSettings {
 	dont_spawn_events
 }
 
+pub struct ShardInfo {
+pub mut:
+	shard_id    int
+	shard_count int
+}
+
+pub fn (si ShardInfo) build() json2.Any {
+	return [json2.Any(si.shard_id), si.shard_count]
+}
+
+pub struct Gateway {
+pub mut:
+	client             &GatewayClient
+	close_event        chan int
+	events             &Events
+	large_threshold    ?int
+	base_url           string
+	resume_gateway_url string
+	shard              ?ShardInfo
+	hbq                ?time.Time
+	hbs                ?time.Time
+	sequence           ?int
+	session_id         string
+	socket             &websocket.Client = unsafe { nil }
+}
+
+pub fn (mut g Gateway) mainloop() {}
+
 @[heap]
 pub struct GatewayClient {
 pub:
@@ -125,6 +153,7 @@ pub:
 	properties      Properties
 	large_threshold ?int
 	gateway_url     string = 'wss://gateway.discord.gg'
+	log             log.Logger
 	rest            REST
 	token           string
 mut:
