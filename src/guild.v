@@ -1759,7 +1759,7 @@ pub fn BulkBanResponse.parse(j json2.Any) !BulkBanResponse {
 			return BulkBanResponse{
 				banned_users: if a := j['banned_users'] {
 					if a !is json2.Null {
-						maybe_map(a as []json2.Any, fn (k json2.Any) ! {
+						maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
 							return Snowflake.parse(k)!
 						})!
 					} else {
@@ -1770,7 +1770,7 @@ pub fn BulkBanResponse.parse(j json2.Any) !BulkBanResponse {
 				}
 				failed_users: if a := j['failed_users'] {
 					if a !is json2.Null {
-						maybe_map(a as []json2.Any, fn (k json2.Any) ! {
+						maybe_map(a as []json2.Any, fn (k json2.Any) !Snowflake {
 							return Snowflake.parse(k)!
 						})!
 					} else {
