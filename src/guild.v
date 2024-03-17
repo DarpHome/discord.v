@@ -1745,6 +1745,75 @@ pub fn (rest &REST) create_guild_ban(guild_id Snowflake, user_id Snowflake, para
 	)!
 }
 
+pub struct BulkBanResponse {
+pub:
+	// list of user ids, that were successfully banned
+	banned_users ?[]Snowflake
+	// list of user ids, that were not banned
+	failed_users ?[]Snowflake
+}
+
+pub fn BulkBanResponse.parse(j json2.Any) !BulkBanResponse {
+	match j {
+		map[string]json2.Any {
+			return BulkBanResponse{
+				banned_users: if a := j['banned_users'] {
+					if a !is json2.Null {
+						maybe_map(a as []json2.Any, fn (k json2.Any) ! {
+							return Snowflake.parse(k)!
+						})!
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+				failed_users: if a := j['failed_users'] {
+					if a !is json2.Null {
+						maybe_map(a as []json2.Any, fn (k json2.Any) ! {
+							return Snowflake.parse(k)!
+						})!
+					} else {
+						none
+					}
+				} else {
+					none
+				}
+			}
+		}
+		else {
+			return error('expected BulkBanResponse to be object, got ${j.type_name()}')
+		}
+	}
+}
+
+@[params]
+pub struct BulkGuildBanParams {
+pub mut:
+	reason   ?string
+	user_ids []Snowflake @[required]
+	// number of seconds to delete messages for, between 0 and 604800 (7 days)
+	delete_message_seconds ?time.Duration
+}
+
+pub fn (params BulkGuildBanParams) build() json2.Any {
+	mut r := {
+		'user_ids': params.user_ids.map(|s| s.build())
+	}
+	if delete_message_seconds := params.delete_message_seconds {
+		r['delete_message_seconds'] = delete_message_seconds / time.second
+	}
+	return r
+}
+
+// Ban up to 200 users from a guild, and optionally delete previous messages sent by the banned users. Requires both the `.ban_members` and `.manage_guild` permissions. Returns 200 response on success, including a field `banned_users` with the IDs of the banned users and `failed_users` with all that were not be banned. The list of `failed_users` will also include all users that were already banned.
+pub fn (rest &REST) bulk_guild_ban(guild_id Snowflake, params BulkGuildBanParams) !BulkBanResponse {
+	return BulkBanResponse.parse(json2.raw_decode(rest.request(.post, '/guilds/${urllib.path_escape(guild_id.str())}/bulk-ban',
+		json: params.build()
+		reason: params.reason
+	)!.body)!)!
+}
+
 // Remove the ban for a user. Requires the `.ban_members` permissions. Returns a 204 empty response on success. Fires a Guild Ban Remove Gateway event.
 pub fn (rest &REST) remove_guild_ban(guild_id Snowflake, user_id Snowflake, params ReasonParam) ! {
 	rest.request(.delete, '/guilds/${urllib.path_escape(guild_id.str())}/bans/${urllib.path_escape(user_id.str())}',
