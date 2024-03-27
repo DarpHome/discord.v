@@ -125,7 +125,7 @@ pub fn EmbedVideo.parse(j json2.Any) !EmbedVideo {
 
 pub fn (ev EmbedVideo) build() json2.Any {
 	return {
-		'url': json2.Any(ev.url)
+		'url': json2.Any(ev.url or { return map[string]json2.Any{} })
 	}
 }
 
